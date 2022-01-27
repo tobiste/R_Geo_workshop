@@ -1,6 +1,6 @@
 ---
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
-subtitle: "Introduction"
+subtitle: "1 - Introduction"
 author: "Tobias Stephan"
 date: "25/01/2022"
 output: 
@@ -27,10 +27,13 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Editor
 Editors are software programs that enable the user to create and edit text files. They also offer compilation, syntax highlighting, and many more useful features. The undisputedly best editor for R is [**RStudio**](https://www.rstudio.com/products/rstudio/download/). Please download the free editor at https://www.rstudio.com/products/rstudio/download/
 
+---
+
+
 # Coding Basics
 
 ## Operators
-Let’s review some basics we’ve so far omitted in the interests of getting you plotting as quickly as possible. You can use R as a calculator with the following operators:
+You can use R as a calculator with the following operators:
 
 Operator |	Description 
 ------- | ------------  
@@ -44,8 +47,8 @@ Operator |	Description
  
 ```{r basics1, echo = TRUE}
 1 + 2
-1 - 2 # this is a comment
-1 / 200 * 30
+1 - 2 # everything that comes after the '#' character will be ignored. People therefor use it to comment lines
+1 / 200 * 30 # Comment 
 (59 + 73 + 2) / 3 # Distributive property
 15 / 2
 15 %/% 2 # the integer divison (%/%) rounds the result down to the nearest whole number
@@ -201,58 +204,46 @@ if (a > b | a > c){
 # Packages
 Packages are collections of R functions, data, and compiled code in a well-defined format. The directory where packages are stored is called the library. R comes with a standard set of packages. Others are available for download and installation. Once installed, they have to be loaded into the session to be used. 
 
-```{r pkg1, eval=FALSE, include=TRUE, echo=TRUE}
-.libPaths() # get library location
-library()   # see all packages installed
-search()    # see packages currently loaded
+## Adding packages
+Befor using any function of a package, you have to install the package.
+
+Packages can be installed from the R's own official package library **CRAN** (Comprehensive R Archive Network) or from Github (the largest platform for any developer of open-source software). 
+
+> There are other sources, incl. private repositories. However, I do not recommend to download packages from such resources as the packages are not tested, documented, nor is there a guarantee that they will even cause any harm to your system. 
+
+```{r pkg2, eval=FALSE, include=TRUE, echo=TRUE}
+install.packages('remotes') # install package 'remotes' from CRAN
 ```
 
-## Adding packages
+```{r pkg3, eval=FALSE, include=TRUE, echo=TRUE}
+remotes::install_github('tobiste/PlateTectonicStressR') # install package 'PlateTectonicStressR' from my repositor on Github
+```
+You only have to install the package once. After that you have to load the the package.
+`library()` allows to call the entire package, i.e. all the functions of the package: 
+```{r pkg4, eval=FALSE, include=TRUE, echo=TRUE}
+library('PlateTectonicStressR') 
+```
+
+`require()` combines the install (if necessary) and the loading of a package:
+```{r pkg5, eval=FALSE, include=TRUE, echo=TRUE}
+require('dplyr') 
+```
+
+If you only want to use a single function from a package, you just prompt the function by adding the package's name and `::` before the function call:
+```{r pkg6, echo = TRUE}
+# require('dadjoke') 
+dadjoke::dadjoke()
+```
+
 
 ## Help
+Packges from CRAN or Github resources have a thorough documentation. Every function, therefor, has a description and details of the in- and output arguments, the mathematical background, references, and many more.
+You can simply call this documentation by using `?` and the name of the function:
 
-
-
-
-# Import data
-It is possible to load every file type into the 
-
-The most basic type is `read.table()` which allows to read the most 'character-separated values' (e.g. whitre space, tab, comma, semi-colon, ...):
-```{r import0, eval=FALSE, include=TRUE, echo=TRUE}
-?read.table()  
+```{r help, eval=FALSE, include=TRUE, echo=TRUE}
+?max()
 ```
 
-The following functions are identical to `read.table()` except for the defaults. 
-```{r import1, eval=FALSE, include=TRUE, echo=TRUE}
-read.csv() #  for reading ‘comma separated value’ files 
-read.csv2() #  same as read.csv() instead uses a comma as decimal point and a semicolon as field separator
-```
-
-```{r import2, eval=FALSE, include=TRUE, echo=TRUE}
-read.delim() # for reading delimited files
-
-readRDS() # reading R objects
-readClipboard() # reading from the clipboard
-```
-
-
-## Excel
-```{r import_excel, eval=FALSE, include=TRUE, echo=TRUE}
-
-readxl::read_excel(path_to_file, sheet = NULL, range = NULL, col_names = TRUE,
-  col_types = NULL, na = "", trim_ws = TRUE, skip = 0,
-  n_max = Inf, guess_max = min(1000, n_max),
-  progress = readxl_progress(), .name_repair = "unique")
-```
-## ESRI shapefiles
-
-# Export data
-
-
-
-# Plotting
-
-# Statistics
 
 # Useful resources
 
@@ -269,13 +260,6 @@ https://www.rstudio.com/resources/cheatsheets/
 Stack Overflow is a question and answer website for professional and enthusiast programmers. For most cases, the site is the first stop to find an answer. **There is an answer for almost every question!** The answers are rated, and the most useful answers are on top!
 https://stackoverflow.com/
 
+---
 
-# Special Applications
-## Geo-/Thermochronology
-
-```{r geo, echo = TRUE, message = FALSE, warning = FALSE}
-#install.packages('IsoplotR')
-library('IsoplotR')
-```
-
-## Maps
+[next course: Data](R_turorial_2.html)

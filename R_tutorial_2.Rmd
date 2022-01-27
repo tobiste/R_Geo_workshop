@@ -1,0 +1,153 @@
+---
+title: "Programming with R --- A Beginners’ Guide for Geoscientists"
+subtitle: "2 - Data"
+author: "Tobias Stephan"
+date: "25/01/2022"
+output: 
+  html_document:
+    theme: "united"
+    highlight: "kate"
+    toc: true
+    toc_depth: 3
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+---
+
+#3 Import data
+It is possible to load **every** file type into R' workspace. 
+To import data sets, you can use RStudio : File > Import Dataset > From...
+
+I recommend to import any data via the R console because if you have to repeat the import, it will save time already after 1 repeat.
+
+### Text files
+The most basic import function is `read.table()` which allows to read the most 'character-separated values' (e.g. white space, tab, comma, semi-colon, ... separated tables). The file extension (e.g. .txt, .csv, .dat, ...) does not matter.
+```{r import0, eval=FALSE, include=TRUE, echo=TRUE}
+read.table("path/to/file/table.txt", header = TRUE, sep = ";", dec = ".")  
+```
+
+The following functions are identical to `read.table()` except for the defaults. 
+```{r import1, eval=FALSE, include=TRUE, echo=TRUE}
+read.csv("path/to/file/table.csv", header = TRUE) #  read ‘comma separated value’ files 
+read.csv2("path/to/file/table.csv", header = TRUE) #  same as read.csv() instead uses a comma as decimal point and a semicolon as field separator
+```
+
+Some data files are organized by columns that are separated by a defined width (e.g. 3 blank spaces, TAB, ...). In this case, you can use `read.delim()`
+```{r import2, eval=FALSE, include=TRUE, echo=TRUE}
+read.delim("path/to/file/table.dat", header = TRUE)
+```
+
+### Excel
+Excel files can be imported by the function `read_excel()` from the *readxl* package. If you want to import the entire table of a excel sheet, you only give the file path, the excel sheet number (or name):
+```{r import_excel, eval=FALSE, include=TRUE, echo=TRUE}
+readxl::read_excel("path/to/file/table.xlsx", sheet = NULL)
+```
+
+### ESRI shape files
+```{r import_shp, eval=FALSE, include=TRUE, echo=TRUE}
+
+```
+
+### more
+There are some more import functions for special datasets:
+```{r import_special, eval=FALSE, include=TRUE, echo=TRUE}
+readRDS("path/to/file/table.Rdata") # reading R objects
+readClipboard() # read from the MS clipboard (MS only)
+```
+
+# Export data
+To write data or tables into a file, we can use similar functions as in the import. You now only have to tell which object you want to save:
+```{r export, eval=FALSE, include=TRUE, echo=TRUE}
+write.table(object, file = "path/to/file/table.txt", sep = " ", row.names = FALSE)
+write.csv(object, file = "path/to/file/table.txt", row.names = FALSE)
+writeClipboard(object) # write to the MS clipboard (MS only)
+saveRDS(object, file = "path/to/file/table.Rdata") # wrtie to a R object file
+```
+
+# Explore datasets
+
+For the workshop, I downloaded some U-Pb detrital zircon data from the Rocky Mountains from the Geochron database (http://geochron.org/detritalsearch.php). 
+
+The downloaded excel file is Geochron_sample_download.xls
+```{r data1, echo=TRUE}
+source("Y:/GIT/R_Geo_workshop/read_geochron.R")
+data <- read_geochron("Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls")
+
+meta <- data$meta
+isotopes <- data$isotopes
+```
+
+```{r dat2, echo=TRUE}
+head(meta)
+```
+```{r data3, echo=TRUE}
+head(isotopes)
+```
+
+## Filter tables
+```{r filter}
+require(dplyr)
+
+dplyr::filter(meta, Province == "British Columbia")
+
+
+```
+## calculate a new column
+
+```{r merge, message = FALSE, warning = FALSE}
+isotopes %>% 
+  mutate(Concordance = ifelse(`207.206_Age` > 1000, `206.238_Age`/ `207.206_Age`, `206.238_Age`/ `207.235_Age`)) %>%
+  select(Fraction_ID, Concordance)
+```
+
+
+
+## Merge tables
+
+```{r merge, message = FALSE, warning = FALSE}
+require(dplyr)
+combined <- dplyr::left_join(isotopes, meta, by = "Sample_ID")
+```
+
+```{r merge, message = FALSE, warning = FALSE}
+combined %>% 
+  group_by(Sample_ID) %>%
+  summarise(length(na.omit(`206.238_Age`)))
+```
+
+
+
+# Plotting
+
+# Statistics
+
+
+
+# Special Applications
+## Geo-/Thermochronology
+
+```{r geo, echo = TRUE, message = FALSE, warning = FALSE}
+require(IsoplotR)
+```
+
+## Maps
+
+```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
+require(ggplot2)
+require(scico)
+
+ggplot(data = meta) +
+  coord_map(projection = "azequalarea", xlim = range(meta$Longitude), ylim = range(meta$Latitude)) +
+  borders() +
+  geom_point(aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
+  scale_color_scico(palette = 'batlow')
+```
+
+
+[previous course: Basics](R_turorial_1.html) | [next course: ]()

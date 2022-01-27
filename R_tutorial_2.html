@@ -1572,7 +1572,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Programming with R — A Beginners’ Guide for Geoscientists</h1>
-<h3 class="subtitle">Introduction</h3>
+<h3 class="subtitle">2 - Data</h3>
 <h4 class="author">Tobias Stephan</h4>
 <h4 class="date">25/01/2022</h4>
 
@@ -1580,255 +1580,96 @@ div.tocify {
 
 
 <hr />
-<div id="obtaining-r" class="section level2">
-<h2>Obtaining R</h2>
-<p><a href="https://cran.r-project.org/"><strong>R</strong></a> is available for Linux, MacOS, and Windows. Software can be downloaded from The Comprehensive R Archive Network (CRAN): (<a href="https://cran.r-project.org/" class="uri">https://cran.r-project.org/</a>)</p>
-</div>
-<div id="editor" class="section level2">
-<h2>Editor</h2>
-<p>Editors are software programs that enable the user to create and edit text files. They also offer compilation, syntax highlighting, and many more useful features. The undisputedly best editor for R is <a href="https://www.rstudio.com/products/rstudio/download/"><strong>RStudio</strong></a>. Please download the free editor at <a href="https://www.rstudio.com/products/rstudio/download/" class="uri">https://www.rstudio.com/products/rstudio/download/</a></p>
-</div>
-<div id="coding-basics" class="section level1">
-<h1>Coding Basics</h1>
-<div id="operators" class="section level2">
-<h2>Operators</h2>
-<p>Let’s review some basics we’ve so far omitted in the interests of getting you plotting as quickly as possible. You can use R as a calculator with the following operators:</p>
-<table>
-<thead>
-<tr class="header">
-<th>Operator</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>+</code></td>
-<td>addition</td>
-</tr>
-<tr class="even">
-<td><code>-</code></td>
-<td>subtraction</td>
-</tr>
-<tr class="odd">
-<td><code>*</code></td>
-<td>multiplication</td>
-</tr>
-<tr class="even">
-<td><code>/</code></td>
-<td>division</td>
-</tr>
-<tr class="odd">
-<td><code>^</code> or <code>**</code></td>
-<td>exponentiation</td>
-</tr>
-<tr class="even">
-<td><code>%%</code></td>
-<td><a href="https://en.wikipedia.org/wiki/Modulo_operation">Modulus</a> (Remainder from division)</td>
-</tr>
-<tr class="odd">
-<td><code>%/%</code></td>
-<td>Integer Division</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="dv">1</span> <span class="op">+</span><span class="st"> </span><span class="dv">2</span></a></code></pre></div>
-<pre><code>## [1] 3</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="dv">2</span> <span class="co"># this is a comment</span></a></code></pre></div>
-<pre><code>## [1] -1</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="dv">1</span> <span class="op">/</span><span class="st"> </span><span class="dv">200</span> <span class="op">*</span><span class="st"> </span><span class="dv">30</span></a></code></pre></div>
-<pre><code>## [1] 0.15</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">(<span class="dv">59</span> <span class="op">+</span><span class="st"> </span><span class="dv">73</span> <span class="op">+</span><span class="st"> </span><span class="dv">2</span>) <span class="op">/</span><span class="st"> </span><span class="dv">3</span> <span class="co"># Distributive property</span></a></code></pre></div>
-<pre><code>## [1] 44.66667</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="dv">15</span> <span class="op">/</span><span class="st"> </span><span class="dv">2</span></a></code></pre></div>
-<pre><code>## [1] 7.5</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="dv">15</span> <span class="op">%/%</span><span class="st"> </span><span class="dv">2</span> <span class="co"># the integer divison (%/%) rounds the result down to the nearest whole number</span></a></code></pre></div>
-<pre><code>## [1] 7</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="dv">364</span> <span class="op">%%</span><span class="st"> </span><span class="dv">360</span> <span class="co"># Modulo operation</span></a></code></pre></div>
-<pre><code>## [1] 4</code></pre>
-</div>
-<div id="logical-operators" class="section level2">
-<h2>Logical Operators</h2>
-<p>In programming, you often need to know if an expression is true or false. You can evaluate any expression in R, and get one of two answers, <code>TRUE</code> or <code>FALSE</code>.</p>
-<p>Logical Operators (“Booleans”) include:</p>
-<table>
-<thead>
-<tr class="header">
-<th>Operator</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>&gt;</code></td>
-<td>greater than</td>
-</tr>
-<tr class="even">
-<td><code>&gt;=</code></td>
-<td>greater than or equal to</td>
-</tr>
-<tr class="odd">
-<td><code>==</code></td>
-<td>exactly equal to</td>
-</tr>
-<tr class="even">
-<td><code>!=</code></td>
-<td>not equal to</td>
-</tr>
-</tbody>
-</table>
-<p>When you compare two values, the expression is evaluated and R returns the logical answer:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="dv">1</span> <span class="op">&lt;</span><span class="st"> </span><span class="dv">2</span></a></code></pre></div>
-<pre><code>## [1] TRUE</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="dv">1</span> <span class="op">==</span><span class="st"> </span><span class="dv">2</span></a></code></pre></div>
-<pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="dv">1</span> <span class="op">&gt;</span><span class="st"> </span><span class="dv">2</span></a></code></pre></div>
-<pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="dv">1</span> <span class="op">!=</span><span class="st"> </span><span class="dv">2</span></a></code></pre></div>
-<pre><code>## [1] TRUE</code></pre>
-</div>
-<div id="creating-new-variables-assignment" class="section level2">
-<h2>Creating new variables (assignment)</h2>
-<p>You can create new objects with <code>&lt;-</code>:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">x &lt;-<span class="st"> </span><span class="dv">3</span> <span class="op">*</span><span class="st"> </span><span class="dv">4</span></a></code></pre></div>
-<p>All R statements where you create objects, assignment statements, have the same form:</p>
-<p><code>object_name &lt;- value</code></p>
-<p>When reading that code say “object name gets value” in your head.</p>
-<blockquote>
-<p>You will make lots of assignments and <code>&lt;-</code> is a pain to type. Don’t be lazy and use <code>=</code>: it will work, but it will cause confusion later. Instead, use RStudio’s keyboard shortcut: <code>Alt</code> + <code>-</code> (the minus sign). Notice that RStudio automagically surrounds <code>&lt;-</code> with spaces, which is a good code formatting practice. Code is miserable to read on a good day, so giveyoureyesabreak and use spaces.</p>
-</blockquote>
-<p>Object names must start with a letter, and can only contain letters, numbers, <code>_</code> and <code>.</code>. You want your object names to be descriptive, so you’ll need a convention for multiple words. It is recommended to use <strong>snake_case</strong> where you separate lowercase words with <code>_</code>.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">i_use_snake_case</a>
-<a class="sourceLine" id="cb24-2" title="2">otherPeopleUseCamelCase</a>
-<a class="sourceLine" id="cb24-3" title="3">some.people.use.periods</a>
-<a class="sourceLine" id="cb24-4" title="4">And_aFew.People_RENOUNCEconvention</a></code></pre></div>
-<p>You can inspect an object by typing its name:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">x</a></code></pre></div>
-<pre><code>## [1] 12</code></pre>
-<p>Make another assignment:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">this_is_a_really_long_name &lt;-<span class="st"> </span><span class="fl">2.5</span></a></code></pre></div>
-<p>To inspect this object, try out RStudio’s completion facility: type “this”, press <code>TAB</code>, add characters until you have a unique prefix, then press return.</p>
-</div>
-<div id="calling-functions" class="section level2">
-<h2>Calling functions</h2>
-<p>R has a large collection of built-in functions that are called like this:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1"><span class="kw">function_name</span>(<span class="dt">arg1 =</span> val1, <span class="dt">arg2 =</span> val2, ...)</a></code></pre></div>
-<p>Let’s try using <code>seq()</code> which makes regular <strong>seq</strong>uences of numbers and, while we’re at it, learn more helpful features of RStudio. Type se and hit TAB. A popup shows you possible completions. Specify <code>seq()</code> by typing more (a “q”) to disambiguate, or by using ↑/↓ arrows to select. Notice the floating tooltip that pops up, reminding you of the function’s arguments and purpose. If you want more help, press F1 to get all the details in the help tab in the lower right pane.</p>
-<p>Press TAB once more when you’ve selected the function you want. RStudio will add matching opening (<code>(</code>) and closing <code>(</code>)) parentheses for you. Type the arguments <code>1</code>, <code>10</code> and hit return.</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"><span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">10</span>)</a></code></pre></div>
-<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
-<p>If you make an assignment, you don’t get to see the value. You’re then tempted to immediately double-check the result:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">y &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">10</span>)</a>
-<a class="sourceLine" id="cb31-2" title="2">y</a></code></pre></div>
-<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
-</div>
-<div id="conditional-statements-ifelse" class="section level2">
-<h2>Conditional statements (if…else)</h2>
-<div id="if" class="section level3">
-<h3>If</h3>
-<p>An **if statement*&quot;** is written with the <code>if</code> keyword, and it is used to specify a block of code to be executed if a condition is <code>TRUE</code>:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1">a &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb33-2" title="2">b &lt;-<span class="st"> </span><span class="dv">200</span></a>
-<a class="sourceLine" id="cb33-3" title="3"></a>
-<a class="sourceLine" id="cb33-4" title="4"><span class="cf">if</span> (b <span class="op">&gt;</span><span class="st"> </span>a) {</a>
-<a class="sourceLine" id="cb33-5" title="5">  <span class="kw">print</span>(<span class="st">&quot;b is greater than a&quot;</span>)</a>
-<a class="sourceLine" id="cb33-6" title="6">} </a></code></pre></div>
-<pre><code>## [1] &quot;b is greater than a&quot;</code></pre>
-<blockquote>
-<p>R uses curly brackets { } to define the scope in the code.</p>
-</blockquote>
-</div>
-<div id="else-if" class="section level3">
-<h3>Else If</h3>
-<p>The <code>else if</code> keyword is R’s way of saying “if the previous conditions were not true, then try this condition”:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1">a &lt;-<span class="st"> </span><span class="dv">33</span></a>
-<a class="sourceLine" id="cb35-2" title="2">b &lt;-<span class="st"> </span><span class="dv">33</span></a>
-<a class="sourceLine" id="cb35-3" title="3"></a>
-<a class="sourceLine" id="cb35-4" title="4"><span class="cf">if</span> (b <span class="op">&gt;</span><span class="st"> </span>a) {</a>
-<a class="sourceLine" id="cb35-5" title="5">  <span class="kw">print</span>(<span class="st">&quot;b is greater than a&quot;</span>)</a>
-<a class="sourceLine" id="cb35-6" title="6">} <span class="cf">else</span> <span class="cf">if</span> (a <span class="op">==</span><span class="st"> </span>b) {</a>
-<a class="sourceLine" id="cb35-7" title="7">  <span class="kw">print</span> (<span class="st">&quot;a and b are equal&quot;</span>)</a>
-<a class="sourceLine" id="cb35-8" title="8">} </a></code></pre></div>
-<pre><code>## [1] &quot;a and b are equal&quot;</code></pre>
-</div>
-<div id="else" class="section level3">
-<h3>Else</h3>
-<p>The <code>else</code> keyword catches anything which isn’t caught by the preceding conditions:</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1">a &lt;-<span class="st"> </span><span class="dv">200</span></a>
-<a class="sourceLine" id="cb37-2" title="2">b &lt;-<span class="st"> </span><span class="dv">33</span></a>
-<a class="sourceLine" id="cb37-3" title="3"></a>
-<a class="sourceLine" id="cb37-4" title="4"><span class="cf">if</span> (b <span class="op">&gt;</span><span class="st"> </span>a) {</a>
-<a class="sourceLine" id="cb37-5" title="5">  <span class="kw">print</span>(<span class="st">&quot;b is greater than a&quot;</span>)</a>
-<a class="sourceLine" id="cb37-6" title="6">} <span class="cf">else</span> <span class="cf">if</span> (a <span class="op">==</span><span class="st"> </span>b) {</a>
-<a class="sourceLine" id="cb37-7" title="7">  <span class="kw">print</span>(<span class="st">&quot;a and b are equal&quot;</span>)</a>
-<a class="sourceLine" id="cb37-8" title="8">} <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb37-9" title="9">  <span class="kw">print</span>(<span class="st">&quot;a is greater than b&quot;</span>)</a>
-<a class="sourceLine" id="cb37-10" title="10">} </a></code></pre></div>
-<pre><code>## [1] &quot;a is greater than b&quot;</code></pre>
-</div>
-<div id="and" class="section level3">
-<h3>AND</h3>
-<p>The <code>&amp;</code> symbol (and) is a logical operator, and is used to combine conditional statements:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1">a &lt;-<span class="st"> </span><span class="dv">200</span></a>
-<a class="sourceLine" id="cb39-2" title="2">b &lt;-<span class="st"> </span><span class="dv">33</span></a>
-<a class="sourceLine" id="cb39-3" title="3">c &lt;-<span class="st"> </span><span class="dv">500</span></a>
-<a class="sourceLine" id="cb39-4" title="4"></a>
-<a class="sourceLine" id="cb39-5" title="5"><span class="cf">if</span> (a <span class="op">&gt;</span><span class="st"> </span>b <span class="op">&amp;</span><span class="st"> </span>c <span class="op">&gt;</span><span class="st"> </span>a){</a>
-<a class="sourceLine" id="cb39-6" title="6">  <span class="kw">print</span>(<span class="st">&quot;Both conditions are true&quot;</span>)</a>
-<a class="sourceLine" id="cb39-7" title="7">} </a></code></pre></div>
-<pre><code>## [1] &quot;Both conditions are true&quot;</code></pre>
-</div>
-<div id="or" class="section level3">
-<h3>OR</h3>
-<p>The <code>|</code> symbol (or) is a logical operator, and is used to combine conditional statements:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1">a &lt;-<span class="st"> </span><span class="dv">200</span></a>
-<a class="sourceLine" id="cb41-2" title="2">b &lt;-<span class="st"> </span><span class="dv">33</span></a>
-<a class="sourceLine" id="cb41-3" title="3">c &lt;-<span class="st"> </span><span class="dv">500</span></a>
-<a class="sourceLine" id="cb41-4" title="4"></a>
-<a class="sourceLine" id="cb41-5" title="5"><span class="cf">if</span> (a <span class="op">&gt;</span><span class="st"> </span>b <span class="op">|</span><span class="st"> </span>a <span class="op">&gt;</span><span class="st"> </span>c){</a>
-<a class="sourceLine" id="cb41-6" title="6">  <span class="kw">print</span>(<span class="st">&quot;At least one of the conditions is true&quot;</span>)</a>
-<a class="sourceLine" id="cb41-7" title="7">} </a></code></pre></div>
-<pre><code>## [1] &quot;At least one of the conditions is true&quot;</code></pre>
-</div>
-</div>
-</div>
-<div id="packages" class="section level1">
-<h1>Packages</h1>
-<p>Packages are collections of R functions, data, and compiled code in a well-defined format. The directory where packages are stored is called the library. R comes with a standard set of packages. Others are available for download and installation. Once installed, they have to be loaded into the session to be used.</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="kw">.libPaths</span>() <span class="co"># get library location</span></a>
-<a class="sourceLine" id="cb43-2" title="2"><span class="kw">library</span>()   <span class="co"># see all packages installed</span></a>
-<a class="sourceLine" id="cb43-3" title="3"><span class="kw">search</span>()    <span class="co"># see packages currently loaded</span></a></code></pre></div>
-<div id="adding-packages" class="section level2">
-<h2>Adding packages</h2>
-</div>
-<div id="help" class="section level2">
-<h2>Help</h2>
-</div>
-</div>
-<div id="import-data" class="section level1">
-<h1>Import data</h1>
-<p>It is possible to load every file type into the</p>
-<p>The most basic type is <code>read.table()</code> which allows to read the most ‘character-separated values’ (e.g. whitre space, tab, comma, semi-colon, …):</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1">?<span class="kw">read.table</span>()  </a></code></pre></div>
+<p>#3 Import data It is possible to load <strong>every</strong> file type into R’ workspace. To import data sets, you can use RStudio : File &gt; Import Dataset &gt; From…</p>
+<p>I recommend to import any data via the R console because if you have to repeat the import, it will save time already after 1 repeat.</p>
+<div id="text-files" class="section level3">
+<h3>Text files</h3>
+<p>The most basic import function is <code>read.table()</code> which allows to read the most ‘character-separated values’ (e.g. white space, tab, comma, semi-colon, … separated tables). The file extension (e.g. .txt, .csv, .dat, …) does not matter.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">read.table</span>(<span class="st">&quot;path/to/file/table.txt&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>, <span class="dt">sep =</span> <span class="st">&quot;;&quot;</span>, <span class="dt">dec =</span> <span class="st">&quot;.&quot;</span>)  </a></code></pre></div>
 <p>The following functions are identical to <code>read.table()</code> except for the defaults.</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="kw">read.csv</span>() <span class="co">#  for reading ‘comma separated value’ files </span></a>
-<a class="sourceLine" id="cb45-2" title="2"><span class="kw">read.csv2</span>() <span class="co">#  same as read.csv() instead use a comma as decimal point and a semicolon as field separator</span></a></code></pre></div>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" title="1"><span class="kw">read.delim</span>() <span class="co"># for reading delimited files</span></a>
-<a class="sourceLine" id="cb46-2" title="2"></a>
-<a class="sourceLine" id="cb46-3" title="3"><span class="kw">readRDS</span>() <span class="co"># reading R objects</span></a>
-<a class="sourceLine" id="cb46-4" title="4"><span class="kw">readClipboard</span>() <span class="co"># reading from the clipboard</span></a></code></pre></div>
-<div id="excel" class="section level2">
-<h2>Excel</h2>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1">readxl<span class="op">::</span><span class="kw">read_excel</span>(path_to_file, <span class="dt">sheet =</span> <span class="ot">NULL</span>, <span class="dt">range =</span> <span class="ot">NULL</span>, <span class="dt">col_names =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb47-2" title="2">  <span class="dt">col_types =</span> <span class="ot">NULL</span>, <span class="dt">na =</span> <span class="st">&quot;&quot;</span>, <span class="dt">trim_ws =</span> <span class="ot">TRUE</span>, <span class="dt">skip =</span> <span class="dv">0</span>,</a>
-<a class="sourceLine" id="cb47-3" title="3">  <span class="dt">n_max =</span> <span class="ot">Inf</span>, <span class="dt">guess_max =</span> <span class="kw">min</span>(<span class="dv">1000</span>, n_max),</a>
-<a class="sourceLine" id="cb47-4" title="4">  <span class="dt">progress =</span> <span class="kw">readxl_progress</span>(), <span class="dt">.name_repair =</span> <span class="st">&quot;unique&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">read.csv</span>(<span class="st">&quot;path/to/file/table.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>) <span class="co">#  read ‘comma separated value’ files </span></a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">read.csv2</span>(<span class="st">&quot;path/to/file/table.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>) <span class="co">#  same as read.csv() instead uses a comma as decimal point and a semicolon as field separator</span></a></code></pre></div>
+<p>Some data files are organized by columns that are separated by a defined width (e.g. 3 blank spaces, TAB, …). In this case, you can use <code>read.delim()</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">read.delim</span>(<span class="st">&quot;path/to/file/table.dat&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 </div>
-<div id="esri-shapefiles" class="section level2">
-<h2>ESRI shapefiles</h2>
+<div id="excel" class="section level3">
+<h3>Excel</h3>
+<p>Excel files can be imported by the function <code>read_excel()</code> from the <em>readxl</em> package. If you want to import the entire table of a excel sheet, you only give the file path, the excel sheet number (or name):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">readxl<span class="op">::</span><span class="kw">read_excel</span>(<span class="st">&quot;path/to/file/table.xlsx&quot;</span>, <span class="dt">sheet =</span> <span class="ot">NULL</span>)</a></code></pre></div>
 </div>
+<div id="esri-shape-files" class="section level3">
+<h3>ESRI shape files</h3>
+</div>
+<div id="more" class="section level3">
+<h3>more</h3>
+<p>There are some more import functions for special datasets:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">readRDS</span>(<span class="st">&quot;path/to/file/table.Rdata&quot;</span>) <span class="co"># reading R objects</span></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="kw">readClipboard</span>() <span class="co"># read from the MS clipboard (MS only)</span></a></code></pre></div>
 </div>
 <div id="export-data" class="section level1">
 <h1>Export data</h1>
+<p>To write data or tables into a file, we can use similar functions as in the import. You now only have to tell which object you want to save:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">write.table</span>(object, <span class="dt">file =</span> <span class="st">&quot;path/to/file/table.txt&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot; &quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">write.csv</span>(object, <span class="dt">file =</span> <span class="st">&quot;path/to/file/table.txt&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="kw">writeClipboard</span>(object) <span class="co"># write to the MS clipboard (MS only)</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="kw">saveRDS</span>(object, <span class="dt">file =</span> <span class="st">&quot;path/to/file/table.Rdata&quot;</span>) <span class="co"># wrtie to a R object file</span></a></code></pre></div>
+</div>
+<div id="explore-datasets" class="section level1">
+<h1>Explore datasets</h1>
+<p>For the workshop, I downloaded some U-Pb detrital zircon data from the Rocky Mountains from the Geochron database (<a href="http://geochron.org/detritalsearch.php" class="uri">http://geochron.org/detritalsearch.php</a>).</p>
+<p>The downloaded excel file is Geochron_sample_download.xls</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">source</span>(<span class="st">&quot;Y:/GIT/R_Geo_workshop/read_geochron.R&quot;</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">data &lt;-<span class="st"> </span><span class="kw">read_geochron</span>(<span class="st">&quot;Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls&quot;</span>)</a></code></pre></div>
+<pre><code>## Loading required package: dplyr</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre><code>## Loading required package: stringr</code></pre>
+<pre><code>## Loading required package: readxl</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">meta &lt;-<span class="st"> </span>data<span class="op">$</span>meta</a>
+<a class="sourceLine" id="cb14-2" title="2">isotopes &lt;-<span class="st"> </span>data<span class="op">$</span>isotopes</a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">head</span>(meta)</a></code></pre></div>
+<pre><code>## # A tibble: 6 x 40
+##   Sample_ID        Unique_ID Sample_Descripti~ Sample_Comment Longitude Latitude
+##   &lt;chr&gt;            &lt;chr&gt;     &lt;chr&gt;             &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Whitehorse Form~ GEG0000EB Sandstone         &lt;NA&gt;               -115.     50.9
+## 2 Horsethief Creek GEG0000VB sandstone         &lt;NA&gt;               -117.     50.6
+## 3 Hamill Group     GEG0000VC sandstone         &lt;NA&gt;               -117.     50.5
+## 4 Mount Wilson Fo~ GEG0000VE sandstone         &lt;NA&gt;               -117.     52.2
+## 5 Spray Lakes Gro~ GEG0000VH sandstone         &lt;NA&gt;               -115.     50.8
+## 6 RVF              GEG0000J4 Pure quartz aren~ &lt;NA&gt;               -114.     49.3
+## # ... with 34 more variables: Min_Age_Ma &lt;dbl&gt;, Max_Age_Ma &lt;dbl&gt;,
+## #   Detrital_Method &lt;chr&gt;, Detrital_Type &lt;chr&gt;, Detrital_Mineral &lt;chr&gt;,
+## #   Stratigraphic_Formation_Name &lt;chr&gt;, Oldest_Frac._Date_Ma &lt;dbl&gt;,
+## #   Youngest_Frac._Date_Ma &lt;dbl&gt;, Metadata &lt;chr&gt;, Concordia_Diagram &lt;chr&gt;,
+## #   Probability_Density &lt;chr&gt;, CSV_Table &lt;chr&gt;, GeoObject_Type &lt;chr&gt;,
+## #   GeoObject_Class &lt;chr&gt;, Collection_Method &lt;chr&gt;, Analyst_Name &lt;chr&gt;,
+## #   Laboratory_Name &lt;chr&gt;, Collector &lt;chr&gt;, Rock_Type &lt;chr&gt;, ...</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">head</span>(isotopes)</a></code></pre></div>
+<pre><code>## # A tibble: 6 x 26
+##   Sample_ID   Unique_ID Fraction_ID `206.238_Age` `206.238_Age_Er~ `207.235_Age`
+##   &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt;
+## 1 Whitehorse~ GEG0000EB Whitehorse~         2071.            31.7          2104.
+## 2 Whitehorse~ GEG0000EB Whitehorse~         1780.            15.6          1852.
+## 3 Whitehorse~ GEG0000EB Whitehorse~         1336.            27.3          1320.
+## 4 Whitehorse~ GEG0000EB Whitehorse~          992.             9.19          990.
+## 5 Whitehorse~ GEG0000EB Whitehorse~         1108.            16.9          1113.
+## 6 Whitehorse~ GEG0000EB Whitehorse~          936.            17.2           954.
+## # ... with 20 more variables: 207.235_Age_Error &lt;dbl&gt;, 207.206_Age &lt;dbl&gt;,
+## #   207.206_Age_Error &lt;dbl&gt;, Pb*.Pbc &lt;dbl&gt;, Rho &lt;dbl&gt;, Rho_Error &lt;dbl&gt;,
+## #   206.238 &lt;dbl&gt;, 206.238_Error &lt;dbl&gt;, 206.204 &lt;dbl&gt;, 208.206 &lt;dbl&gt;,
+## #   conc_U &lt;dbl&gt;, Th.U_samp &lt;dbl&gt;, 206.238xTh_Age &lt;dbl&gt;,
+## #   206.238xTh_Age_Error &lt;dbl&gt;, 207.235xPa_Age &lt;dbl&gt;,
+## #   207.235xPa_Age_Error &lt;dbl&gt;, 207.206xTh_Age &lt;dbl&gt;,
+## #   207.206xTh_Age_Error &lt;dbl&gt;, 207.206xPa_Age &lt;dbl&gt;, ...</code></pre>
+<div id="merge-tables" class="section level2">
+<h2>Merge tables</h2>
+</div>
 </div>
 <div id="plotting" class="section level1">
 <h1>Plotting</h1>
@@ -1836,23 +1677,26 @@ div.tocify {
 <div id="statistics" class="section level1">
 <h1>Statistics</h1>
 </div>
-<div id="useful-resources" class="section level1">
-<h1>Useful resources</h1>
-<ul>
-<li><p><strong>R for Data Science</strong> written by Hadley Wickham – the …. This <strong>free</strong> book will teach you how to do data science with R: You’ll learn how to get your data into R, get it into the most useful structure, transform it, visualise it and model it. <a href="https://r4ds.had.co.nz/" class="uri">https://r4ds.had.co.nz/</a></p></li>
-<li><p><strong>Cheatsheets</strong> Eclectic, graphical, easy to understand, and handy summaries for some of the most important packages: <a href="https://www.rstudio.com/resources/cheatsheets/" class="uri">https://www.rstudio.com/resources/cheatsheets/</a></p></li>
-<li><p><strong>Stackoverflow</strong> Stack Overflow is a question and answer website for professional and enthusiast programmers. For most cases, the site is the first stop to find an answer. <strong>There is an answer for almost every question!</strong> The answers are rated, and the most useful answers are on top! <a href="https://stackoverflow.com/" class="uri">https://stackoverflow.com/</a></p></li>
-</ul>
-</div>
 <div id="special-applications" class="section level1">
 <h1>Special Applications</h1>
 <div id="geo-thermochronology" class="section level2">
 <h2>Geo-/Thermochronology</h2>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1"><span class="co">#install.packages(&#39;IsoplotR&#39;)</span></a>
-<a class="sourceLine" id="cb48-2" title="2"><span class="kw">library</span>(<span class="st">&#39;IsoplotR&#39;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="kw">require</span>(IsoplotR)</a></code></pre></div>
 </div>
 <div id="maps" class="section level2">
 <h2>Maps</h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">require</span>(ggplot2)</a></code></pre></div>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="kw">require</span>(scico)</a></code></pre></div>
+<pre><code>## Loading required package: scico</code></pre>
+<pre><code>## Warning: package &#39;scico&#39; was built under R version 4.1.2</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1"><span class="kw">ggplot</span>(<span class="dt">data =</span> meta) <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-2" title="2"><span class="st">  </span><span class="kw">coord_map</span>(<span class="dt">projection =</span> <span class="st">&quot;azequalarea&quot;</span>, <span class="dt">xlim =</span> <span class="kw">range</span>(meta<span class="op">$</span>Longitude), <span class="dt">ylim =</span> <span class="kw">range</span>(meta<span class="op">$</span>Latitude)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-3" title="3"><span class="st">  </span><span class="kw">borders</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb25-4" title="4"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(Longitude, Latitude, <span class="dt">color =</span> Min_Age_Ma), <span class="dt">size =</span> <span class="dv">2</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb25-5" title="5"><span class="st">  </span><span class="kw">scale_color_scico</span>(<span class="dt">palette =</span> <span class="st">&#39;batlow&#39;</span>)</a></code></pre></div>
+<p><img src="data:image/png;base64,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" width="672" /></p>
+<p><a href="R_turorial_1.html">previous course: Basics</a> | <a href>next course:</a></p>
 </div>
 </div>
 
