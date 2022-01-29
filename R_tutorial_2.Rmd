@@ -20,9 +20,86 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ---
 
-#3 Import data
+## Types of Data
+### Scalars
+```{r data_scalar, echo=TRUE}
+a <- 1 # numeric
+b <- "Word" # character
+c <- TRUE # logical
+```
+
+### Vectors
+All elements of a vector must have the same mode (numeric, character, etc.).
+```{r data_vector1, echo=TRUE}
+a <- c(1,2,5.3,6,-2,4) # numeric vector
+b <- c("one","two","three") # character vector
+c <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
+```
+
+Refer to elements of a vector using subscripts. 
+```{r data_vector2, echo=TRUE}
+b[2]# second element in vector b
+```
+
+#### Multi-column vector
+```{r data_vector3, echo=TRUE}
+cbind(a, a+1)
+```
+
+### Matrices
+All columns in a matrix ($m \times n$) must have the same mode (numeric, character, etc.) and the same length. The general format is
+```{r data_matrix1, echo=TRUE}
+x <- c(1, 0, 0)
+y <- c(0, 1, 0)
+z <- c(0, 0, 1)
+
+m <- as.matrix(
+  cbind(a, b, c)
+)
+m
+```
+Identify rows, columns or elements using subscripts. 
+```{r data_matrix2, echo=TRUE}
+m[,3] # 3rd column of matrix
+m[2,] # 2nd row of matrix
+m[2,3] # 2nd row, 3rd element
+```
+
+
+### Data frames
+A data frame is more general than a matrix, in that different columns can have different modes (numeric, character, factor, etc.). 
+
+```{r dataframe1, echo=TRUE}
+mydataframe <- data.frame (a, b, c)
+names(mydataframe) <- c('column1', 'column2', 'column3') # header of the data frame
+mydataframe
+```
+
+There are a variety of ways to identify the elements of a data frame:
+```{r dataframe2, echo=TRUE}
+mydataframe[2:3] # columns 2 to 3 of data frame
+mydataframe[c("column1","column3")] # columns ID and Age from data frame
+mydataframe$column2 # variable column2 in the data frame 
+mydataframe$column2[2] # 2nd element of column2
+```
+
+### Lists
+An ordered collection of objects (components). A list allows you to gather a variety of (possibly unrelated) objects under one name. 
+
+```{r list1, echo=TRUE}
+mylist <- list(name = "Jean", numbers = x, table = mydataframe)
+```
+
+Identify elements of a list using the [[]] convention. 
+```{r list2, echo=TRUE}
+mylist[[3]] # 2nd component of the list
+mylist[["numbers"]] # component named mynumbers in list
+```
+
+
+## Import data
 It is possible to load **every** file type into R' workspace. 
-To import data sets, you can use RStudio : File > Import Dataset > From...
+To import data sets, you can use the RStudio interface for Import: File > Import Dataset > From...
 
 I recommend to import any data via the R console because if you have to repeat the import, it will save time already after 1 repeat.
 
@@ -61,7 +138,7 @@ readRDS("path/to/file/table.Rdata") # reading R objects
 readClipboard() # read from the MS clipboard (MS only)
 ```
 
-# Export data
+## Export data
 To write data or tables into a file, we can use similar functions as in the import. You now only have to tell which object you want to save:
 ```{r export, eval=FALSE, include=TRUE, echo=TRUE}
 write.table(object, file = "path/to/file/table.txt", sep = " ", row.names = FALSE)
@@ -70,13 +147,13 @@ writeClipboard(object) # write to the MS clipboard (MS only)
 saveRDS(object, file = "path/to/file/table.Rdata") # wrtie to a R object file
 ```
 
-# Explore datasets
+## Explore datasets
 
 For the workshop, I downloaded some U-Pb detrital zircon data from the Rocky Mountains from the Geochron database (http://geochron.org/detritalsearch.php). 
 
 The downloaded excel file is Geochron_sample_download.xls
-```{r data1, echo=TRUE}
-source("Y:/GIT/R_Geo_workshop/read_geochron.R")
+```{r data1, echo=TRUE, warning=FALSE, message=FALSE}
+source("Y:/GIT/R_Geo_workshop/course_stuff.R")
 data <- read_geochron("Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls")
 
 meta <- data$meta
@@ -90,64 +167,120 @@ head(meta)
 head(isotopes)
 ```
 
-## Filter tables
-```{r filter}
+### Rename columns
+
+`rename(data, New_Name = Old_Name)`
+
+```{r rename, echo=TRUE}
 require(dplyr)
 
+dplyr::rename(meta, "Oldest_Fraction_Date_Ma" = 'Oldest_Frac._Date_Ma')
+```
+### Select columns
+
+`select(data, column1, column2, column3)`
+```{r select, echo=TRUE}
+# select only the columns "Sample_ID", "Longitude", and  "Latitude":
+dplyr::select(meta, Sample_ID, Longitude, Latitude)
+
+# select all columns but the column "Sample_Description":
+dplyr::select(meta, !Sample_Description)
+```
+
+
+### Filter tables
+
+`filter(data. column == value)`
+ such filters can include any of the Logical Operators (or "Booleans"), such as `==`, `>`, `>=`, or `!=`:
+
+```{r filter, echo=TRUE}
+# only samples from British Columbia:
 dplyr::filter(meta, Province == "British Columbia")
-
-
-```
-## calculate a new column
-
-```{r merge, message = FALSE, warning = FALSE}
-isotopes %>% 
-  mutate(Concordance = ifelse(`207.206_Age` > 1000, `206.238_Age`/ `207.206_Age`, `206.238_Age`/ `207.235_Age`)) %>%
-  select(Fraction_ID, Concordance)
 ```
 
+### Calculate a new column
+New columns can be calculated the following:
+`mutate(data, new_column1 = "Word", new_column2 = old_column1 + 1, new_column_3 = old_column2 / olc_column3)`.
+```{r mutate, message = FALSE, warning = FALSE}
+#calculate the concordance of the U-Pb ages:
+x <- dplyr::mutate(isotopes, conc = ifelse(
+      t.Pb206U238 > 1000,
+      t.Pb206U238 / t.Pb207Pb206,
+      t.Pb206U238 / t.Pb207U235
+      )
+    )
+dplyr::select(x, Fraction_ID, conc)
+```
 
+> `ifelse()` does a calculation depending on a condition.
+> `ifelse(condition, this, that)` literally means "If condition is TRUE does this. If not, do that".
 
-## Merge tables
+### Pipe commands
+A sequence of functions omn the same object can be expressed like the following:
 
+```{r pipe1, echo=TRUE}
+# one after the other
+x <-
+  dplyr::mutate(
+    isotopes,
+    conc = ifelse(
+      t.Pb206U238 > 1000,
+      t.Pb206U238 / t.Pb207Pb206,
+      t.Pb206U238 / t.Pb207U235
+    )
+  )
+x <- dplyr::select(x, Fraction_ID, conc)
+x <- dplyr::filter(x, conc >= 0.85 & conc <= 1.05)
+
+#or in one step
+y <-
+  dplyr::filter(
+    dplyr::select(
+      dplyr::mutate(
+        isotopes,
+        conc = ifelse(
+      t.Pb206U238 > 1000,
+      t.Pb206U238 / t.Pb207Pb206,
+      t.Pb206U238 / t.Pb207U235
+    )
+      ),
+      Fraction_ID,
+      conc
+    ),
+    conc >= 0.85 & conc <= 1.05
+  )
+
+identical(x, y) # test if both sequences did the same job and produce the identical result
+```
+As you can see both ways require a lot of typing and are complicated to read.
+
+The package *dplyr* offers a convenient way to do a sequcence of functions by using the "pipe" operator `%>%`:
+```{r pipe2, echo=TRUE}
+isotopes %>%
+  mutate(conc = ifelse(
+      t.Pb206U238 > 1000,
+      t.Pb206U238 / t.Pb207Pb206,
+      t.Pb206U238 / t.Pb207U235
+      )
+    ) %>%
+  select(Fraction_ID, conc) %>%
+  filter(conc >= 0.85 & conc <= 1.05)
+```
+
+### Merge tables
 ```{r merge, message = FALSE, warning = FALSE}
 require(dplyr)
 combined <- dplyr::left_join(isotopes, meta, by = "Sample_ID")
 ```
 
-```{r merge, message = FALSE, warning = FALSE}
+
+### Grouped calculations or statistics
+```{r group, message = FALSE, warning = FALSE}
 combined %>% 
   group_by(Sample_ID) %>%
-  summarise(length(na.omit(`206.238_Age`)))
+  summarise(length(na.omit(t.Pb206U238)))
 ```
 
 
 
-# Plotting
-
-# Statistics
-
-
-
-# Special Applications
-## Geo-/Thermochronology
-
-```{r geo, echo = TRUE, message = FALSE, warning = FALSE}
-require(IsoplotR)
-```
-
-## Maps
-
-```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
-require(ggplot2)
-require(scico)
-
-ggplot(data = meta) +
-  coord_map(projection = "azequalarea", xlim = range(meta$Longitude), ylim = range(meta$Latitude)) +
-  borders() +
-  geom_point(aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
-  scale_color_scico(palette = 'batlow')
-```
-
-
-[previous course: Basics](R_turorial_1.html) | [next course: ]()
+[previous course: Basics](R_turorial_1.html) | [next course: Decriptive statistics](R_turorial_3.html)

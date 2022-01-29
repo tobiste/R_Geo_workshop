@@ -120,12 +120,12 @@ read_geochron <- function(path, method = 'U-Pb') {
       )
     colnames(isotopes) <- isotopes.header <- c(
       "Sample_ID", "Unique_ID", "Fraction_ID",
-      "Age_206.238", "Age_Error_206.238",
-      "Age_207.235", "Age_Error_207.235",
-      "Age_207.206",  "Age_Error_207.206",
-      "Pb_rad.Pb_cor", "Rho", "Rho_Error",
-      "Isotope_206.238", "Isotope_Error_206.238",
-      "Isotope_206.204", "Isotope_208.206", "conc_U", "Th.U_samp",
+      "t.Pb206U238", "st.Pb206U238",
+      "t.Pb207U235", "st.Pb207U235",
+      "t.Pb207Pb206",  "st.Pb207Pb206",
+      "PbPb.cor", "rho", "s.rho",
+      "Pb206U238", "errPb206U238",
+      "Pb206Pb204", "Pb208Pb206", "U", "ThU",
       "Age_206.238xTh", "Age_Error_206.238xTh",
       "Age_207.235xPa", "Age_Error_207.235xPar",
       "Age_207.206xTh", "Age_Error_207.206xTh",
@@ -137,6 +137,20 @@ read_geochron <- function(path, method = 'U-Pb') {
   }
 }
 
+# color palette ####
+colorblind <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", '#7555C8', '#7EF791', '#85112A', '#2BE6BE', '#EE599F', '#5F9143', '#759301') # Bang Wong
 
-wong <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", '#7555C8', '#7EF791', '#85112A', '#2BE6BE', '#EE599F', '#5F9143', '#759301') # Bang Wong
+
+geochron_to_dz <- function(x){
+  lst <- list()
+  for(i in x$Sample_ID){
+    x.i <- subset(x, x$Sample_ID==i)
+    ages <- c(x.i$t)
+    #names(ages) <- i
+    lst[[i]] = ages
+  }
+
+  class(lst) <- "detritals"
+  return(lst)
+}
 

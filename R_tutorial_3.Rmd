@@ -1,0 +1,143 @@
+---
+title: "Programming with R --- A Beginners’ Guide for Geoscientists"
+subtitle: "3 - Statistics"
+author: "Tobias Stephan"
+date: "25/01/2022"
+output: 
+  html_document:
+    theme: "united"
+    highlight: "kate"
+    toc: true
+    toc_depth: 3
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load, echo=TRUE}
+require("ggpubr")
+
+source("Y:/GIT/R_Geo_workshop/course_stuff.R")
+data <- read_geochron("Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls")
+isotopes <- data$isotopes
+sample1 <- data$isotopes %>% filter(Sample_ID == "Whitehorse Formation")
+```
+
+---
+
+## Descriptive statistics
+
+### One variable (Univariate statistics)
+The goal of univariate statistics is to explore the spread (or distribution) of a variable.
+
+```{r}
+x <- sample1$st.Pb206U238/sample1$t.Pb206U238
+```
+
+Important values to characterize the distribution of `x` are:
+```{r univariate1, echo=TRUE}
+# minimum maximum
+min(x) 
+
+#maximum
+max(x) 
+
+# mean
+mean(x) 
+
+# median
+median(x) 
+
+# quantiles
+quantile(x)
+
+# variance
+var(x) 
+
+# standard deviation
+sd(x) 
+```
+#### Visualization of the distibution
+##### Boxplot
+```{r univariate_box, echo=TRUE}
+ggboxplot(x, xlab = NULL, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+```
+
+##### Histogram
+```{r univariate_hist, echo=TRUE, warning=FALSE, message=FALSE}
+gghistogram(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+```
+#### Statistical tests
+
+How to check the normality?
+It’s possible to use the **Shapiro-Wilk normality test** and to look at the normality plot.
+
+Shapiro-Wilk test:
+- Null hypothesis: the data are normally distributed
+- Alternative hypothesis: the data are not normally distributed
+
+```{r shapiro, echo=TRUE}
+shapiro.test(x) 
+```
+>From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribtion. 
+
+Visual inspection of the data normality using **Q-Q plots** (quantile-quantile plots). Q-Q plot draws the correlation between a given sample and the normal distribution.
+```{r univariate_qq, echo=TRUE, warning=FALSE, message=FALSE}
+ggqqplot(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+```
+From the normality plots, we conclude that the data does not come from normal distributions.
+
+Does the mean has any value for the variable? 
+- Normally distributed values: One Sample t-test `t.texst()`
+- Non normally distributed values: Non parametric one-sample Wilcoxon rank test  `wilcox.test()`
+```{r univariate_t1, echo=TRUE}
+#t.test(x)
+wilcox.test(x)
+```
+>The **p-value** of the test is $2.2^{-16}$, which is less than the significance level alpha = 0.05. We can conclude that the mean uncertainties of the reported uncertainties is significantly different from 0 with a **p-value** = $2.2^{-16}$. 
+
+
+
+### Two variables (Bivariate statistics)
+The goal of bivariate statistics is to explore how two different variables relate to or differ from each other.
+
+Values
+- **Covariance** indicates the direction of the linear relationship between variables.
+- **Correlation** measures both the strength and direction of the linear relationship between two variables. The value ("correlation coefficent") ranges between 0 (*variable do not correlate*) and 1 (*variables correlate*).
+
+```{r bivariate1, echo=TRUE}
+# coviariance
+#cov(sample1$Age_206.238, sample1$Age_206.238) identical to var() with two input variables
+var(sample1$st.Pb206U238, sample1$st.Pb207U235) 
+
+# correlation
+cor(sample1$st.Pb206U238, sample1$st.Pb207U235) # correlation
+```
+
+#### Visualization of the correlation
+```{r bivariate2, echo=TRUE, message=FALSE}
+ggscatter(data = sample1, x='st.Pb206U238', y = 'st.Pb207U235', 
+  color = "black", shape = 21, size = 3, # Points color, shape and size
+   add = "reg.line",  # Add regression line
+   add.params = list(color = colorblind[3], fill = "lightgray"), # Customize reg. line
+   conf.int = TRUE, # Add confidence interval
+   cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+   cor.coeff.args = list(method = "pearson", label.x = 3, label.sep = "\n")
+   )
+```
+
+
+
+
+
+### Mutliple variables (Multivariate statistics)
+
+
+## Useful resources
+-  *ggpubr*: ‘ggplot2’ Based Publication Ready Plots. phttps://rpkgs.datanovia.com/ggpubr/
+
+[previous course: Data](R_turorial_2.html) | [next course: ](R_turorial_3.html)

@@ -1,0 +1,158 @@
+---
+title: "Programming with R --- A Beginners’ Guide for Geoscientists"
+subtitle: "3 - Geo-/Thermochronology"
+author: "Tobias Stephan"
+date: "25/01/2022"
+output: 
+  html_document:
+    theme: "united"
+    highlight: "kate"
+    toc: true
+    toc_depth: 3
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Geo-/Thermochronology
+```{r load, echo = TRUE, message = FALSE, warning = FALSE}
+require(IsoplotR)
+require(ggplot2)
+source("Y:/GIT/R_Geo_workshop/course_stuff.R")
+```
+
+### U-Pb
+
+```{r}
+source("Y:/GIT/R_Geo_workshop/course_stuff.R")
+data <- read_geochron("Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls")
+isotopes <- data$isotopes
+meta <- data$meta
+
+samples <- left_join(isotopes, meta, by = "Sample_ID")
+sample1 <- samples %>% filter(Sample_ID == "Whitehorse Formation")
+```
+
+
+```{r, echo=TRUE}
+#data.upb <- examples$UPb
+data.upb <- sample1
+```
+
+
+### Detritals
+```{r dz_load}
+#data.dz <- examples$DZ
+data.dz  <- samples
+
+data.dz <-
+  data.dz %>% mutate(
+    conc = ifelse(
+      t.Pb206U238 > 1000,
+      t.Pb206U238 / t.Pb207Pb206,
+      t.Pb206U238 / t.Pb207U235
+    ),
+    t = ifelse(t.Pb206U238 > 1000, t.Pb207Pb206, t.Pb206U238),
+    st = ifelse(t.Pb206U238 > 1000, st.Pb207Pb206, st.Pb206U238)
+  ) %>%
+  filter(conc >= 0.85 & conc <= 1.05)
+```
+
+```{r kde.dz, echo=TRUE}
+n = 75
+dz.plot <- ggplot(data.dz) +
+  theme_minimal() + # minimal design
+  coord_cartesian(xlim = c(0, 4500), expand = FALSE) + # set the range of the x axis
+  labs(x = 'Age (Ma)') + # axis label
+  geom_vline(xintercept = 1000, # add a vertical line at 1000 Ma
+             lty = 2,
+             color = 'grey') 
+
+dz.plot + geom_density( # density 
+    aes(t),
+    kernel = "gaussian",
+    fill = colorblind[3],
+    alpha = .25,
+    bw = n
+  ) +
+  geom_histogram( # histogram
+    aes(t, y = ..density..),
+    color = 'white',
+    fill = 'grey',
+    alpha = .5,
+    binwidth = n
+  ) +
+  geom_density(
+    aes(t),
+    kernel = "gaussian",
+    fill = NA,
+    color = colorblind[3],
+    bw = n
+  ) +
+  facet_wrap( ~ Sample_ID, # one plot per Sample_ID
+              #ncol = 1,
+              scales = "free_y") 
+```
+
+```{r cad.dz, echo=TRUE}
+dz.plot +
+  stat_ecdf(aes(t, color = Sample_ID)) 
+```
+
+
+```{r mds, echo=TRUE, message=FALSE, warning=FALSE}
+data.dz2 <- geochron_to_dz(data.dz)
+dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
+```
+```{r mds2, echo=TRUE}
+dz.mds.df <- data.frame(Sample_ID = rownames(dz.mds$points),  X = dz.mds$points[,1], Y = dz.mds$points[,2]) %>%
+  left_join(meta)
+
+
+ggplot(dz.mds.df) +
+  labs(title = 'Multidimensional Scaling', x = 'DIM 1', y = 'DIM 2') +
+  theme_bw() +
+  coord_fixed() +
+  geom_point(aes(X, Y, color = Stratigraphic_Formation_Name), show.legend = FALSE) +
+  ggrepel::geom_text_repel(aes(X, Y, label = Sample_ID, color = Stratigraphic_Formation_Name))
+  
+```
+
+
+
+
+
+### Thermochon
+
+```{r}
+data.ft <- examples$FT1
+```
+
+```{r}
+radialplot(data.ft, bg = colorblind[3], alpha =.8)
+```
+
+
+### 
+
+###
+
+
+
+
+## Maps
+
+```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
+require(ggplot2)
+require(scico)
+
+ggplot(data = meta) +
+  coord_map(projection = "azequalarea", xlim = range(meta$Longitude), ylim = range(meta$Latitude)) +
+  borders() +
+  geom_point(aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
+  scale_color_scico(palette = 'batlow')
+```

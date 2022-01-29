@@ -201,6 +201,22 @@ if (a > b | a > c){
 } 
 ```
 
+
+## Loops
+A for loop is used to iterate over a vector in R programming. 
+```{r loop, echo=TRUE}
+#Below is an example to count the number of even numbers in a vector.
+x <- c(2, 5, 3, 9, 8, 11, 6)
+count <- 0
+for (i in x) {
+  if(i %% 2 == 0) {
+    count <- count + 1
+  }
+}
+print(count)
+```
+
+
 # Packages
 Packages are collections of R functions, data, and compiled code in a well-defined format. The directory where packages are stored is called the library. R comes with a standard set of packages. Others are available for download and installation. Once installed, they have to be loaded into the session to be used. 
 
@@ -238,11 +254,28 @@ dadjoke::dadjoke()
 
 ## Help
 Packges from CRAN or Github resources have a thorough documentation. Every function, therefor, has a description and details of the in- and output arguments, the mathematical background, references, and many more.
-You can simply call this documentation by using `?` and the name of the function:
+You can simply call this documentation by using  `?` and the name of the function:
 
 ```{r help, eval=FALSE, include=TRUE, echo=TRUE}
-?max()
+?max
+help(c)
 ```
+
+## Functions
+
+In addition to R’s built-in functions, you can also define your own:
+
+```{r fun, echo=TRUE}
+cube <- function(n){  
+    return(n^3)  
+}  
+
+# Using this function to take the cube of 3:  
+c3 <- cube(3)  
+
+```
+
+
 
 
 # Useful resources
