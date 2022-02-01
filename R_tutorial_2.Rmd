@@ -6,7 +6,7 @@ date: "25/01/2022"
 output: 
   html_document:
     theme: "united"
-    highlight: "kate"
+    highlight: "tango"
     toc: true
     toc_depth: 3
     toc_float: 
