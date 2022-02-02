@@ -18,11 +18,12 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r load, echo=TRUE}
-require("ggpubr")
+```{r load, message=FALSE, warning=FALSE}
+#require("ggpubr")
+require(ggplot2)
 
-source("Y:/GIT/R_Geo_workshop/course_stuff.R")
-data <- read_geochron("Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls")
+source("course_stuff.R")
+data <- read_geochron("Geochron_sample_download.xls")
 isotopes <- data$isotopes
 sample1 <- data$isotopes %>% filter(Sample_ID == "Whitehorse Formation")
 ```
@@ -35,92 +36,208 @@ sample1 <- data$isotopes %>% filter(Sample_ID == "Whitehorse Formation")
 The goal of univariate statistics is to explore the spread (or distribution) of a variable.
 
 ```{r}
-x <- sample1$st.Pb206U238/sample1$t.Pb206U238
+sample1$st.Pb206U238.perc <- sample1$st.Pb206U238/sample1$t.Pb206U238
 ```
 
-Important values to characterize the distribution of `x` are:
+***
+**Background** 
+
+Types of Variables:
+ 
+- *Categorical* = qualitative variables
+  - *Nominal*: variable has two or more categories, but there is no ordering (*rank*) (e.g. binary variables (0 vs. 1, yes vs. no, true vs. false), blood type (A, B, AB, or O) rock type (magmatic, sedimentary, or metamorphic)).
+  - *Ordinal*: similar as categorical, but there is a clear ordering (or rank) of the categories (e.g. economic status low-medium-high, ).
+  - *Discrete numerical*: variable can only be a finite number of real values within a given interval (e.g. a score of a judge between 0 and 10).
+- *Continuous (numerical)* = quantitative variables (Similar to discrete numerical values, except that the variable can be any an infinite number of real values within a given interval)
+  - *Intervals*: ordered units that have the same difference (e. g. temperatures in degrees Celsius or Fahrenheit as difference between 20°C and 30°C is the same as 30°C to 40°C)
+  - *Ratios*:  same as intervals but with an absolute zero (none of a variable). E.g. temperature in K, distance, weight, age, .... 
+  
+***
+
+
+Important values to characterize the distribution of the variable `sample1$st.Pb206U238.perc` are:
 ```{r univariate1, echo=TRUE}
 # minimum maximum
-min(x) 
+min(sample1$st.Pb206U238.perc) 
 
 #maximum
-max(x) 
+max(sample1$st.Pb206U238.perc) 
 
 # mean
-mean(x) 
+mean(sample1$st.Pb206U238.perc) 
 
 # median
-median(x) 
+median(sample1$st.Pb206U238.perc) 
 
 # quantiles
-quantile(x)
+quantile(sample1$st.Pb206U238.perc)
 
 # variance
-var(x) 
+var(sample1$st.Pb206U238.perc) 
 
 # standard deviation
-sd(x) 
+sd(sample1$st.Pb206U238.perc) 
 ```
+
+***
+
+**Mathematical background**
+
+- Mean $|X| = \frac{\sum(x_i)}{n}$
+- Variance $\sigma_X^2 = \frac{1}{n}\sum(x_i - |X|)^2$
+- Standard deviation $\sigma_X = \sqrt{\sigma_X^2}$ 
+
+$x$ the variable/observation
+
+$n$ is the number of observations (sample size) 
+
+***
+
 #### Visualization of the distibution
 ##### Boxplot
-```{r univariate_box, echo=TRUE}
-ggboxplot(x, xlab = NULL, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+```{r univariate_box1, eval=FALSE, include=FALSE}
+ggpubr::ggboxplot(sample1$st.Pb206U238.perc, xlab = NULL, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+```
+
+```{r univariate_box2, echo=TRUE}
+# simple plot
+# boxplot(sample1$st.Pb206U238.perc)
+
+#ggplot
+ggplot(data = sample1, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
+  geom_boxplot() +
+  labs(title = "Boxplot", x = NULL, y = '206/238 Age uncertainties (%)' ) 
 ```
 
 ##### Histogram
-```{r univariate_hist, echo=TRUE, warning=FALSE, message=FALSE}
+```{r univariate_hist1, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 gghistogram(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
 ```
+
+```{r univariate_hist2, echo=TRUE}
+# simple plot
+# hist(sample1$st.Pb206U238.perc)
+
+# ggplot
+ggplot(data = sample1, aes(x = st.Pb206U238.perc)) +
+  geom_histogram(color='white') +  # adds the hisogram
+  labs(title = "Histogram", x = '206/238 Age uncertainties (%)') # add description
+```
+
 #### Statistical tests
 
 How to check the normality?
 It’s possible to use the **Shapiro-Wilk normality test** and to look at the normality plot.
 
 Shapiro-Wilk test:
+
 - Null hypothesis: the data are normally distributed
 - Alternative hypothesis: the data are not normally distributed
 
 ```{r shapiro, echo=TRUE}
-shapiro.test(x) 
+shapiro.test(sample1$st.Pb206U238.perc) 
 ```
->From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribtion. 
+From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribtion. 
 
 Visual inspection of the data normality using **Q-Q plots** (quantile-quantile plots). Q-Q plot draws the correlation between a given sample and the normal distribution.
-```{r univariate_qq, echo=TRUE, warning=FALSE, message=FALSE}
-ggqqplot(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+
+```{r univariate_qq1, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+#ggqqplot(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+```
+
+
+```{r univariate_qq2, echo=TRUE, warning=FALSE, message=FALSE}
+# simple R plot
+qqnorm(sample1$st.Pb206U238.perc)
 ```
 From the normality plots, we conclude that the data does not come from normal distributions.
 
 Does the mean has any value for the variable? 
+
 - Normally distributed values: One Sample t-test `t.texst()`
 - Non normally distributed values: Non parametric one-sample Wilcoxon rank test  `wilcox.test()`
+
 ```{r univariate_t1, echo=TRUE}
-#t.test(x)
-wilcox.test(x)
+#t.test(sample1$st.Pb206U238.perc)
+wilcox.test(sample1$st.Pb206U238.perc)
 ```
->The **p-value** of the test is $2.2^{-16}$, which is less than the significance level alpha = 0.05. We can conclude that the mean uncertainties of the reported uncertainties is significantly different from 0 with a **p-value** = $2.2^{-16}$. 
+The **p-value** of the test is 2.2x10^-16^, which is less than the significance level alpha = 0.05. We can conclude that the mean uncertainties of the reported uncertainties is significantly different from 0 with a **p-value** = 2.2x10^-16^. 
 
 
 
 ### Two variables (Bivariate statistics)
 The goal of bivariate statistics is to explore how two different variables relate to or differ from each other.
 
-Values
+Values:
+
 - **Covariance** indicates the direction of the linear relationship between variables.
-- **Correlation** measures both the strength and direction of the linear relationship between two variables. The value ("correlation coefficent") ranges between 0 (*variable do not correlate*) and 1 (*variables correlate*).
+- **Correlation** measures both the strength and direction of the linear relationship between two variables. The correlation coefficient **R** ranges between 0 (*variables do not correlate*) and 1 (*variables correlate*).
+
+***
+
+**Mathematical background**
+
+- Covariance $\sigma_{XY} = \frac{1}{n} \sum(x_i - |X|)(y_i - |Y|)$
+- Correlation $R_{XY} = \frac{\sigma_{XY}}{\sigma_X \sigma_Y}$
+
+***
 
 ```{r bivariate1, echo=TRUE}
-# coviariance
+# covariance
 #cov(sample1$Age_206.238, sample1$Age_206.238) identical to var() with two input variables
 var(sample1$st.Pb206U238, sample1$st.Pb207U235) 
 
 # correlation
-cor(sample1$st.Pb206U238, sample1$st.Pb207U235) # correlation
+cor(sample1$st.Pb206U238, sample1$st.Pb207U235, method = 'pearson') # (Pearson) correlation
 ```
 
+***
+
+**Background**
+
+The *Pearson correlation (R)* (`method = 'pearson'`) measures a linear dependence between two variables. It’s also known as a **parametric correlation** test because it depends to the distribution of the data: it can be used only when x and y are from *normal distribution*! 
+
+If both variables do not come from a bivariate normal distribution, you have to use rank-based correlation coefficients (**non-parametric**), such as the *Kendall rank correlation* (`method = 'kendall'`) or the *Spearman’s rho statistic* (`method = 'spearman'`).
+
+***
+
+```{r pearson_test, echo=TRUE}
+qqnorm(sample1$st.Pb206U238)
+qqnorm(sample1$st.Pb207U235)
+```
+From the normality plots, we conclude that both populations may come from normal distributions.
+
+
+#### Correlation test
+Testing the statistical significance of the correlation:
+
+```{r cor.test, echo=TRUE} 
+cor.test(sample1$st.Pb206U238, sample1$st.Pb207U235, method = 'pearson')
+```
+In the result above :
+
+- `t` is the t-test statistic value (t = 11.675),
+- `df` is the degrees of freedom (df = 194),
+- `p-value` is the significance level of the t-test (p-value < 2.2e-16).
+- `conf.int` is the confidence interval of the correlation coefficient at 95% (conf.int = [0.5519445, 0.7179183]);
+- `sample estimates` is the correlation coefficient (cor = 0.6424031).
+
+The p-value of the test is <2.2x10^-16^, which is less than the significance level alpha = 0.05. We can conclude that the two variables are significantly correlated with a correlation coefficient of 0.64 and p-value of <2.2x10^-16^.
+
+##### Interpretation of the correlation coefficient
+Correlation coefficient is comprised between -1 and 1:
+
+- `-1` indicates a strong negative correlation : this means that every time x increases, y decreases (left panel figure)
+- `0` means that there is no association between the two variables (x and y) (middle panel figure)
+- `1` indicates a strong positive correlation : this means that y increases with x (right panel figure)
+
+
+
 #### Visualization of the correlation
-```{r bivariate2, echo=TRUE, message=FALSE}
-ggscatter(data = sample1, x='st.Pb206U238', y = 'st.Pb207U235', 
+##### Linear Regression
+
+```{r bivariate2, eval=FALSE, message=FALSE, include=FALSE}
+ggpubr::ggscatter(data = sample1, x='st.Pb206U238', y = 'st.Pb207U235', 
   color = "black", shape = 21, size = 3, # Points color, shape and size
    add = "reg.line",  # Add regression line
    add.params = list(color = colorblind[3], fill = "lightgray"), # Customize reg. line
@@ -130,14 +247,41 @@ ggscatter(data = sample1, x='st.Pb206U238', y = 'st.Pb207U235',
    )
 ```
 
+```{r bivariate3, echo=TRUE}
+# simple R plot
+# plot(sample1$st.Pb206U238, sample1$st.Pb207U235)
 
+ggplot(data = sample1, aes(st.Pb206U238, st.Pb207U235)) +
+  coord_fixed(xlim = c(0, 80), ylim = c(0, 80)) + # x and y axis have same scaling
+  geom_abline(slope = 1, lty = 2, color = 'grey') + # drwas a diagonal line with slope = 1
+  geom_smooth(method = 'lm', formula = 'y~x') + # 'lm' : linear regression
+  geom_point() + # adds points
+  labs(title = "Linear regression", x = '206/238 Age uncertainties (%)', y = '207/235 Age uncertainties (%)') # add description
+```
 
+A summary of the linear regression , incl. $R^2$ (goodness-of-fit), can be shown via:
+```{r lm_summary, echo=TRUE}
+lm_fit <- lm(data = sample1, st.Pb206U238 ~ st.Pb207U235)
+summary(lm_fit)
+```
+- $R$: The correlation between the observed values of the response variable and the predicted values of the response variable made by the model. 
+- $R^2$: The proportion of the variance in the response variable that can be explained by the predictor variables in the regression model.
+
+---
+  
+Ideally, when you plot the residuals, they should look random. Otherwise means that maybe there is a hidden pattern that the linear model is not considering. To plot the residuals, use the command `plot(lm_fit$residuals)`.
+```{r resdiduals, echo=TRUE}
+#simple plot
+plot(lm_fit$residuals)
+```
 
 
 ### Mutliple variables (Multivariate statistics)
 
 
 ## Useful resources
+- https://www.datacamp.com/community/tutorials/linear-regression-R
+- http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
 -  *ggpubr*: ‘ggplot2’ Based Publication Ready Plots. phttps://rpkgs.datanovia.com/ggpubr/
 
 [previous course: Data](R_turorial_2.html) | [next course: ](R_turorial_3.html)
