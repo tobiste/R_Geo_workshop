@@ -1,0 +1,36 @@
+---
+title: "Programming with R --- A Beginners’ Guide for Geoscientists"
+subtitle: "5 - Maps"
+author: "Tobias Stephan"
+date: "03/02/2022"
+output: 
+  html_document:
+    theme: "united"
+    highlight: "tango"
+    toc: true
+    toc_depth: 3
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Maps
+
+```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
+require(ggplot2)
+require(scico)
+
+ggplot(data = meta) +
+  coord_map(projection = "azequalarea", xlim = range(meta$Longitude), ylim = range(meta$Latitude)) +
+  borders() +
+  geom_point(aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
+  scale_color_scico(palette = 'batlow')
+```
+
+
+[previous course: Geochronology](R_turorial_4.html)

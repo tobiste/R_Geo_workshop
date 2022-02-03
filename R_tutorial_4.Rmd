@@ -1,6 +1,6 @@
 ---
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
-subtitle: "3 - Geo-/Thermochronology"
+subtitle: "4 - Geo-/Thermochronology"
 author: "Tobias Stephan"
 date: "25/01/2022"
 output: 
@@ -543,7 +543,8 @@ plot.upb <- ggplot(dunn, aes(Z.UPb.Age, fill = Z.Signal)) +
 ```
 
 ```{r double, echo=TRUE, warning=FALSE, message=FALSE}
-require(patchwork)
+require(patchwork) # multi-plot arrangements
+
 plot.upb + plot_spacer() + plotxy + plot.ft +
   plot_layout(guides = 'collect', ncol = 2, widths = c(3, 1), heights = c(2, 3)) +
   plot_annotation(
@@ -551,18 +552,9 @@ plot.upb + plot_spacer() + plotxy + plot.ft +
     subtitle = 'Mineral: zircon',
     caption = 'Data from Dunn et al. 2017')
 ```
+## Useful resources
 
+***
 
+[previous course: Statistics](R_turorial_3.html) | [next course: Maps](R_turorial_5.html)
 
-## Maps
-
-```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
-require(ggplot2)
-require(scico)
-
-ggplot(data = meta) +
-  coord_map(projection = "azequalarea", xlim = range(meta$Longitude), ylim = range(meta$Latitude)) +
-  borders() +
-  geom_point(aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
-  scale_color_scico(palette = 'batlow')
-```

@@ -359,7 +359,6 @@ seem to be a poor contribution, but it actually allows performing very complex
 nested calculations in such a way that they are both computationally efficient and
 easy to read.
 
-
 ...
 
 ---
