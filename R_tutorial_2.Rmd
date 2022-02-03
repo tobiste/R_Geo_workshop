@@ -147,14 +147,14 @@ writeClipboard(object) # write to the MS clipboard (MS only)
 saveRDS(object, file = "path/to/file/table.Rdata") # wrtie to a R object file
 ```
 
-## Explore datasets
+## Explore and manipulate datasets
 
 For the workshop, I downloaded some U-Pb detrital zircon data from the Rocky Mountains from the Geochron database (http://geochron.org/detritalsearch.php). 
 
 The downloaded excel file is Geochron_sample_download.xls
 ```{r data1, echo=TRUE, warning=FALSE, message=FALSE}
-source("Y:/GIT/R_Geo_workshop/course_stuff.R")
-data <- read_geochron("Y:/GIT/R_Geo_workshop/Geochron_sample_download.xls")
+source("course_stuff.R")
+data <- read_geochron("Data/Geochron_sample_download.xls")
 
 meta <- data$meta
 isotopes <- data$isotopes

@@ -1,3 +1,14 @@
+clean_header <- function(x){
+  x <- stringr::str_replace(x, '[ ]+', "_")
+  x <- stringr::str_replace(x, pattern = '[(]', replacement = "")
+  x <- stringr::str_replace(x, pattern = '[)]', replacement = "")
+  x <- stringr::str_replace(x, ' ', "_")
+  x <- stringr::str_replace(x, ' ', "_")
+  x <- stringr::str_squish(x)
+  return(x)
+}
+
+
 #' @title Read data from Geochron database
 #'
 #' @description Converts Excel spreadsheets from a Geochon download into a meta
@@ -22,6 +33,20 @@ read_geochron <- function(path, method = 'U-Pb') {
   if (method == "(U-Th)/He") {
   }
   if (method == "Fission Track") {
+    details0 <- readxl::read_excel(path = path, sheet = 'Details', col_names = FALSE)
+
+    details <- data.frame(t(details0$`...2`))
+    names(details) <-  clean_header(details0$`...1`)
+
+    meta0 <- readxl::read_excel(path = path, sheet = 'Metadata', col_names = FALSE)
+    meta <- data.frame(t(meta0$`...2`))
+    names(meta) <- clean_header(meta0$`...1`)
+
+    meta <- cbind(meta, details)
+    ages <- readxl::read_excel(path = path, sheet = 'Ages')
+
+    return(list(meta=meta, tracks=ages))
+
   }
   if (method == "U-Pb") {
     # meta
@@ -29,15 +54,7 @@ read_geochron <- function(path, method = 'U-Pb') {
                                 sheet = 1,
                                 skip = 7)
     meta.header <- colnames(meta0)
-    meta.header <- stringr::str_replace(meta.header, '[ ]+', "_")
-    meta.header <-
-      stringr::str_replace(meta.header, pattern = '[(]', replacement = "")
-    meta.header <-
-      stringr::str_replace(meta.header, pattern = '[)]', replacement = "")
-    meta.header <- stringr::str_replace(meta.header, ' ', "_")
-    meta.header <- stringr::str_replace(meta.header, ' ', "_")
-    meta.header <- stringr::str_squish(meta.header)
-    colnames(meta0) <- meta.header
+    colnames(meta0) <- clean_header(colnames(meta0))
 
     meta <- meta0 %>%
       filter(!is.na(Country)) %>%

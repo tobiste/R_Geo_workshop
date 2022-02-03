@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo = FALSE)
 require(ggplot2)
 
 source("course_stuff.R")
-data <- read_geochron("Geochron_sample_download.xls")
+data <- read_geochron("Data/Geochron_sample_download.xls")
 isotopes <- data$isotopes
 sample1 <- data$isotopes %>% filter(Sample_ID == "Whitehorse Formation")
 ```
@@ -279,9 +279,49 @@ plot(lm_fit$residuals)
 ### Mutliple variables (Multivariate statistics)
 
 
+### Tests
+
+- **One Sample t-Test**: a parametric test used to test if the mean of a sample from a normal distribution could reasonably be a specific value.
+`t.test()`
+
+- **Wilcoxon Signed Rank Test**: To test the mean of a sample when normal distribution is not assumed. Wilcoxon signed rank test can be an alternative to t-Test, especially when the data sample is not assumed to follow a normal distribution. It is a non-parametric method used to test if an estimate is different from its true value.
+`wilcox.test()`
+
+- **Two Sample t-Test and Wilcoxon Rank Sum Test**: Both t.Test and Wilcoxon rank test can be used to compare the mean of 2 samples. The difference is t-Test assumes the samples being tests is drawn from a normal distribution, while, Wilcoxon’s rank sum test does not.
+
+
+- **Shapiro Test**: To test if a sample follows a normal distribution.
+`shapiro.test(numericVector) # Does myVec follow a normal disbn?`
+
+- The **Kolmogorov–Smirnov test** is used to check whether 2 samples follow the same distribution.
+`ks.test(x, y) # x and y are two numeric vector`
+
+- **Fisher’s F-Test** can be used to check if two samples have same variance.
+`var.test(x, y)  # Do x and y have the same variance?`
+
+- **Chi Squared Test** can be used to test if two categorical variables are dependent, by means of a contingency table
+`chisq.test()`
+
+- **Correlation**: To test the linear relationship of two continuous variables
+`cor.test(x, y)`
+
+- The **Kruskal-Wallis Rank Sum Test** (also Kruskal–Wallis H test, or one-way ANOVA on ranks) is a non-parametric method for testing whether samples originate from the same distribution. It is used for comparing two or more independent samples of equal or different sample sizes.
+`kruskal.test(x)`
+
+- More Commonly Used Tests
+`fisher.test(contingencyMatrix, alternative = "greater")  # Fisher's exact test to test independence of rows and columns in contingency table`
+`friedman.test()  # Friedman's rank sum non-parametric test`
+
+There are more useful tests available in various other packages.
+
+The package `lawstat` has a good collection. The `outliers` package has a number of test for testing for presence of outliers.
+
+
 ## Useful resources
 - https://www.datacamp.com/community/tutorials/linear-regression-R
 - http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
--  *ggpubr*: ‘ggplot2’ Based Publication Ready Plots. phttps://rpkgs.datanovia.com/ggpubr/
+-  http://r-statistics.co/Statistical-Tests-in-R.html
+- [Tolosana-Delgado & Mueller (2021): "Geostatistics for Compositional Data with R", Springer, Cham](https://link.springer.com/book/10.1007/978-3-030-82568-3)
+- [P. Vermeesch: Lecture notes to "Statistics for geoscientists"](https://github.com/pvermees/geostats/blob/main/latex/geostats.pdf)
 
 [previous course: Data](R_turorial_2.html) | [next course: ](R_turorial_3.html)

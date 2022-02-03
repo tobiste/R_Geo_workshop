@@ -21,39 +21,115 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Geo-/Thermochronology
 ```{r load, echo = TRUE, message = FALSE, warning = FALSE}
 require(IsoplotR)
+require(provenance)
 require(ggplot2) 
+require(dplyr)
 require(scico) # colorblind palettes for continuous data
 source("course_stuff.R")
 ```
 
 ### U-Pb
 
-```{r upb_data, echo=TRUE}
-source("course_stuff.R")
-data <- read_geochron("Geochron_sample_download.xls")
-isotopes <- data$isotopes
-meta <- data$meta
 
-samples <- left_join(isotopes, meta, by = "Sample_ID")
-sample1 <- samples %>% filter(Sample_ID == "Whitehorse Formation")
+```{r}
+data.upb <- examples$UPb
+head(data.upb$x)
+```
+#### Common Pb correction
+
+`Pb0corr()` applies a common-Pb correction to a U-Pb dataset using either the Stacey-Kramers mantle evolution model (`option = 3`), isochron regression (`option = 2`), or any nominal inital Pb isotope composition (`option = 1`).
+```{r}
+data.upb.cor <- Pb0corr(data.upb, option = 3)
+head(data.upb.cor$x)
 ```
 
 
-```{r, echo=TRUE}
-#data.upb <- examples$UPb
-data.upb <- sample1
+Calculate the individual ages of the individual aliquots:
+```{r ages.upb}
+# age per each U-Pb analysis:
+tUPb <- IsoplotR::age(data.upb.cor, type=1) %>% as.data.frame()
+head(tUPb)
 ```
-
 #### Concordia diagram
+Wetherill -– ${}^{206}Pb/{}^{238}U$ vs. ${}^{207}Pb/{}^{235}U$
+```{r concordia1}
+IsoplotR::concordia(data.upb.cor, type = 1, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
+```
+Tera-Wasserburg -– ${}^{207}Pb/{}^{206}Pb$ vs. ${}^{238}U/{}^{206}Pb$
+```{r concordia2}
+IsoplotR::concordia(data.upb.cor, type = 2, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
+```
+The concordia age:
+```{r concordia.age}
+tconc <- IsoplotR::age(data.upb.cor, type=2)
+tconc
+```
+The result returns a list with the following values:
+
+- `x`: a named vector with the (weighted mean) U-Pb composition
+- `cov`:  the covariance matrix of the (weighted mean) U-Pb composition
+- `mswd`: a vector with three items (equivalence, concordance and combined) containing the MSWD (Mean of the Squared Weighted Deviates, a.k.a the reduced Chi-squared statistic) of isotopic equivalence, age concordance and combined goodness of fit, respectively.
+- `p.value`: a vector with three items (equivalence, concordance and combined) containing the p-value of the Chi-square test for isotopic equivalence, age concordance and combined goodness of fit, respectively.
+- `df`:  a three-element vector with the number of degrees of freedom used for the mswd calculation.
+- `age`:  a 4-element vector with:
+  - `t`: the concordia age (in Ma)
+  - `s[t]`: the estimated uncertainty of `t`
+  - `ci[t]`: the *100(1-$\alpha$)*\% confidence interval of `t` for the appropriate degrees of freedom
+  - `disp[t]`: the studentised *100(1-$\alpha$)*\% confidence interval for `t` augmented by $\sqrt{\text{mswd}}$ to account for overdispersed datasets.
+
+
+#### Age spectrum (histrogram and density)
+```{r upb.spectrum}
+n <- provenance::botev(tUPb$t.68) # get the optimal bandwidth using the diffusion algorithm of Zdravko Botev (2011)
+
+ggplot(tUPb) +
+  theme_minimal() + # minimal design
+  coord_cartesian(expand = FALSE) + # set the range of the x axis
+  labs(x = 'Age (Ma)', 
+       caption = paste(
+         'Kernel bandwidth: ', round(n, 1), 
+         '\nConcordia age: ', round(tconc$age[1], 2), ' \u00B1 ',  round(tconc$age[2], 2), 'Ma')
+       ) + # axis label
+  geom_histogram( # histogram
+    aes(t.68, y = ..density..),
+    color = 'white',
+    fill = 'grey',
+    alpha = .5,
+    binwidth = n
+  ) +
+  geom_density(
+    aes(t.68),
+    kernel = "gaussian",
+    fill = NA,
+    color = colorblind[3],
+    bw = n
+  ) +
+  geom_vline(xintercept = tconc$age[1], lty = 2)
+```
+#### Finite mixture modelling of geochronological dataset
+Discrete mixture modelling algorithms of Galbraith and Laslett (1993) by using `peakfit()`.
+
+`peakfit(x, k = 1)`
+
+with
+
+- `x` is the age dataset
+- `k`	is the number of discrete age components to be sought. Setting this parameter to `'auto'` automatically selects the optimal number of components (up to a maximum of 5) using the Bayes Information Criterion (BIC).
+
+
+```{r peak.fit.upb}
+IsoplotR::peakfit(data.upb.cor, k = 'auto')
+```
 
 
 ### Detritals
-```{r dz_load}
-#data.dz <- examples$DZ
-data.dz  <- samples
+```{r dz_load, echo=TRUE}
+data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
+isotopes <- data$isotopes
+meta <- data$meta
 
-data.dz <-
-  data.dz %>% mutate(
+data.dz <- left_join(isotopes, meta, by = "Sample_ID") %>% 
+  mutate(
     conc = ifelse(
       t.Pb206U238 > 1000,
       t.Pb206U238 / t.Pb207Pb206,
@@ -134,26 +210,44 @@ dz.plot +
 
 
 #### Multidimensional scaling
-```{r mds, echo=TRUE, message=FALSE, warning=FALSE}
-data.dz2 <- geochron_to_dz(data.dz)
+If you have multiple features for each observation (row) in a dataset and would like to reduce the number of features in the data so as to visualize which observations are similar, Multi-Dimensional Scaling (MDS) will help.
+
+MDS serves as a ‘map’ in which similar samples cluster closely together and dissimilar samples plot far apart. In the context of detrital geochronology, the dissimilarity between samples is given by the statistical distance between age distributions.
+
+There are many ways to define this statistical distance. `IsoplotR` uses the Kolmogorov-Smirnov (KS) statistic due to its simplicity and the fact that it behaves like a true distance in the mathematical sense of the word (Vermeesch, 2013). The KS-distance is given by the maximum vertical distance between two cad step functions. Thus, the KS-distance takes on values between zero (perfect match between two age distributions) and one (no overlap between two distributions). Calculating the KS-distance between samples two at a time populates a symmetric dissimilarity matrix with positive values and a zero diagonal.
+
+```{r mds0, echo=TRUE, message=FALSE, warning=FALSE}
+data.dz2 <- geochron_to_dz(data.dz) #  my function. converts the Geochron table into dataset suitable for IsoplotR
 dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
 ```
+The function `mds()` by the `IsoplotR` packages produces a `list` that contains the dissimilarity matrix (`diss`) and the MDS configuration coordinates (`points`).
 
-plot
-```{r mds2, echo=TRUE}
-dz.mds.df <- data.frame(Sample_ID = rownames(dz.mds$points),  X = dz.mds$points[,1], Y = dz.mds$points[,2]) %>%
-  left_join(meta)
-
-
-ggplot(dz.mds.df) +
-  labs(title = 'Multidimensional Scaling', x = 'DIM 1', y = 'DIM 2') +
-  theme_bw() +
-  coord_fixed() +
-  geom_point(aes(X, Y, color = Stratigraphic_Formation_Name), show.legend = FALSE) +
-  ggrepel::geom_text_repel(aes(X, Y, label = Sample_ID, color = Stratigraphic_Formation_Name))
+The dissimilarity matrix can be shown by
+```{r diss, echo=FALSE}
+dz.mds$diss
 ```
 
-or use different meta information to explore the provenance
+The MDS configuration can be shown by
+```{r mds1, echo=TRUE}
+head(dz.mds$points) # head() shows only the first 6 rows of a table
+```
+
+To plot the MDS result, i.e. the "map" of dissimilarities, we use the points object from the list
+```{r mds2, echo=TRUE}
+dz.mds.df <- data.frame(Sample_ID = rownames(dz.mds$points),  X = dz.mds$points[,1], Y = dz.mds$points[,2]) %>%
+  left_join(meta) # convert to a data.frame and join with the meta data
+
+ggplot(dz.mds.df) +
+  labs(title = 'Multidimensional Scaling', subtitle = 'Dissimilarity of the detrital age spectra',  x = 'DIM 1', y = 'DIM 2') +
+  theme_bw() +
+  coord_fixed() +
+  geom_point(aes(X, Y, color = Stratigraphic_Formation_Name), show.legend = FALSE) + # color code the points by their stratigraphic formation
+  ggrepel::geom_text_repel(aes(X, Y, label = Sample_ID, color = Stratigraphic_Formation_Name)) +
+  scale_color_manual(values = colorblind)
+```
+In the plot above, similar samples plot close together, whereas samples with contrasting detrital age spectra plot far apart.
+
+The plot above is color coded by the Stratigraphic Formation. You can also use different meta information to explore the provenance
 ```{r mds3, echo=TRUE}
 ggplot(dz.mds.df) +
   labs(title = 'Multidimensional Scaling', x = 'DIM 1', y = 'DIM 2') +
@@ -190,7 +284,7 @@ factoextra::fviz_nbclust(x=dz.mds$points, diss=dz.mds$diss, FUNcluster=cluster::
 ```
 ##### Cluster the data:
 ```{r}
-pam.res2 <- pam(dz.mds$diss, 2)
+pam.res2 <- cluster::pam(dz.mds$diss, 2)
 ```
 
 
@@ -201,7 +295,7 @@ The last part of the analysis is to validate the clusters found.
 Silhouette coefficient measures how similar an object i is to the other objects in its own cluster versus those in its neighbor cluster. Values close to 1 indicate the object is well clustered.
 
 ```{r clust, echo=TRUE, warning=FALSE, message=FALSE}
-factoextra::fviz_silhouette(pam.res2, palette = "jco", ggtheme = theme_classic())
+factoextra::fviz_silhouette(pam.res2, palette = colorblind, ggtheme = theme_classic())
 ```
 Our 2-cluster solution gives an average silhouette coefficient of 0.47. One of the objects in cluster 1 has a negative silhouette coefficient indicating it may be in the wrong cluster.
 
@@ -217,19 +311,246 @@ ggplot(dz.mds.df) +
   ggrepel::geom_text_repel(aes(X, Y, label = Sample_ID, color = Cluster))
 ```
 
+https://rstudio-pubs-static.s3.amazonaws.com/375287_5021917f670c435bb0458af333716136.html
 
 
 ### Thermochron
+#### Fission track data 
+
+```{r}
+data.ft <- read_geochron(path = "Data/Geochron_sample_download_AFT.xlsx", method = "Fission Track")
+data.ft <- list(
+  format = 1,
+  zeta = c(as.numeric(data.ft$meta$Zeta_Factor), as.numeric(data.ft$meta$Zeta_Factor_Error_1s)),
+  rhoD = c(as.numeric(data.ft$meta$Rho_d), as.numeric(data.ft$meta$Rho_d)*as.numeric(data.ft$meta$`Rho_d_%_Relative Error`)/100),
+  x = cbind(Ns = data.ft$tracks$Ns, Ni = data.ft$tracks$Ni)
+)
+class(data.ft) <- "fissiontracks"
+#data.ft <- examples$FT1
+
+```
+
 
 ```{r thermo0, echo=TRUE}
-data.ft <- examples$FT1
+
+
+# counts
+head(data.ft$x)
+
+# Zeta value
+data.ft$zeta
+
+#rhoD
+data.ft$rhoD
 ```
+If `data.ft` has class `"fissiontracks"` and `central=FALSE`, `age()` returns a table of fission track ages and standard errors:
+```{r age.ft}
+data.ft.age <- IsoplotR::age(data.ft, central = FALSE) %>% as.data.frame()
+head(data.ft.age)
+```
+
+
+The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
+```{r central.ft}
+#age(data.ft, central = TRUE) # identical to central()
+IsoplotR::central(data.ft) 
+```
+The return value is a list containing the following items:
+
+- `age` gives the central age (`t`), the standard error of t (`s[t]`),  and the width of a *100(1-$\alpha$)\%* confidence interval for t (`ci[t]`). 
+- `disp` is a a three-element vector with the overdispersion (standard deviation) of the excess scatter, and the upper and lower half-widths of its *100(1-$\alpha$)\%* confidence interval.
+- `mswd` is the reduced Chi-square statistic of data concordance, i.e. *mswd=$\chi$^2^/`df`*, where X^2^ is a Chi-square statistic of the EDM data or ages
+- `df` is the degrees of freedom (*n-2*)
+- `p.value` is the p-value of a Chi-square test with `df` degrees of freedom
+
+
+Plotting the histogram and density of the age distribution:
+```{r hist.ft}
+n <- provenance::botev(data.ft.age$t) # get the optimal bandwidth using the diffusion algorithm of Zdravko Botev (2011)
+
+ggplot(data.ft.age) +
+  theme_minimal() + # minimal design
+  coord_cartesian(expand = FALSE) + # set the range of the x axis
+  labs(x = 'Age (Ma)', caption = paste('Kernel bandwidth :', round(n, 1))) + # axis label
+  geom_histogram( # histogram
+    aes(t, y = ..density..),
+    color = 'white',
+    fill = 'grey',
+    alpha = .5,
+    binwidth = n
+  ) +
+  geom_density(
+    aes(t),
+    kernel = "gaussian",
+    fill = NA,
+    color = colorblind[3],
+    bw = n
+  ) +
+  geom_vline(xintercept = IsoplotR::central(data.ft.age)$age[1], lty = 2)
+```
+
 
 #### Radial plot
+The radial plot (Galbraith, 1988, 1990) is a graphical device that was specifically designed to display heteroscedastic data.
+
+These dates can be more easily visualised by drawing a radial scale at some convenient distance from the origin and annotating it with labelled ticks at the appropriate angles. While the angular position of each data point represents the date, its horizontal distance from the origin is proportional to the precision. Imprecise measurements plot on the left hand side of the radial plot, whereas precise age determinations are found further towards the right. Thus, radial plots allow the observer to assess both the magnitude and the precision of quantitative data in one glance.
+
 ```{r radial, echo=TRUE}
-radialplot(data.ft, bg = colorblind[3], alpha =.8)
+IsoplotR::radialplot(data.ft, bg = colorblind[3], alpha =.8)
+```
+The plot also gives the return values from the `central()`function (see above).
+
+#### Finite mixture modelling of geochronological dataset
+For fission track data, the default input values are:
+
+`peakfit(x, k = 1, exterr = TRUE, sigdig = 2, log = TRUE, alpha = 0.05)`
+
+with
+
+- `x` is the age dataset
+- `k`	is the number of discrete age components to be sought. Setting this parameter to `'auto'` automatically selects the optimal number of components (up to a maximum of 5) using the Bayes Information Criterion (BIC).
+- `exterr`:  propagate the external sources of uncertainty into the component age errors?
+- `sigdig`: number of significant digits to be used for any legend in which the peak fitting results are to be displayed.
+- `log`: take the logs of the data before applying the mixture model?
+- `alpha`: cutoff value for confidence intervals
+
+```{r}
+IsoplotR::peakfit(data.ft, k = 'auto')
 ```
 
+
+
+#### U-Th-He Data
+
+```{r}
+data.uthhe <- examples$UThHe
+head(data.uthhe)
+```
+We can use the same functions as for the fission track data. `IsoplotR` will identify the class UThHe class and changes the default values for the functions automatically.
+
+```{r age.he}
+data.uthhe.ages <- IsoplotR::age(data.uthhe, central = FALSE) %>% as.data.frame()
+head(data.uthhe.ages)
+```
+
+The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
+```{r central.he}
+#age(data.ft, central = TRUE) # identical to central()
+IsoplotR::central(data.uthhe) 
+```
+##### Finite mixture modelling of geochronological dataset
+
+The default values are:
+`peakfit(x, k = 1, sigdig = 2, log = TRUE, alpha = 0.05)`
+
+with
+
+- `x` is the age dataset
+- `k`	is the number of discrete age components to be sought. Setting this parameter to `'auto'` automatically selects the optimal number of components (up to a maximum of 5) using the Bayes Information Criterion (BIC).
+- `log`: take the logs of the data before applying the mixture model?
+- `alpha`: cutoff value for confidence intervals
+	
+
+```{r peakfit, echo=TRUE}
+IsoplotR::peakfit(data.uthhe, k = 'auto')
+```
+it returns the following:
+
+- `peaks`: a 3 x k matrix with the following rows:
+  - `t`: the ages of the `k` peaks
+  - `s[t]`: the estimated uncertainties of `t`
+  - `ci[t]`: the widths of approximate 100(1-α)\% confidence intervals for `t`
+- `props`: a 2xk matrix with the following rows:
+  - `p`: the proportions of the k peaks
+  - `s[p]`: the estimated uncertainties (standard errors) of p
+- `L`: the log-likelihood of the fit
+- `legend`: a vector of text expressions to be used in a figure legend
+
+
+Plotting the histogram and density of the age distribution:
+
+```{r hist.he}
+n <- provenance::botev(data.uthhe.ages$t) # get the optimal bandwidth using the diffusion algorithm of Zdravko Botev (2011)
+
+ggplot(data.uthhe.ages) +
+  theme_minimal() + # minimal design
+  coord_cartesian(expand = FALSE) + # set the range of the x axis
+  labs(x = 'Age (Ma)', caption = paste('Kernel bandwidth :', round(n, 2))) + # axis label
+  geom_histogram( # histogram
+    aes(t, y = ..density..),
+    color = 'white',
+    fill = 'grey',
+    alpha = .5,
+    binwidth = n
+  ) +
+  geom_density(
+    aes(t),
+    kernel = "gaussian",
+    fill = NA,
+    color = colorblind[3],
+    bw = n
+  ) +
+  geom_vline(xintercept = IsoplotR::central(data.uthhe)$age[1], lty = 2)
+```
+
+
+age per eU
+
+age vs. Rs
+
+### Doube-dating
+
+```{r}
+dunn.meta <- read_excel('Data/dunn2017.xlsx', sheet = 'meta')
+dunn.zrn <- read_excel('Data/dunn2017.xlsx', sheet = 'zrn')
+dunn  <- left_join(dunn.meta, dunn.zrn)
+head(dunn)
+```
+```{r double_xy, echo=TRUE, warning=FALSE, message=FALSE}
+plotxy <- ggplot(dunn, aes(x = Z.UPb.Age, y = Z.FT.Age, color = Z.Signal)) +
+  theme_bw() +
+  labs(x = 'U-Pb age (Ma)', y = 'FT age (Ma)') +
+  scale_color_manual(name = 'Signal', values = colorblind) +
+  coord_cartesian(xlim = c(0, 3000), ylim = c(0, 800)) +
+  geom_abline(slope = 1) +
+  geom_errorbar(aes(
+    ymin = Z.FT.Age - Z.FT.1s_err, 
+    ymax = Z.FT.Age + Z.FT.1s_err), alpha = .25) +
+  geom_errorbarh(aes(
+    xmin = Z.UPb.Age - Z.UPb.2s_err/2,
+    xmax = Z.UPb.Age + Z.UPb.2s_err/2), alpha = .25) +
+  geom_point(alpha= .5)
+```
+
+```{r double_den, echo=TRUE, warning=FALSE, message=FALSE}
+plot.ft <- ggplot(dunn, aes(Z.FT.Age, fill = Z.Signal)) +
+  theme_bw() +
+  scale_fill_manual(name = 'Signal', values = colorblind) +
+  coord_flip(xlim = c(0, 800)) +
+  geom_density(alpha = .5, show.legend = FALSE) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+plot.upb <- ggplot(dunn, aes(Z.UPb.Age, fill = Z.Signal)) +
+  theme_bw() +
+  scale_fill_manual(name = 'Signal', values = colorblind) +
+  coord_cartesian(xlim = c(0, 3000)) +
+  geom_density(alpha = .5, show.legend = FALSE) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+```{r double, echo=TRUE, warning=FALSE, message=FALSE}
+require(patchwork)
+plot.upb + plot_spacer() + plotxy + plot.ft +
+  plot_layout(guides = 'collect', ncol = 2, widths = c(3, 1), heights = c(2, 3)) +
+  plot_annotation(
+    title = 'Double dating plot',
+    subtitle = 'Mineral: zircon',
+    caption = 'Data from Dunn et al. 2017')
+```
 
 
 

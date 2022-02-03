@@ -293,6 +293,75 @@ https://www.rstudio.com/resources/cheatsheets/
 Stack Overflow is a question and answer website for professional and enthusiast programmers. For most cases, the site is the first stop to find an answer. **There is an answer for almost every question!** The answers are rated, and the most useful answers are on top!
 https://stackoverflow.com/
 
+- **R-bloggers**
+content contributed by bloggers who write about R (in English). This includes useful tutorials.
+https://www.r-bloggers.com/
+
+# Some usful geoscience packages
+
+Geochemistry
+
+- [`rgr`: Applied Geochemistry EDA (by Geological Survey of Canada (GSC))](https://cran.r-project.org/web/packages/rgr/rgr.pdf):
+Geological Survey of Canada (GSC) functions for exploratory data analysis with applied geochemical data, with special application to the estimation of background ranges and identification of outliers, 'anomalies', to support mineral exploration and environmental studies. Additional functions are provided to support analytical data QA/QC, ANOVA for investigations of field sampling and analytical variability, and utility tasks. NOTE: function caplot() for concentration-area plots employs package 'akima', however, 'akima' is only licensed for not-for-profit use. Therefore, not-for-profit users of 'rgr' will have to independently make package 'akima' available through library(....); and use of function caplot() by for-profit users will fail.
+`install.packages(rgr)`
+
+- [`gmGeostats`: Geostatistics for Compositional Analysis](https://cran.r-project.org/web/packages/gmGeostats/vignettes/gmGeostats.html):
+Support for geostatistical analysis of multivariate data, in particular data with restrictions, e.g. positive amounts data, compositional data, distributional data, microstructural data, etc. It includes descriptive analysis and modelling for such data, both from a two-point Gaussian perspective and multipoint perspective. The methods mainly follow Tolosana-Delgado, Mueller and van den Boogaart (2018) <doi:10.1007/s11004-018-9769-3>.
+`install.packages("gmGeostats")`
+
+- [`GCDkit`: GeoChemical Data toolkit](http://www.gcdkit.org/) The GeoChemical Data ToolKIT, or in short GCDkit, is a system for handling and recalculation of whole-rock analyses from igneous rocks. It is written in R, a language and environment for statistical computing and graphics. 
+
+Geochronology
+
+- [`isoplotR`](https://www.ucl.ac.uk/~ucfbpve/papers/VermeeschGSF2018/):
+IsoplotR is a free and open-source substitute for Kenneth Ludwig's popular Isoplot add-in to Microsoft Excel. 
+Provenance analysis.
+`install.packages(isoplotR)`
+
+- [`provenance`: Statistical Toolbox for Sedimentary Provenance Analysis (by P. Vermeesch)](https://cran.r-project.org/web/packages/provenance/provenance.pdf):
+Bundles a number of established statistical methods to facilitate the visual interpretation of large datasets in sedimentary geology. Includes functionality for adaptive kernel density estimation, principal component analysis, correspondence analysis, multidimensional scaling, generalised procrustes analysis and individual differences scaling using a variety of dissimilarity measures. Univariate provenance proxies, such as single-grain ages or (isotopic) compositions are compared with the Kolmogorov-Smirnov, Kuiper or Sircombe-Hazelton L2 distances. Categorical provenance proxies such as chemical compositions are compared with the Aitchison and Bray-Curtis distances, and point-counting data with the chi-square distance. Also included are tools to plot compositional and point-counting data on ternary diagrams and point-counting data on radial plots, to calculate the sample size required for specified levels of statistical precision, and to assess the effects of hydraulic sorting on detrital compositions. Includes an intuitive query-based user interface for users who are not proficient in R.
+`install.packages(provenance)`
+
+- [`Luminescence`: Comprehensive Luminescence Dating Data Analysis](https://r-luminescence.org/):
+A collection of various R functions for the purpose of Luminescence dating data analysis. This includes, amongst others, data import, export, application of age models, curve deconvolution, sequence analysis and plotting of equivalent dose distributions.
+`install.packages("Luminescence")`
+
+Structural geology, tectonics, seismicity
+
+- [`RockFab`: Rock fabric and strain analysis tools](https://cran.r-project.org/web/packages/RockFab/index.html): Provides functions to complete three-dimensional rock fabric and strain analyses following the Rf Phi, Fry, and normalized Fry methods. Also allows for plotting of results (Stereoplot) and interactive 3D visualization functionality.
+`install.packages(RockFab)` 
+
+- [`RFOC`: Spherical Distributions and Earthquake Focal Mechanisms](https://leesj.sites.oasis.unc.edu/FETCH/GRAB/Vignettes/focalmec.pdf): Graphics for statistics on a sphere, as applied to geological fault data, crystallography, earthquake focal mechanisms, radiation patterns, ternary plots and geographical/geological maps. Non-double couple plotting of focal spheres and source type maps are included for statistical analysis of moment tensors.
+`install.packages(RFOC)` 
+
+Multivariable Geostatistics
+
+- [`gstat`: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation](https://r-spatial.github.io/gstat/)
+Spatial and spatio-temporal geostatistical modelling, prediction and simulation (e.g. krige, variograms)
+- [`gear`]()  Geostatistical analysis in R
+- [`georob`: Robust Geostatistical Analysis of Spatial Data](https://cran.r-project.org/web/packages/georob/vignettes/georob_vignette.pdf): Provides functions for efficiently fitting linear models with spatially correlated errors by robust and Gaussian (Restricted) Maximum Likelihood and for computing robust and customary point and block external-drift Kriging predictions, along with utility functions for variogram modelling in ad hoc geostatistical analyses, model building, model evaluation by cross-validation, (conditional) simulation of Gaussian processes, unbiased back-transformation of Kriging predictions of log-transformed data.
+
+## Generally helpful packages
+
+- [`ggplot2`]()
+- [`ggpubr`: ‘ggplot2’ Based Publication Ready Plots](phttps://rpkgs.datanovia.com/ggpubr/)
+- [`dplyr`]()   is a data wrangling package, offering a series of functions (all called
+as verbs) for data manipulations ( select columns, filter rows, mutate
+variables into new ones, etc.). This has the advantage to nicely integrate with the
+pipe, jointly with certain convenience functionality in variable selection.
+- [`sp`]() is a cornerstone of spatial analysis in **R**, as it brings a set of data classes
+to contain spatial objects and spatial data, closely following the paradigms
+of data representation in geographic information systems (Pebesma & Bivand,
+2005).
+- [`magrittr`]() Its sole contribution is to provide piping functionality to **R**. The
+pipe `%>%` allows writing `fun(X, args)` as X `%>% fun(args)`. This might
+seem to be a poor contribution, but it actually allows performing very complex
+nested calculations in such a way that they are both computationally efficient and
+easy to read.
+
+
+...
+
 ---
 
 [next course: Data](R_turorial_2.html)
