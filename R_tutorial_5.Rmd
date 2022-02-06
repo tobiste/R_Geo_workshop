@@ -136,6 +136,7 @@ line.pts <- cbind(
 )
 
 # extracts the swath profile and some statistics
+# WARNING CPU-intensive
 swath.profile <- swathR(
   coords = line.pts, 
   raster = dem.cropped,
