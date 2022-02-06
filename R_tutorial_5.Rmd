@@ -410,6 +410,8 @@ idw <- phylin::idw(
 idw.mag <- data.frame(grid, idw)
 coordinates(idw.mag) <- ~ x + y
 proj4string(idw.mag) <- aea
+#gridded(idw.mag) <- TRUE
+
 
 idw.mag.wgs84 <-
   sp::spTransform(idw.mag, "+proj=longlat +ellps=WGS84 +no_defs") %>% as.data.frame()
@@ -431,7 +433,7 @@ map3 <- ggplot() +
   scale_fill_scico() + # format legend labels
   coord_cartesian(
     xlim = range(earthquakes$longitude),
-    ylim = range,
+    ylim = range(earthquakes$latitude),
     expand = FALSE
   ) +
   labs(title = "Seismicity of western British Columbia",
