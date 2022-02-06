@@ -21,15 +21,154 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Maps
 
-```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
+```{r packages, echo = TRUE, message = FALSE, warning = FALSE}
+gc(verbose = FALSE)
+require(dplyr)
+require(squish)
+
+# pLotting
 require(ggplot2)
 require(scico)
+require(patchwork)
 
-ggplot(data = meta) +
-  coord_map(projection = "azequalarea", xlim = range(meta$Longitude), ylim = range(meta$Latitude)) +
-  borders() +
-  geom_point(aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
-  scale_color_scico(palette = 'batlow')
+# geospatial packages
+require(sp)
+require(sf)
+require(raster)
+require(rgeos)
+library(rgdal)
+
+# my functions and stuff for the course
+source("course_stuff.R")
+```
+
+
+### Basic maps
+```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
+data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
+
+map <- ggplot() + # extent of the map 
+  borders() + # political borders 
+  geom_point(data = data$meta, aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
+  scale_color_scico(palette = 'batlow', name = 'Depositional age (Ma)') # a colorblind-friendly color-palette
+
+map +
+  coord_map(
+    projection = "mercator", # the projection
+    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map 
+  labs(title = "mercator", subtitle = "equally spaced straight meridians, conformal, straight compass courses") +
+map +
+  coord_map(
+    projection = "azequidistant", # the projection
+    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map
+    labs(title = "azequidistant", subtitle = "equally spaced parallels, true distances from pole") +
+map +
+  coord_map(
+    projection = "azequalarea", # the projection
+    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map
+    labs(title = "azequalarea", subtitle = "equal-area") +
+map +
+  coord_map(
+    projection = "albers", parameters = c(52, 52), # the projection
+    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map
+    labs(title = "albers", subtitle = "equal-area, true scale on lat0 and lat1") 
+gc(verbose = FALSE)
+```
+
+### Import Shape-files
+
+
+### Import Raster
+
+```{r raster_load}
+dem <- raster::raster('Data/DEM/srtm_13_02.tif')
+
+# first glimpse
+plot(dem)
+```
+
+```{r}
+crop_extent <- sf::st_bbox(
+  c(
+    xmin = min(data$meta$Longitude),
+    xmax = max(data$meta$Longitude),
+    ymin = min(data$meta$Latitude),
+    ymax = max(data$meta$Latitude)
+    ), crs = sf::st_crs('WGS84')
+  ) %>%
+  sf::st_as_sfc() %>%
+  sf::as_Spatial()
+
+dem.cropped <- crop(dem, crop_extent)
+plot(dem.cropped)
+plot(crop_extent, add = TRUE)
+
+
+dem.df <- as(dem.cropped, "SpatialPixelsDataFrame") %>% as.data.frame()
+colnames(dem.df) <- c("elevation", "lon", "lat")
+```
+
+```{r}
+dem.df$elevation %>% summary()
+```
+
+
+```{r}
+map +
+  #geom_tile(data = dem.df, aes(lon, lat, fill = elevation)) +
+  scale_fill_scico(palette = 'oleron', name = 'Topography (m a.s.l.)', limits = c(-max(dem.df$elevation), max(dem.df$elevation)), oob=scales::squish, breaks = seq(-5000, 5000, 1000)) +
+  coord_map(
+    projection = "azequalarea", # the projection
+    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude))
+```
+
+
+
+
+
+
+### Swath-profile from a DEM
+
+```{r swath, echo=TRUE, message=FALSE, warning=FALSE}
+line.pts <- cbind(
+  lon =  c(-119, -116),
+  lat = c(50.5, 52.5)
+)
+
+# extracts the swath profile and some statistics
+swath.profile <- swathR(
+  coords = line.pts, 
+  raster = dem.cropped,
+  crs = '+proj=longlat +ellps=WGS84 +no_defs', 
+  dist = .2,
+  k = 1
+  )
+
+swath.stats <- as.data.frame(swath.profile[[1]])
+swath.data <- swath.profile[[2]]
+swath.lines <- swath.profile[[3]]
+```
+
+```{r plot_swath, echo=TRUE}
+swath.data.line <- data.frame(dist = seq_along(swath.data[[2]]), elevation = swath.data[[2]])
+
+ggplot(swath.data.line, aes(dist, elevation)) +
+  coord_cartesian(expand = FALSE) + 
+  geom_ribbon(aes(ymin = elevation - swath.stats$std.dev.[2], ymax = elevation + swath.stats$std.dev.[2]), fill='grey') +
+  geom_line(color = colorblind[4]) +
+  labs(x = 'Distance (degree)', y = 'Elevation (m)')
+```
+
+
+
+
+
+
+### Heat map
+
+
+```{r gc, include=FALSE}
+gc(verbose = FALSE)
 ```
 
 

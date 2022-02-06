@@ -19,26 +19,41 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Geo-/Thermochronology
-```{r load, echo = TRUE, message = FALSE, warning = FALSE}
+
+Packages that we will need:
+```{r packages, echo = TRUE, message = FALSE, warning = FALSE}
+# Geo-Thermochronology packages
 require(IsoplotR)
 require(provenance)
-require(ggplot2) 
-require(dplyr)
+
+#plotting
+require(ggplot2)
 require(scico) # colorblind palettes for continuous data
+require(patchwork) # multi-plot arrangements
+
+# data handling
+require(tidyr)
+require(dplyr)
+
+# cluster analysis
+require(cluster)
+require(factoextra)
+
+# my functions and stuff for the course
 source("course_stuff.R")
 ```
 
 ### U-Pb
-
-
+Load example data:
 ```{r}
-data.upb <- examples$UPb
+data.upb <- examples$UPb # example data from the IsoplotR package
 head(data.upb$x)
 ```
 #### Common Pb correction
 
 `Pb0corr()` applies a common-Pb correction to a U-Pb dataset using either the Stacey-Kramers mantle evolution model (`option = 3`), isochron regression (`option = 2`), or any nominal inital Pb isotope composition (`option = 1`).
 ```{r}
+# ?Pb0corr()
 data.upb.cor <- Pb0corr(data.upb, option = 3)
 head(data.upb.cor$x)
 ```
@@ -47,14 +62,19 @@ head(data.upb.cor$x)
 Calculate the individual ages of the individual aliquots:
 ```{r ages.upb}
 # age per each U-Pb analysis:
+# ?IsoplotR::age()
 tUPb <- IsoplotR::age(data.upb.cor, type=1) %>% as.data.frame()
 head(tUPb)
 ```
+
 #### Concordia diagram
+
 Wetherill -– ${}^{206}Pb/{}^{238}U$ vs. ${}^{207}Pb/{}^{235}U$
 ```{r concordia1}
+# ?IsoplotR::concordia()
 IsoplotR::concordia(data.upb.cor, type = 1, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
 ```
+
 Tera-Wasserburg -– ${}^{207}Pb/{}^{206}Pb$ vs. ${}^{238}U/{}^{206}Pb$
 ```{r concordia2}
 IsoplotR::concordia(data.upb.cor, type = 2, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
@@ -118,31 +138,45 @@ with
 
 
 ```{r peak.fit.upb}
+# ?IsoplotR::peakfit()
 IsoplotR::peakfit(data.upb.cor, k = 'auto')
 ```
 
 
 ### Detritals
+Load some example data. The data is from a Geochron.org query. I wrote a  function  `read_geochron()` that reads the Geochron.org export into the R file, so that you don't have to do any table manipulation anymore.
+
 ```{r dz_load, echo=TRUE}
 data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
 isotopes <- data$isotopes
 meta <- data$meta
+```
 
+#### Preferred age
+The U-Pb system has the big advantage that you can measure 2-3 independent "clocks", i.e. ${}^{206}\text{Pb}/{}^{238}\text{U}$, ${}^{207}\text{Pb}/{}^{235}\text{U}$,  and ${}^{206}\text{Pb}/{}^{207}\text{Pb}$. These three isotopic ratios are used to deduce the concordance of the age, i.e. the should be identical if the decay system was closed or undisturbed. In reality, noise (measurement) and bias (Pb-loss due to, e.g., metamorphism) can result in discordant ages.  
+
+Using ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ ages to estimate discordance of Phanerozoic zircons may result in apparent discordance as for geologically young samples the intersection between the discordia reflecting the ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ age and the concordia has a very flat angle.
+Even a small error in the ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ ratio has a major effect on the apparent ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ age (e.g. Mattinson, 1987). 
+Because of the shape of the concordia, which flattens for older ages, the intersection of the ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ discordia and the concordia is better defined for older ages. 
+Thus, the ${}^{206}\text{Pb}/{}^{238}\text{U}$ age is preferred for Phanerozoic and Neoproterozoic zircons and the ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ age for zircons older than 1000 Ma.
+
+```{r pref.age, echo=TRUE}
 data.dz <- left_join(isotopes, meta, by = "Sample_ID") %>% 
   mutate(
     conc = ifelse(
-      t.Pb206U238 > 1000,
+      t.Pb207Pb206 > 1000,
       t.Pb206U238 / t.Pb207Pb206,
       t.Pb206U238 / t.Pb207U235
     ),
-    t = ifelse(t.Pb206U238 > 1000, t.Pb207Pb206, t.Pb206U238),
-    st = ifelse(t.Pb206U238 > 1000, st.Pb207Pb206, st.Pb206U238)
+    t = ifelse(t.Pb207Pb206 > 1000, t.Pb207Pb206, t.Pb206U238),
+    st = ifelse(t.Pb207Pb206 > 1000, st.Pb207Pb206, st.Pb206U238)
   ) %>%
-  filter(conc >= 0.85 & conc <= 1.05)
+  filter(conc >= 0.85 & conc <= 1.05) # concordance filter
 ```
 
 #### Histograms and kernel density distribution
-
+The detrital age spectrum of a sample is usually shown by histograms and density distribution. 
+Histograms are intuitive, whereas density distributions are not. Kernel Density Estimation are preferred over Probability Density Plots (Vermeesch 2012)
 ```{r kde.dz0, echo=TRUE}
 dz.plot <- ggplot(data.dz) +
   theme_minimal() + # minimal design
@@ -160,6 +194,7 @@ dz.plot +
     bw = 75
   ) 
 ```
+
 This gives us a density distribution of **all** samples. If we want to plot the age spectra for each sample we can indicate this by defining the color within the aesthetics `aes()`: 
 
 ```{r kde.dz1, echo=TRUE}
@@ -218,6 +253,8 @@ There are many ways to define this statistical distance. `IsoplotR` uses the Kol
 
 ```{r mds0, echo=TRUE, message=FALSE, warning=FALSE}
 data.dz2 <- geochron_to_dz(data.dz) #  my function. converts the Geochron table into dataset suitable for IsoplotR
+
+#?IsoplotR::mds()
 dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
 ```
 The function `mds()` by the `IsoplotR` packages produces a `list` that contains the dissimilarity matrix (`diss`) and the MDS configuration coordinates (`points`).
@@ -258,12 +295,6 @@ ggplot(dz.mds.df) +
   scico::scale_color_scico()
 ```
 #### Cluster the dissimilarity matrix
-
-```{r}
-require(cluster)
-require(factoextra)
-```
-
 
 ##### Hierarchical agglomerative clustering 
 ```{r cluster}
@@ -311,7 +342,6 @@ ggplot(dz.mds.df) +
   ggrepel::geom_text_repel(aes(X, Y, label = Sample_ID, color = Cluster))
 ```
 
-https://rstudio-pubs-static.s3.amazonaws.com/375287_5021917f670c435bb0458af333716136.html
 
 
 ### Thermochron
@@ -327,13 +357,10 @@ data.ft <- list(
 )
 class(data.ft) <- "fissiontracks"
 #data.ft <- examples$FT1
-
 ```
 
 
 ```{r thermo0, echo=TRUE}
-
-
 # counts
 head(data.ft$x)
 
@@ -352,7 +379,7 @@ head(data.ft.age)
 
 The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
 ```{r central.ft}
-#age(data.ft, central = TRUE) # identical to central()
+# age(data.ft, central = TRUE) # identical to central()
 IsoplotR::central(data.ft) 
 ```
 The return value is a list containing the following items:
@@ -396,6 +423,7 @@ The radial plot (Galbraith, 1988, 1990) is a graphical device that was specifica
 These dates can be more easily visualised by drawing a radial scale at some convenient distance from the origin and annotating it with labelled ticks at the appropriate angles. While the angular position of each data point represents the date, its horizontal distance from the origin is proportional to the precision. Imprecise measurements plot on the left hand side of the radial plot, whereas precise age determinations are found further towards the right. Thus, radial plots allow the observer to assess both the magnitude and the precision of quantitative data in one glance.
 
 ```{r radial, echo=TRUE}
+# ?IsoplotR::radialplot()
 IsoplotR::radialplot(data.ft, bg = colorblind[3], alpha =.8)
 ```
 The plot also gives the return values from the `central()`function (see above).
@@ -452,6 +480,7 @@ with
 	
 
 ```{r peakfit, echo=TRUE}
+# IsoplotR::peakfit()
 IsoplotR::peakfit(data.uthhe, k = 'auto')
 ```
 it returns the following:
@@ -493,6 +522,29 @@ ggplot(data.uthhe.ages) +
   geom_vline(xintercept = IsoplotR::central(data.uthhe)$age[1], lty = 2)
 ```
 
+#### Visualise U-Th-He data on a logratio plot or ternary diagram: the helioplot
+Plot U-Th(-Sm)-He data on a *(log[He/Th] vs. log[U/He])* logratio plot or *U-Th-He ternary diagram*.
+
+```{r helop, echo=TRUE}
+#?IsoplotR::helioplot()
+
+# bivariate log[He/Th] vs. log[U/He] diagram
+IsoplotR::helioplot(
+  data.uthhe,
+  logratio = TRUE,
+  contour.col = c('white', colorblind[7]),
+    ellipse.fill = alpha(colorblind[4], .5))
+
+# U-Th-He ternary diagram
+IsoplotR::helioplot(
+  data.uthhe,
+  logratio = FALSE,
+  contour.col = c('white', colorblind[7]),
+    ellipse.fill = alpha(colorblind[4], .5)
+  )
+
+```
+
 
 age per eU
 
@@ -501,11 +553,13 @@ age vs. Rs
 ### Doube-dating
 
 ```{r}
-dunn.meta <- read_excel('Data/dunn2017.xlsx', sheet = 'meta')
+dunn.meta <- read_excel('Data/dunn2017.xlsx', sheet = 'meta') %>%
+  tidyr::separate(col=Age.range, into=c('DA.min', 'DA.max'), sep = '–', remove = FALSE, convert=TRUE)
 dunn.zrn <- read_excel('Data/dunn2017.xlsx', sheet = 'zrn')
 dunn  <- left_join(dunn.meta, dunn.zrn)
 head(dunn)
 ```
+
 ```{r double_xy, echo=TRUE, warning=FALSE, message=FALSE}
 plotxy <- ggplot(dunn, aes(x = Z.UPb.Age, y = Z.FT.Age, color = Z.Signal)) +
   theme_bw() +
@@ -543,8 +597,7 @@ plot.upb <- ggplot(dunn, aes(Z.UPb.Age, fill = Z.Signal)) +
 ```
 
 ```{r double, echo=TRUE, warning=FALSE, message=FALSE}
-require(patchwork) # multi-plot arrangements
-
+#equire(patchwork) # multi-plot arrangements
 plot.upb + plot_spacer() + plotxy + plot.ft +
   plot_layout(guides = 'collect', ncol = 2, widths = c(3, 1), heights = c(2, 3)) +
   plot_annotation(
@@ -552,7 +605,46 @@ plot.upb + plot_spacer() + plotxy + plot.ft +
     subtitle = 'Mineral: zircon',
     caption = 'Data from Dunn et al. 2017')
 ```
+Lag-time
+```{r lag, warning=FALSE, message=FALSE}
+ggplot(dunn %>% filter(DA>0.3), aes(x=Z.FT.Age, y=DA, color=Sample)) +
+  geom_abline(slope = -1, intercept = seq(0, 300, 5), color="gray") +
+  geom_errorbarh(aes(xmin=Z.FT.Age-Z.FT.1s_err, xmax=Z.FT.Age+Z.FT.1s_err), alpha=.2) +
+  geom_errorbar(aes(ymin=DA.min, ymax=DA.max), alpha=.2) +
+  geom_point(aes(shape = Z.Signal), alpha=1) +
+  scale_x_continuous(breaks = seq(0, 100, 10), position = "top") +
+  scale_y_continuous(breaks = seq(0, 10, 1), trans = "reverse") +
+  coord_cartesian(xlim = c(0, 100), ylim=c(0, 10), expand = F, clip="on") +
+  scale_color_manual(values = colorblind) +
+  labs(title = "Lag time diagram: Zircon", x = "Zircon FT age (Ma)", y="Depositional Age (Ma)") +
+  theme_classic()
+```
+
+
 ## Useful resources
+
+IsoplotR
+
+- Vermeesch, P. (2018). IsoplotR: A free and open toolbox for geochronology. Geoscience Frontiers, 9(5), 1479–1493. https://doi.org/10.1016/j.gsf.2018.04.001
+
+
+Statistics for geochronology
+
+-Vermeesch, P. (2012). On the visualisation of detrital age distributions. Chemical Geology, 312–313, 190–194. https://doi.org/10.1016/j.chemgeo.2012.04.021
+- Vermeesch, P. (2013). Multi-sample comparison of detrital age distributions. Chemical Geology, 341, 140–146. https://doi.org/10.1016/j.chemgeo.2013.01.010
+- Vermeesch, P. (2017). Statistics for LA-ICP-MS based fission track dating. Chemical Geology, 456, 19–27. https://doi.org/https://doi.org/10.1016/j.chemgeo.2017.03.002
+- Vermeesch, P. (2019). Statistics for Fission-Track Thermochronology. In M. G. Malusà & P. G. Fitzgerald (Eds.), Fission-Track Thermochronology and its Application to Geology (pp. 109–122). Cham: Springer Textbooks in Earth Sciences, Geography and Environment. https://doi.org/10.1007/978-3-319-89421-8_6
+
+Cluster analysis with R
+
+- https://rstudio-pubs-static.s3.amazonaws.com/375287_5021917f670c435bb0458af333716136.html
+
+
+```{r gc, include=FALSE}
+gc(verbose = FALSE)
+```
+
+
 
 ***
 

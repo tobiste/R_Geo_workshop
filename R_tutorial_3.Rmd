@@ -18,14 +18,26 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r load, message=FALSE, warning=FALSE}
-#require("ggpubr")
-require(ggplot2)
 
+```{r packages}
+# data handling
+require(dplyr)
+
+#Plotting
+require(ggplot2)
+#require(ggpubr)
+
+# my functions and stuff for the course
 source("course_stuff.R")
-data <- read_geochron("Data/Geochron_sample_download.xls")
-isotopes <- data$isotopes
-sample1 <- data$isotopes %>% filter(Sample_ID == "Whitehorse Formation")
+```
+
+
+```{r load, message=FALSE, warning=FALSE}
+data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
+samples <- data$isotopes %>% 
+  mutate(st.Pb206U238.perc = st.Pb206U238/t.Pb206U238)
+
+sample1 <- samples %>% filter(Sample_ID == "Whitehorse Formation")
 ```
 
 ---
@@ -35,9 +47,6 @@ sample1 <- data$isotopes %>% filter(Sample_ID == "Whitehorse Formation")
 ### One variable (Univariate statistics)
 The goal of univariate statistics is to explore the spread (or distribution) of a variable.
 
-```{r}
-sample1$st.Pb206U238.perc <- sample1$st.Pb206U238/sample1$t.Pb206U238
-```
 
 ***
 **Background** 
@@ -106,23 +115,38 @@ ggpubr::ggboxplot(sample1$st.Pb206U238.perc, xlab = NULL, ylab = "206/238 Age un
 #ggplot
 ggplot(data = sample1, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
   geom_boxplot() +
-  labs(title = "Boxplot", x = NULL, y = '206/238 Age uncertainties (%)' ) 
+  labs(title = "Boxplot", x = "Sample", y = '206/238 Age uncertainties (%)' ) 
+```
+Btw, if you want to have the boxplot for more than one sample... R automatically identifies when there are more than one sample in your data set. 
+```{r univariate_boxs, echo=TRUE}
+ggplot(data = samples, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
+  geom_boxplot() +
+  labs(title = "Boxplot", x = 'Sample', y = '206/238 Age uncertainties (%)' ) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 
 ##### Histogram
 ```{r univariate_hist1, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 gghistogram(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
 ```
-
 ```{r univariate_hist2, echo=TRUE}
 # simple plot
 # hist(sample1$st.Pb206U238.perc)
 
 # ggplot
 ggplot(data = sample1, aes(x = st.Pb206U238.perc)) +
-  geom_histogram(color='white') +  # adds the hisogram
+  geom_histogram(color='white') +  # adds the histogram
   labs(title = "Histogram", x = '206/238 Age uncertainties (%)') # add description
 ```
+**R** finds the optimal width of the bins automatically. You can also give a specific bin width by defining `binwidth` or the number of bins by `bins` as options int in the `geom_histogram()` function. See `?geom_histogram()` for more information
+
+If you want to show more than one sample in one histogram plot and color them according to their sample, just define the `fill` option.
+```{r histograms}
+ggplot(data = samples, aes(x = st.Pb206U238.perc, fill = Sample_ID)) +
+  geom_histogram(color='white') +  # adds the histogram
+  labs(title = "Histogram", x = '206/238 Age uncertainties (%)') # add description
+```
+
 
 #### Statistical tests
 
@@ -323,5 +347,13 @@ The package `lawstat` has a good collection. The `outliers` package has a number
 -  http://r-statistics.co/Statistical-Tests-in-R.html
 - [Tolosana-Delgado & Mueller (2021): "Geostatistics for Compositional Data with R", Springer, Cham](https://link.springer.com/book/10.1007/978-3-030-82568-3)
 - [P. Vermeesch: Lecture notes to "Statistics for geoscientists"](https://github.com/pvermees/geostats/blob/main/latex/geostats.pdf)
+
+
+```{r gc, include=FALSE}
+gc(verbose = FALSE)
+```
+
+
+
 
 [previous course: Data](R_turorial_2.html) | [next course: ](R_turorial_3.html)

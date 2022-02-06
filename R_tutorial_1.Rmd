@@ -363,4 +363,12 @@ easy to read.
 
 ---
 
+
+```{r gc, include=FALSE}
+gc(verbose = FALSE)
+```
+
+
+
+
 [next course: Data](R_turorial_2.html)

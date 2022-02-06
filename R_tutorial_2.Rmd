@@ -282,5 +282,11 @@ combined %>%
 ```
 
 
+```{r gc, include=FALSE}
+gc(verbose = FALSE)
+```
+
+
+
 
 [previous course: Basics](R_turorial_1.html) | [next course: Decriptive statistics](R_turorial_3.html)
