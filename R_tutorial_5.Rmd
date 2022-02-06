@@ -18,9 +18,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-## Maps
-
+Packages we need:
 ```{r packages, echo = TRUE, message = FALSE, warning = FALSE}
 gc(verbose = FALSE)
 require(dplyr)
@@ -30,72 +28,214 @@ require(squish)
 require(ggplot2)
 require(scico)
 require(patchwork)
+require(ggrepel)
 
 # geospatial packages
 require(sp)
 require(sf)
 require(raster)
 require(rgeos)
-library(rgdal)
+require(rgdal)
+
+# spatial interpolation
+# require(gstat)
+# require(dismo)
+require(phylin)
+
 
 # my functions and stuff for the course
 source("course_stuff.R")
 ```
 
+## Maps
+
+### Seismics at BC coast
+```{r data}
+earthquakes <- read.csv("Data/Map/earthquakes_2000-2020.csv", sep = ",") %>% arrange(depth)
+head(earthquakes)
+```
+
+
 
 ### Basic maps
 ```{r map1, echo = TRUE, message = FALSE, warning = FALSE}
-data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
 
-map <- ggplot() + # extent of the map 
-  borders() + # political borders 
-  geom_point(data = data$meta, aes(Longitude, Latitude, color = Min_Age_Ma), size = 2) + 
-  scale_color_scico(palette = 'batlow', name = 'Depositional age (Ma)') # a colorblind-friendly color-palette
+map1 <- ggplot() + # extent of the map
+  borders() + # political borders
+  geom_point(
+    data = earthquakes,
+    aes(longitude, latitude, color = depth), size = 2
+  ) +
+  scale_color_scico(palette = "bilbao", name = "Depth (km)") # a colorblind-friendly color-palette
 
-map +
+map1 +
   coord_map(
     projection = "mercator", # the projection
-    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map 
+    xlim = range(earthquakes$longitude), ylim = range(earthquakes$latitude)
+  ) + # extent of the map
   labs(title = "mercator", subtitle = "equally spaced straight meridians, conformal, straight compass courses") +
-map +
+  map1 +
   coord_map(
     projection = "azequidistant", # the projection
-    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map
-    labs(title = "azequidistant", subtitle = "equally spaced parallels, true distances from pole") +
-map +
+    xlim = range(earthquakes$longitude), ylim = range(earthquakes$latitude)
+  ) + # extent of the map
+  labs(title = "azequidistant", subtitle = "equally spaced parallels, true distances from pole") +
+  map1 +
   coord_map(
     projection = "azequalarea", # the projection
-    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map
-    labs(title = "azequalarea", subtitle = "equal-area") +
-map +
+    xlim = range(earthquakes$longitude), ylim = range(earthquakes$latitude)
+  ) + # extent of the map
+  labs(title = "azequalarea", subtitle = "equal-area") +
+  map1 +
   coord_map(
-    projection = "albers", parameters = c(52, 52), # the projection
-    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude)) + # extent of the map
-    labs(title = "albers", subtitle = "equal-area, true scale on lat0 and lat1") 
+    projection = "albers", parameters = c(50, 58.5), # the projection
+    xlim = range(earthquakes$longitude), ylim = range(earthquakes$latitude)
+  ) + # extent of the map
+  labs(title = "albers", subtitle = "equal-area, true scale on lat0 and lat1")
 gc(verbose = FALSE)
 ```
 
+```{r map2}
+ggplot(data = earthquakes) +
+  borders(fill = alpha("grey", .25)) + # political borders
+  geom_point(aes(longitude, latitude, color = depth, size = mag), alpha = .75) +
+  scale_color_scico(palette = "hawaii", name = "Depth (km)", direction = -1, breaks = seq(0, 30, 5)) +
+  scale_size_binned(name = "Magnitude") +
+  # scale_shape()+
+  # scale_alpha()+
+  coord_map(
+    projection = "azequalarea", # the projection
+    xlim = range(earthquakes$longitude), ylim = range(earthquakes$latitude)
+  ) + # extent of the map
+  labs(title = "Seismicity of western British Columbia", subtitle = "Data source: ANSS Comprehensive Earthquake Catalog", caption = "equal-area projection") +
+  theme_bw()
+```
+
+
+
 ### Import Shape-files
+
+```{r read.shp, message=FALSE}
+# load shape file as 'simple feature'
+plates <- sf::st_read("Data/Map/plate_boundaries.shp") # plate boundaries
+sf::st_crs(plates) <- "WGS84"
+```
+
+```{r shp.prepare, message=FALSE, warning=FALSE}
+plates.df <- sf::st_drop_geometry(plates) %>% mutate(id = as.character(seq_along(plates$Code)))
+plates.sp <- sf::as_Spatial(plates) %>% # convert into "sp" feature
+  broom::tidy() %>%
+  left_join(plates.df)
+
+gc()
+```
+
+```{r map.plate}
+ggplot(data = earthquakes %>% arrange(depth)) +
+  geom_path(data = plates.sp, aes(long, lat, group = group), lwd = 2, color = colorblind[7]) +
+  borders(fill = alpha("grey", .25)) + # political borders
+  geom_point(aes(longitude, latitude, color = depth, size = mag), alpha = .75) +
+  scale_color_scico(palette = "hawaii", name = "Depth (km)", direction = -1, breaks = seq(0, 30, 5)) +
+  scale_size_binned(name = "Magnitude") +
+  coord_map(
+    projection = "azequalarea", # the projection
+    xlim = range(earthquakes$longitude), ylim = range(earthquakes$latitude)
+  ) + # extent of the map
+  labs(title = "Seismicity of western British Columbia", subtitle = "Data source: ANSS Comprehensive Earthquake Catalog", caption = "equal-area projection") +
+  theme_bw()
+```
+### Create a spatial object
+
+Create a lines object
+```{r line1}
+line.pts <- cbind(
+  lon = c(-120, -130),
+  lat = c(52, 48)
+)
+
+line.df <- as.data.frame(cbind(line.pts))
+
+
+
+line.sf <- sf::st_linestring(line.pts) %>%
+  sf::st_geometry() %>%
+  sf::st_set_crs("+proj=longlat +ellps=WGS84 +no_defs")
+```
+
+Plot the new object as a profile line:
+```{r plot_line}
+ggplot() +
+  geom_path(
+    data = plates.sp,
+    aes(long, lat, group = group),
+    lwd = 2,
+    color = colorblind[7]
+  ) +
+  borders(fill = alpha("grey", .25)) +
+  geom_point(
+    data = earthquakes,
+    aes(longitude, latitude, color = depth, size = mag),
+    alpha = .75
+  ) +
+  scale_color_scico(
+    palette = "hawaii",
+    name = "Depth (km)",
+    direction = -1,
+    breaks = seq(0, 30, 5)
+  ) +
+  scale_size_binned(name = "Magnitude") +
+
+  # adds the profile line
+  geom_line(data = line.df, aes(lon, lat), lty = 2) +
+
+  # end points
+  geom_point(data = line.df, aes(lon, lat), size = 2) +
+
+  # label the points
+  geom_label_repel(data = line.df, aes(lon, lat), label = c("A", "B")) +
+  coord_map(
+    projection = "azequalarea",
+    # the projection
+    xlim = range(earthquakes$longitude),
+    ylim = range(earthquakes$latitude)
+  ) + # extent of the map
+  labs(
+    title = "Seismicity of western British Columbia",
+    subtitle = "Data source: ANSS Comprehensive Earthquake Catalog",
+    caption = "equal-area projection"
+  ) +
+  theme_bw()
+
+gc(verbose = FALSE)
+```
+
+Save line into ESRI shapefile:
+```{r line2, echo=FALSE, eval=FALSE, include=TRUE}
+sf::st_write(line.sf, "Data/Map/my_line.shp")
+```
+
 
 
 ### Import Raster
 
 ```{r raster_load}
-dem <- raster::raster('Data/DEM/srtm_13_02.tif')
+# dem <- raster::raster('Data/DEM/srtm_13_02.tif')
+dem <- raster::raster("Data/Map/ETOPO_vancouver.tif")
 
 # first glimpse
 plot(dem)
 ```
-
-```{r}
+#### Crop a raster
+```{r raster_crop}
 crop_extent <- sf::st_bbox(
   c(
-    xmin = min(data$meta$Longitude),
-    xmax = max(data$meta$Longitude),
-    ymin = min(data$meta$Latitude),
-    ymax = max(data$meta$Latitude)
-    ), crs = sf::st_crs('WGS84')
-  ) %>%
+    xmin = min(earthquakes$longitude),
+    xmax = max(earthquakes$longitude),
+    ymin = min(earthquakes$latitude),
+    ymax = max(earthquakes$latitude)
+  ),
+  crs = sf::st_crs("WGS84")
+) %>%
   sf::st_as_sfc() %>%
   sf::as_Spatial()
 
@@ -104,46 +244,98 @@ plot(dem.cropped)
 plot(crop_extent, add = TRUE)
 
 
-dem.df <- as(dem.cropped, "SpatialPixelsDataFrame") %>% as.data.frame()
+dem.df <- as(dem.cropped, "SpatialPixelsDataFrame") %>%
+  as.data.frame()
 colnames(dem.df) <- c("elevation", "lon", "lat")
 ```
+#### Save raster
+```{r write_raster, eval=FALSE, include=TRUE}
+raster::writeRaster(dem.cropped, "Data/Map/dem_cropped.tif", overwrite = TRUE)
+```
 
-```{r}
+
+```{r raster_stats, warning=FALSE, message=FALSE}
+# Stats numbers
 dem.df$elevation %>% summary()
+
+# Histogram
+hist(dem.df$elevation)
+```
+#### Plot the raster
+
+```{r plot_raster, echo=TRUE}
+map2 <- ggplot() +
+
+  # add the raster with coloring (CPU intensive!!!)
+  geom_raster(data = dem.df, aes(x = lon, y = lat, fill = elevation)) +
+  geom_path(
+    data = plates.sp,
+    aes(long, lat, group = group),
+    lwd = 2,
+    color = colorblind[7]
+  ) +
+  borders(fill = alpha("grey", .25)) +
+  geom_point(
+    data = earthquakes,
+    aes(longitude, latitude, color = depth, size = mag),
+    alpha = .75
+  ) +
+  geom_path(data = line.df, aes(lon, lat), lty = 2) +
+  geom_point(data = line.df, aes(lon, lat), size = 2) +
+  geom_label_repel(data = line.df, aes(lon, lat), label = c("A", "B")) +
+  scale_color_scico(
+    palette = "hawaii",
+    name = "Depth (km)",
+    direction = -1,
+    breaks = seq(0, 30, 5)
+  ) +
+  scale_size_binned(name = "Magnitude") +
+
+  # colorblind color palette for topography
+  scale_fill_scico(
+    palette = "oleron",
+    name = "Topography (m a.s.l.)",
+    # legend title
+    limits = c(-max(dem.df$elevation), max(dem.df$elevation)),
+    #
+    oob = scales::squish,
+    #
+    breaks = seq(-5000, 5000, 1000)
+  ) + # format legend labels
+  coord_cartesian(
+    xlim = range(earthquakes$longitude),
+    ylim = range(earthquakes$latitude),
+    expand = FALSE
+  ) +
+  labs(
+    title = "Seismicity of western British Columbia",
+    subtitle = "Data source: ANSS Comprehensive Earthquake Catalog",
+    caption = "equal-area projection"
+  ) +
+  theme_bw()
+
+map2
 ```
 
 
-```{r}
-map +
-  #geom_tile(data = dem.df, aes(lon, lat, fill = elevation)) +
-  scale_fill_scico(palette = 'oleron', name = 'Topography (m a.s.l.)', limits = c(-max(dem.df$elevation), max(dem.df$elevation)), oob=scales::squish, breaks = seq(-5000, 5000, 1000)) +
-  coord_map(
-    projection = "azequalarea", # the projection
-    xlim = range(data$meta$Longitude), ylim = range(data$meta$Latitude))
+## Save a map
+```{r save_map, echo=FALSE, eval=FALSE, include=TRUE}
+ggsave(map2, filename = "Data/DEM/my_map.pdf", width = 11, height = 8.5)
 ```
-
-
-
-
 
 
 ### Swath-profile from a DEM
 
 ```{r swath, echo=TRUE, message=FALSE, warning=FALSE}
-line.pts <- cbind(
-  lon =  c(-119, -116),
-  lat = c(50.5, 52.5)
-)
-
 # extracts the swath profile and some statistics
 # WARNING CPU-intensive
 swath.profile <- swathR(
-  coords = line.pts, 
+  coords = line.pts,
   raster = dem.cropped,
-  crs = '+proj=longlat +ellps=WGS84 +no_defs', 
+  crs = "+proj=longlat +ellps=WGS84 +no_defs",
   dist = .2,
   k = 1
-  )
+)
 
 swath.stats <- as.data.frame(swath.profile[[1]])
 swath.data <- swath.profile[[2]]
@@ -154,19 +346,109 @@ swath.lines <- swath.profile[[3]]
 swath.data.line <- data.frame(dist = seq_along(swath.data[[2]]), elevation = swath.data[[2]])
 
 ggplot(swath.data.line, aes(dist, elevation)) +
-  coord_cartesian(expand = FALSE) + 
-  geom_ribbon(aes(ymin = elevation - swath.stats$std.dev.[2], ymax = elevation + swath.stats$std.dev.[2]), fill='grey') +
+  coord_cartesian(expand = FALSE) +
+  geom_ribbon(aes(ymin = elevation - swath.stats$std.dev.[2], ymax = elevation + swath.stats$std.dev.[2]), fill = "grey") +
   geom_line(color = colorblind[4]) +
-  labs(x = 'Distance (degree)', y = 'Elevation (m)')
+  labs(x = "Distance (degree)", y = "Elevation (m)")
 ```
 
 
 
+### "Heat map" --- Spatial interpolation
+
+reproject into equal area projection
+```{r}
+earthquakes.sp <- earthquakes
+coordinates(earthquakes.sp) <- ~ longitude + latitude
+sp::proj4string(earthquakes.sp) <-
+  sp::CRS("+proj=longlat +ellps=WGS84 +no_defs")
+
+aea <-
+  sp::CRS(
+    "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs"
+  )
+
+earthquakes.sp.aea <- sp::spTransform(earthquakes.sp, aea)
 
 
+```
 
-### Heat map
+initialize the interpolation grid
+```{r grid}
+extent <- crop_extent@bbox %>%
+  t() %>%
+  as.data.frame()
+coordinates(extent) <- ~ x + y
+proj4string(extent) <- "+proj=longlat +ellps=WGS84 +no_defs"
 
+extent.aea <- sp::spTransform(extent, aea)
+
+spacing <- 150000 # m
+grid <-
+  expand.grid(
+    x = seq(
+      from = extent.aea@coords[1, 1],
+      to = extent.aea@coords[2, 1],
+      by = spacing
+    ),
+    y = seq(extent.aea@coords[1, 2], to = extent.aea@coords[2, 2], by = spacing)
+  ) # expand points to grid
+# coordinates(grid) <- ~ x + y
+# proj4string(grid) <- aea
+# gridded(grid) <- TRUE
+```
+
+
+### Interpolation method: Inverse distance weigthing
+```{r idw}
+idw <- phylin::idw(
+  values = earthquakes.sp.aea$mag,
+  coords = earthquakes.sp.aea@coords,
+  grid = grid,
+  p = 2
+)
+idw.mag <- data.frame(grid, idw)
+coordinates(idw.mag) <- ~ x + y
+proj4string(idw.mag) <- aea
+
+idw.mag.wgs84 <-
+  sp::spTransform(idw.mag, "+proj=longlat +ellps=WGS84 +no_defs") %>% as.data.frame()
+colnames(idw.mag.wgs84) <- c("mag", "lon", "lat")
+```
+
+Plot the interpolation result
+```{r heat}
+map3 <- ggplot() +
+  # add the raster with coloring (CPU intensive!!!)
+  geom_tile(data = idw.mag.wgs84, aes(x = lon, y = lat, fill = mag)) +
+  geom_path(
+    data = plates.sp,
+    aes(long, lat, group = group),
+    lwd = 2,
+    color = colorblind[7]
+  ) +
+  borders(fill = alpha("grey", .25)) +
+  scale_fill_scico() + # format legend labels
+  coord_cartesian(
+    xlim = range(earthquakes$longitude),
+    ylim = range,
+    expand = FALSE
+  ) +
+  labs(title = "Seismicity of western British Columbia",
+       subtitle = "Data source: ANSS Comprehensive Earthquake Catalog",
+       caption = "equal-area projection") +
+  theme_bw()
+map3
+```
+
+```{r, echo=FALSE, eval=FALSE, include=TRUE}
+ggsave(map3, filename = "Data/DEM/my_heatmap.pdf", width = 11, height = 8.5)
+```
+
+
+## Useful resources
+
+- Spatial interpolation with R: https://rspatial.org/raster/analysis/4-interpolation.html
 
 ```{r gc, include=FALSE}
 gc(verbose = FALSE)
