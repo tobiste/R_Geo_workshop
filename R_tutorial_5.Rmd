@@ -422,7 +422,7 @@ Plot the interpolation result
 ```{r heat}
 map3 <- ggplot() +
   # add the raster with coloring (CPU intensive!!!)
-  geom_tile(data = idw.mag.wgs84, aes(x = lon, y = lat, fill = mag)) +
+  geom_tile(data = idw.mag.wgs84, aes(lon, lat, fill = mag)) +
   geom_path(
     data = plates.sp,
     aes(long, lat, group = group),
@@ -450,7 +450,11 @@ ggsave(map3, filename = "Data/DEM/my_heatmap.pdf", width = 11, height = 8.5)
 
 ## Useful resources
 
+- https://erinbecker.github.io/r-raster-vector-geospatial/02-raster-plot/index.html
+- https://www.earthdatascience.org/courses/earth-analytics/lidar-raster-data-r/crop-raster-data-in-r/
 - Spatial interpolation with R: https://rspatial.org/raster/analysis/4-interpolation.html
+- https://jjvhab.github.io/swathR/
+
 
 ```{r gc, include=FALSE}
 gc(verbose = FALSE)
