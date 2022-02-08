@@ -1,3 +1,15 @@
+clean_header <- function(x) {
+  require(stringr)
+  x <- stringr::str_replace(x, "[ ]+", "_")
+  x <- stringr::str_replace(x, pattern = "[(]", replacement = "")
+  x <- stringr::str_replace(x, pattern = "[)]", replacement = "")
+  x <- stringr::str_replace(x, " ", "_")
+  x <- stringr::str_replace(x, " ", "_")
+  x <- stringr::str_squish(x)
+  return(x)
+}
+
+
 #' @title Read data from Geochron database
 #'
 #' @description Converts Excel spreadsheets from a Geochon download into a meta
@@ -12,36 +24,45 @@
 #' @importFrom dplyr "%>%" filter select
 #' @importFrom stringr str_replace
 #' @importFrom readxl read_excel
-read_geochron <- function(path, method = 'U-Pb') {
+read_geochron <- function(path, method = "U-Pb") {
   require(dplyr)
-  require(stringr)
   require(readxl)
+
+  meta.header <- NULL
+
 
   if (method == "Ar-Ar") {
   }
   if (method == "(U-Th)/He") {
   }
   if (method == "Fission Track") {
+    details0 <- readxl::read_excel(path = path, sheet = "Details", col_names = FALSE)
+
+    details <- data.frame(t(details0$`...2`))
+    names(details) <- clean_header(details0$`...1`)
+
+    meta0 <- readxl::read_excel(path = path, sheet = "Metadata", col_names = FALSE)
+    meta <- data.frame(t(meta0$`...2`))
+    names(meta) <- clean_header(meta0$`...1`)
+
+    meta <- cbind(meta, details)
+    ages <- readxl::read_excel(path = path, sheet = "Ages")
+
+    return(list(meta = meta, tracks = ages))
   }
   if (method == "U-Pb") {
     # meta
-    meta0 <- readxl::read_excel(path = path,
-                                sheet = 1,
-                                skip = 7)
+    meta0 <- readxl::read_excel(
+      path = path,
+      sheet = 1,
+      skip = 7
+    )
     meta.header <- colnames(meta0)
-    meta.header <- stringr::str_replace(meta.header, '[ ]+', "_")
-    meta.header <-
-      stringr::str_replace(meta.header, pattern = '[(]', replacement = "")
-    meta.header <-
-      stringr::str_replace(meta.header, pattern = '[)]', replacement = "")
-    meta.header <- stringr::str_replace(meta.header, ' ', "_")
-    meta.header <- stringr::str_replace(meta.header, ' ', "_")
-    meta.header <- stringr::str_squish(meta.header)
-    colnames(meta0) <- meta.header
+    colnames(meta0) <- clean_header(colnames(meta0))
 
     meta <- meta0 %>%
       filter(!is.na(Country)) %>%
-      filter(Unique_ID != 'Unique ID') %>%
+      filter(Unique_ID != "Unique ID") %>%
       mutate(
         Longitude = as.numeric(Longitude),
         Latitude = as.numeric(Latitude),
@@ -52,22 +73,23 @@ read_geochron <- function(path, method = 'U-Pb') {
       )
 
     # isotopes
-    isotopes.header <- t(meta0[2,])
+    isotopes.header <- t(meta0[2, ])
     rownames(isotopes.header) <- NULL
     isotopes.header[1] <- "Sample ID"
     isotopes.header[2] <- "Unique ID"
-    #isotopes.header <- na.omit(isotopes.header)
     isotopes.header <-
-      stringr::str_replace(isotopes.header, '[ ]', "_")
+      stringr::str_replace(isotopes.header, "[ ]", "_")
     isotopes.header <-
       stringr::str_replace(isotopes.header, "/", ".")
     isotopes.header <-
-      stringr::str_replace(isotopes.header, '[ ]', "_")
+      stringr::str_replace(isotopes.header, "[ ]", "_")
 
     isotopes0 <-
-      readxl::read_excel(path = path,
-                         sheet = 1,
-                         skip = 7)
+      readxl::read_excel(
+        path = path,
+        sheet = 1,
+        skip = 7
+      )
     colnames(isotopes0) <- isotopes.header
 
 
@@ -80,7 +102,7 @@ read_geochron <- function(path, method = 'U-Pb') {
       }
       if (is.na(isotopes0$Sample_ID[i]) &
           is.na(isotopes0$Unique_ID[i])) {
-        isotopes.i <- isotopes0[i,]
+        isotopes.i <- isotopes0[i, ]
         isotopes.i$Sample_ID <- sample_id
         isotopes.i$Unique_ID <- unique_id
 
@@ -88,7 +110,7 @@ read_geochron <- function(path, method = 'U-Pb') {
       }
     }
     isotopes <- isotopes %>%
-      select(na.omit(isotopes.header)) %>%
+      dplyr::select(na.omit(isotopes.header)) %>%
       mutate(
         `206.238_Age` = as.numeric(`206.238_Age`),
         `206.238_Age_Error` = as.numeric(`206.238_Age_Error`),
@@ -97,7 +119,7 @@ read_geochron <- function(path, method = 'U-Pb') {
         `207.206_Age` = as.numeric(`207.206_Age`),
         `207.206_Age_Error` = as.numeric(`207.206_Age_Error`),
         `Pb*.Pbc` = as.numeric(`Pb*.Pbc`),
-        Rho  = as.numeric(Rho),
+        Rho = as.numeric(Rho),
         Rho_Error = as.numeric(Rho_Error),
         `206.238` = as.numeric(`206.238`),
         `206.238_Error` = as.numeric(`206.238_Error`),
@@ -120,12 +142,12 @@ read_geochron <- function(path, method = 'U-Pb') {
       )
     colnames(isotopes) <- isotopes.header <- c(
       "Sample_ID", "Unique_ID", "Fraction_ID",
-      "Age_206.238", "Age_Error_206.238",
-      "Age_207.235", "Age_Error_207.235",
-      "Age_207.206",  "Age_Error_207.206",
-      "Pb_rad.Pb_cor", "Rho", "Rho_Error",
-      "Isotope_206.238", "Isotope_Error_206.238",
-      "Isotope_206.204", "Isotope_208.206", "conc_U", "Th.U_samp",
+      "t.Pb206U238", "st.Pb206U238",
+      "t.Pb207U235", "st.Pb207U235",
+      "t.Pb207Pb206", "st.Pb207Pb206",
+      "PbPb.cor", "rho", "s.rho",
+      "Pb206U238", "errPb206U238",
+      "Pb206Pb204", "Pb208Pb206", "U", "ThU",
       "Age_206.238xTh", "Age_Error_206.238xTh",
       "Age_207.235xPa", "Age_Error_207.235xPar",
       "Age_207.206xTh", "Age_Error_207.206xTh",
@@ -137,6 +159,14 @@ read_geochron <- function(path, method = 'U-Pb') {
   }
 }
 
+geochron_to_dz <- function(x) {
+  lst <- list()
+  for (i in x$Sample_ID) {
+    x.i <- subset(x, x$Sample_ID == i)
+    ages <- c(x.i$t)
+    lst[[i]] <- ages
+  }
 
-wong <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", '#7555C8', '#7EF791', '#85112A', '#2BE6BE', '#EE599F', '#5F9143', '#759301') # Bang Wong
-
+  class(lst) <- "detritals"
+  return(lst)
+}
