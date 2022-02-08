@@ -6,6 +6,7 @@
 #' @param a lon, lat coordinate of point 1
 #' @param b lon, lat coordinate of point 2
 #' @return distance in km
+#' @importFrom pracma acosd cosd sind deg2rad
 #' @export
 #' @examples
 #' berlin <- c(52.517, 13.4)

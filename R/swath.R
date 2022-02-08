@@ -8,15 +8,15 @@
 #' and points have to be the same.
 #' @param coords matrix(ncol=2, nrow=2) with x and y coordinates of beginning and
 #' end point of the baseline; each point in one row
-#' {\describe
-#' \item{column 1}{xcoordinates}
-#' \item{column 2}{ycoordinates}
+#' \describe{
+#'   \item{column 1}{xcoordinates}
+#'   \item{column 2}{ycoordinates}
 #' }
 #' @param raster raster file (loaded with \code{raster()} from package 'raster')
 #' @param k integer; number of lines on each side of the baseline
 #' @param dist numeric; distance between lines
 #' @param crs string; CRS
-#' @param method = string; method for extraction of raw data, see
+#' @param method string; method for extraction of raw data, see
 #' \code{extract()} from package 'raster': default value: 'bilinear'
 #' @import sp
 #' @import rgeos
@@ -158,4 +158,3 @@ swath_profile <- function(x) {
   names(elevs.df) <- c("distance", "elevation", "min", "max")
   return(elevs.df)
 }
-

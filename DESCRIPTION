@@ -1,0 +1,46 @@
+Package: R_Geo_workshop
+Title: Turotial using R in Geoscience
+Version: 0.0.0.9
+Authors@R: 
+    person("Tobias", "Stephan", , "tobias.stephan1@yahoo.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9290-014X"))
+Description: Contains manual and content for R tutorial
+License: GPL (>= 3)
+Depends: 
+    R (>= 3.5.0)
+Imports: 
+    dplyr,
+    pracma,
+    raster,
+    readxl,
+    rgeos,
+    sp,
+    stringr
+Suggests: 
+    cluster,
+    factoextra,
+    ggplot2,
+    ggrepel,
+    ggthemes,
+    gstat,
+    IsoplotR,
+    knitr,
+    pacman,
+    patchwork,
+    pracma,
+    provenance,
+    remotes,
+    rgdal,
+    scales,
+    scico,
+    sf,
+    squish,
+    tidyr
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2

@@ -1,4 +1,4 @@
-source('my_function/colorblind_discrete')
-source("my_function/orthodrome.R")
-source('my_function/read_geochron')
-source("my_function/swath.R")
+source("R/colorblind_discrete.R")
+source("R/orthodrome.R")
+source("R/read_geochron.R")
+source("R/swath.R")
