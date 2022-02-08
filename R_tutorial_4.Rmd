@@ -2,7 +2,7 @@
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
 subtitle: "4 - Geo-/Thermochronology"
 author: "Tobias Stephan"
-date: "25/01/2022"
+date: "10/02/2022"
 output: 
   html_document:
     theme: "united"
@@ -22,22 +22,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Packages that we will need:
 ```{r packages, echo = TRUE, message = FALSE, warning = FALSE}
-# Geo-Thermochronology packages
-require(IsoplotR)
-require(provenance)
+pacman::p_load(
+  # Geo-Thermochronology packages
+  IsoplotR,
+  provenance,
 
-#plotting
-require(ggplot2)
-require(scico) # colorblind palettes for continuous data
-require(patchwork) # multi-plot arrangements
+  # plotting
+  ggplot2,
+  scico, # colorblind palettes for continuous data
+  patchwork, # multi-plot arrangements
 
-# data handling
-require(tidyr)
-require(dplyr)
+  # data handling
+  tidyr,
+  dplyr,
 
-# cluster analysis
-require(cluster)
-require(factoextra)
+  # cluster analysis
+  cluster,
+  factoextra
+)
 
 # my functions and stuff for the course
 source("course_stuff.R")
@@ -63,7 +65,7 @@ Calculate the individual ages of the individual aliquots:
 ```{r ages.upb}
 # age per each U-Pb analysis:
 # ?IsoplotR::age()
-tUPb <- IsoplotR::age(data.upb.cor, type=1) %>% as.data.frame()
+tUPb <- IsoplotR::age(data.upb.cor, type = 1) %>% as.data.frame()
 head(tUPb)
 ```
 
@@ -81,7 +83,7 @@ IsoplotR::concordia(data.upb.cor, type = 2, ellipse.fill = alpha(colorblind[3], 
 ```
 The concordia age:
 ```{r concordia.age}
-tconc <- IsoplotR::age(data.upb.cor, type=2)
+tconc <- IsoplotR::age(data.upb.cor, type = 2)
 tconc
 ```
 The result returns a list with the following values:
@@ -105,15 +107,17 @@ n <- provenance::botev(tUPb$t.68) # get the optimal bandwidth using the diffusio
 ggplot(tUPb) +
   theme_minimal() + # minimal design
   coord_cartesian(expand = FALSE) + # set the range of the x axis
-  labs(x = 'Age (Ma)', 
-       caption = paste(
-         'Kernel bandwidth: ', round(n, 1), 
-         '\nConcordia age: ', round(tconc$age[1], 2), ' \u00B1 ',  round(tconc$age[2], 2), 'Ma')
-       ) + # axis label
+  labs(
+    x = "Age (Ma)",
+    caption = paste(
+      "Kernel bandwidth: ", round(n, 1),
+      "\nConcordia age: ", round(tconc$age[1], 2), " \u00B1 ", round(tconc$age[2], 2), "Ma"
+    )
+  ) + # axis label
   geom_histogram( # histogram
     aes(t.68, y = ..density..),
-    color = 'white',
-    fill = 'grey',
+    color = "white",
+    fill = "grey",
     alpha = .5,
     binwidth = n
   ) +
@@ -139,7 +143,7 @@ with
 
 ```{r peak.fit.upb}
 # ?IsoplotR::peakfit()
-IsoplotR::peakfit(data.upb.cor, k = 'auto')
+IsoplotR::peakfit(data.upb.cor, k = "auto")
 ```
 
 
@@ -161,7 +165,7 @@ Because of the shape of the concordia, which flattens for older ages, the inters
 Thus, the ${}^{206}\text{Pb}/{}^{238}\text{U}$ age is preferred for Phanerozoic and Neoproterozoic zircons and the ${}^{206}\text{Pb}/{}^{207}\text{Pb}$ age for zircons older than 1000 Ma.
 
 ```{r pref.age, echo=TRUE}
-data.dz <- left_join(isotopes, meta, by = "Sample_ID") %>% 
+data.dz <- left_join(isotopes, meta, by = "Sample_ID") %>%
   mutate(
     conc = ifelse(
       t.Pb207Pb206 > 1000,
@@ -181,46 +185,48 @@ Histograms are intuitive, whereas density distributions are not. Kernel Density 
 dz.plot <- ggplot(data.dz) +
   theme_minimal() + # minimal design
   coord_cartesian(xlim = c(0, 4500), expand = FALSE) + # set the range of the x axis
-  labs(x = 'Age (Ma)') + # axis label
-  geom_vline(xintercept = 1000, # add a vertical line at 1000 Ma
-             lty = 2,
-             color = 'grey') 
+  labs(x = "Age (Ma)") + # axis label
+  geom_vline(
+    xintercept = 1000, # add a vertical line at 1000 Ma
+    lty = 2,
+    color = "grey"
+  )
 
 dz.plot +
-  geom_density( # density 
+  geom_density( # density
     aes(t),
     kernel = "gaussian",
     alpha = .25,
     bw = 75
-  ) 
+  )
 ```
 
 This gives us a density distribution of **all** samples. If we want to plot the age spectra for each sample we can indicate this by defining the color within the aesthetics `aes()`: 
 
 ```{r kde.dz1, echo=TRUE}
 dz.plot +
-  geom_density( # density 
+  geom_density( # density
     aes(t, color = Sample_ID),
     kernel = "gaussian",
     alpha = .25,
     bw = 75
-  ) 
+  )
 ```
 Because we have a high number of samples in our dataset, this becomes quite messy. Instead we can have a density plot per sample by 
 using `facet_wrap()`:
 
 ```{r kde.dz2, echo=TRUE, warning=FALSE, message=FALSE}
-dz.plot + geom_density( # density 
-    aes(t),
-    kernel = "gaussian",
-    fill = colorblind[3],
-    alpha = .25,
-    bw = n
-  ) +
+dz.plot + geom_density( # density
+  aes(t),
+  kernel = "gaussian",
+  fill = colorblind[3],
+  alpha = .25,
+  bw = n
+) +
   geom_histogram( # histogram
     aes(t, y = ..density..),
-    color = 'white',
-    fill = 'grey',
+    color = "white",
+    fill = "grey",
     alpha = .5,
     binwidth = n
   ) +
@@ -231,16 +237,17 @@ dz.plot + geom_density( # density
     color = colorblind[3],
     bw = n
   ) +
-  facet_wrap( ~ Sample_ID, # one plot per Sample_ID
-              #ncol = 1,
-              scales = "free_y") 
+  facet_wrap(~Sample_ID, # one plot per Sample_ID
+    # ncol = 1,
+    scales = "free_y"
+  )
 ```
 
 #### Cumulative distributions
 Another way to visualize age apectra is the cumulative distribution. 
 ```{r cad.dz, echo=TRUE}
 dz.plot +
-  stat_ecdf(aes(t, color = Sample_ID)) 
+  stat_ecdf(aes(t, color = Sample_ID))
 ```
 
 
@@ -254,7 +261,7 @@ There are many ways to define this statistical distance. `IsoplotR` uses the Kol
 ```{r mds0, echo=TRUE, message=FALSE, warning=FALSE}
 data.dz2 <- geochron_to_dz(data.dz) #  my function. converts the Geochron table into dataset suitable for IsoplotR
 
-#?IsoplotR::mds()
+# ?IsoplotR::mds()
 dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
 ```
 The function `mds()` by the `IsoplotR` packages produces a `list` that contains the dissimilarity matrix (`diss`) and the MDS configuration coordinates (`points`).
@@ -271,11 +278,11 @@ head(dz.mds$points) # head() shows only the first 6 rows of a table
 
 To plot the MDS result, i.e. the "map" of dissimilarities, we use the points object from the list
 ```{r mds2, echo=TRUE}
-dz.mds.df <- data.frame(Sample_ID = rownames(dz.mds$points),  X = dz.mds$points[,1], Y = dz.mds$points[,2]) %>%
+dz.mds.df <- data.frame(Sample_ID = rownames(dz.mds$points), X = dz.mds$points[, 1], Y = dz.mds$points[, 2]) %>%
   left_join(meta) # convert to a data.frame and join with the meta data
 
 ggplot(dz.mds.df) +
-  labs(title = 'Multidimensional Scaling', subtitle = 'Dissimilarity of the detrital age spectra',  x = 'DIM 1', y = 'DIM 2') +
+  labs(title = "Multidimensional Scaling", subtitle = "Dissimilarity of the detrital age spectra", x = "DIM 1", y = "DIM 2") +
   theme_bw() +
   coord_fixed() +
   geom_point(aes(X, Y, color = Stratigraphic_Formation_Name), show.legend = FALSE) + # color code the points by their stratigraphic formation
@@ -287,7 +294,7 @@ In the plot above, similar samples plot close together, whereas samples with con
 The plot above is color coded by the Stratigraphic Formation. You can also use different meta information to explore the provenance
 ```{r mds3, echo=TRUE}
 ggplot(dz.mds.df) +
-  labs(title = 'Multidimensional Scaling', x = 'DIM 1', y = 'DIM 2') +
+  labs(title = "Multidimensional Scaling", x = "DIM 1", y = "DIM 2") +
   theme_bw() +
   coord_fixed() +
   geom_point(aes(X, Y, color = Latitude), show.legend = FALSE) +
@@ -310,8 +317,8 @@ We are going to use PAM (Partitioning Around Medoids) algorithm to cluster the d
 - The *gap statistic* compares intra-cluster variation for different values of k with expected intra-cluster variation under null distribution. Ideally we should be choosing the value of k which maximizes the gap statistic however in real world datasets where clusters are not so well defined it may be more parsimonious to choose the k value to be the one where the rate of increase of the statistic begins to slow down (i.e. value lowest value of k that is greater than or equal to the value of k+1 minus the standard error).
 
 ```{r nclust, echo=TRUE, warning=FALSE, message=FALSE}
-factoextra::fviz_nbclust(x=dz.mds$points, diss=dz.mds$diss, FUNcluster=cluster::pam, method = "silhouette")+ theme_classic()
-factoextra::fviz_nbclust(x=dz.mds$points, diss=dz.mds$diss, FUNcluster=cluster::pam, method = "gap_stat")+ theme_classic()
+factoextra::fviz_nbclust(x = dz.mds$points, diss = dz.mds$diss, FUNcluster = cluster::pam, method = "silhouette") + theme_classic()
+factoextra::fviz_nbclust(x = dz.mds$points, diss = dz.mds$diss, FUNcluster = cluster::pam, method = "gap_stat") + theme_classic()
 ```
 ##### Cluster the data:
 ```{r}
@@ -335,7 +342,7 @@ cluster.df <- data.frame(Sample_ID = names(pam.res2$clustering), Cluster = pam.r
 dz.mds.df <- left_join(dz.mds.df, cluster.df)
 
 ggplot(dz.mds.df) +
-  labs(title = 'Multidimensional Scaling', x = 'DIM 1', y = 'DIM 2') +
+  labs(title = "Multidimensional Scaling", x = "DIM 1", y = "DIM 2") +
   theme_bw() +
   coord_fixed() +
   geom_point(aes(X, Y, color = Cluster), show.legend = FALSE) +
@@ -352,11 +359,11 @@ data.ft <- read_geochron(path = "Data/Geochron_sample_download_AFT.xlsx", method
 data.ft <- list(
   format = 1,
   zeta = c(as.numeric(data.ft$meta$Zeta_Factor), as.numeric(data.ft$meta$Zeta_Factor_Error_1s)),
-  rhoD = c(as.numeric(data.ft$meta$Rho_d), as.numeric(data.ft$meta$Rho_d)*as.numeric(data.ft$meta$`Rho_d_%_Relative Error`)/100),
+  rhoD = c(as.numeric(data.ft$meta$Rho_d), as.numeric(data.ft$meta$Rho_d) * as.numeric(data.ft$meta$`Rho_d_%_Relative Error`) / 100),
   x = cbind(Ns = data.ft$tracks$Ns, Ni = data.ft$tracks$Ni)
 )
 class(data.ft) <- "fissiontracks"
-#data.ft <- examples$FT1
+# data.ft <- examples$FT1
 ```
 
 
@@ -367,7 +374,7 @@ head(data.ft$x)
 # Zeta value
 data.ft$zeta
 
-#rhoD
+# rhoD
 data.ft$rhoD
 ```
 If `data.ft` has class `"fissiontracks"` and `central=FALSE`, `age()` returns a table of fission track ages and standard errors:
@@ -380,7 +387,7 @@ head(data.ft.age)
 The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
 ```{r central.ft}
 # age(data.ft, central = TRUE) # identical to central()
-IsoplotR::central(data.ft) 
+IsoplotR::central(data.ft)
 ```
 The return value is a list containing the following items:
 
@@ -398,11 +405,11 @@ n <- provenance::botev(data.ft.age$t) # get the optimal bandwidth using the diff
 ggplot(data.ft.age) +
   theme_minimal() + # minimal design
   coord_cartesian(expand = FALSE) + # set the range of the x axis
-  labs(x = 'Age (Ma)', caption = paste('Kernel bandwidth :', round(n, 1))) + # axis label
+  labs(x = "Age (Ma)", caption = paste("Kernel bandwidth :", round(n, 1))) + # axis label
   geom_histogram( # histogram
     aes(t, y = ..density..),
-    color = 'white',
-    fill = 'grey',
+    color = "white",
+    fill = "grey",
     alpha = .5,
     binwidth = n
   ) +
@@ -424,7 +431,7 @@ These dates can be more easily visualised by drawing a radial scale at some conv
 
 ```{r radial, echo=TRUE}
 # ?IsoplotR::radialplot()
-IsoplotR::radialplot(data.ft, bg = colorblind[3], alpha =.8)
+IsoplotR::radialplot(data.ft, bg = colorblind[3], alpha = .8)
 ```
 The plot also gives the return values from the `central()`function (see above).
 
@@ -443,7 +450,7 @@ with
 - `alpha`: cutoff value for confidence intervals
 
 ```{r}
-IsoplotR::peakfit(data.ft, k = 'auto')
+IsoplotR::peakfit(data.ft, k = "auto")
 ```
 
 
@@ -463,8 +470,8 @@ head(data.uthhe.ages)
 
 The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
 ```{r central.he}
-#age(data.ft, central = TRUE) # identical to central()
-IsoplotR::central(data.uthhe) 
+# age(data.ft, central = TRUE) # identical to central()
+IsoplotR::central(data.uthhe)
 ```
 ##### Finite mixture modelling of geochronological dataset
 
@@ -481,7 +488,7 @@ with
 
 ```{r peakfit, echo=TRUE}
 # IsoplotR::peakfit()
-IsoplotR::peakfit(data.uthhe, k = 'auto')
+IsoplotR::peakfit(data.uthhe, k = "auto")
 ```
 it returns the following:
 
@@ -504,11 +511,11 @@ n <- provenance::botev(data.uthhe.ages$t) # get the optimal bandwidth using the 
 ggplot(data.uthhe.ages) +
   theme_minimal() + # minimal design
   coord_cartesian(expand = FALSE) + # set the range of the x axis
-  labs(x = 'Age (Ma)', caption = paste('Kernel bandwidth :', round(n, 2))) + # axis label
+  labs(x = "Age (Ma)", caption = paste("Kernel bandwidth :", round(n, 2))) + # axis label
   geom_histogram( # histogram
     aes(t, y = ..density..),
-    color = 'white',
-    fill = 'grey',
+    color = "white",
+    fill = "grey",
     alpha = .5,
     binwidth = n
   ) +
@@ -526,23 +533,23 @@ ggplot(data.uthhe.ages) +
 Plot U-Th(-Sm)-He data on a *(log[He/Th] vs. log[U/He])* logratio plot or *U-Th-He ternary diagram*.
 
 ```{r helop, echo=TRUE}
-#?IsoplotR::helioplot()
+# ?IsoplotR::helioplot()
 
 # bivariate log[He/Th] vs. log[U/He] diagram
 IsoplotR::helioplot(
   data.uthhe,
   logratio = TRUE,
-  contour.col = c('white', colorblind[7]),
-    ellipse.fill = alpha(colorblind[4], .5))
+  contour.col = c("white", colorblind[7]),
+  ellipse.fill = alpha(colorblind[4], .5)
+)
 
 # U-Th-He ternary diagram
 IsoplotR::helioplot(
   data.uthhe,
   logratio = FALSE,
-  contour.col = c('white', colorblind[7]),
-    ellipse.fill = alpha(colorblind[4], .5)
-  )
-
+  contour.col = c("white", colorblind[7]),
+  ellipse.fill = alpha(colorblind[4], .5)
+)
 ```
 
 
@@ -553,73 +560,81 @@ age vs. Rs
 ### Doube-dating
 
 ```{r}
-dunn.meta <- read_excel('Data/dunn2017.xlsx', sheet = 'meta') %>%
-  tidyr::separate(col=Age.range, into=c('DA.min', 'DA.max'), sep = '–', remove = FALSE, convert=TRUE)
-dunn.zrn <- read_excel('Data/dunn2017.xlsx', sheet = 'zrn')
-dunn  <- left_join(dunn.meta, dunn.zrn)
+dunn.meta <- read_excel("Data/dunn2017.xlsx", sheet = "meta") %>%
+  tidyr::separate(col = Age.range, into = c("DA.min", "DA.max"), sep = "–", remove = FALSE, convert = TRUE)
+dunn.zrn <- read_excel("Data/dunn2017.xlsx", sheet = "zrn")
+dunn <- left_join(dunn.meta, dunn.zrn)
 head(dunn)
 ```
 
 ```{r double_xy, echo=TRUE, warning=FALSE, message=FALSE}
 plotxy <- ggplot(dunn, aes(x = Z.UPb.Age, y = Z.FT.Age, color = Z.Signal)) +
   theme_bw() +
-  labs(x = 'U-Pb age (Ma)', y = 'FT age (Ma)') +
-  scale_color_manual(name = 'Signal', values = colorblind) +
+  labs(x = "U-Pb age (Ma)", y = "FT age (Ma)") +
+  scale_color_manual(name = "Signal", values = colorblind) +
   coord_cartesian(xlim = c(0, 3000), ylim = c(0, 800)) +
   geom_abline(slope = 1) +
   geom_errorbar(aes(
-    ymin = Z.FT.Age - Z.FT.1s_err, 
-    ymax = Z.FT.Age + Z.FT.1s_err), alpha = .25) +
+    ymin = Z.FT.Age - Z.FT.1s_err,
+    ymax = Z.FT.Age + Z.FT.1s_err
+  ), alpha = .25) +
   geom_errorbarh(aes(
-    xmin = Z.UPb.Age - Z.UPb.2s_err/2,
-    xmax = Z.UPb.Age + Z.UPb.2s_err/2), alpha = .25) +
-  geom_point(alpha= .5)
+    xmin = Z.UPb.Age - Z.UPb.2s_err / 2,
+    xmax = Z.UPb.Age + Z.UPb.2s_err / 2
+  ), alpha = .25) +
+  geom_point(alpha = .5)
 ```
 
 ```{r double_den, echo=TRUE, warning=FALSE, message=FALSE}
 plot.ft <- ggplot(dunn, aes(Z.FT.Age, fill = Z.Signal)) +
   theme_bw() +
-  scale_fill_manual(name = 'Signal', values = colorblind) +
+  scale_fill_manual(name = "Signal", values = colorblind) +
   coord_flip(xlim = c(0, 800)) +
   geom_density(alpha = .5, show.legend = FALSE) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
 
 plot.upb <- ggplot(dunn, aes(Z.UPb.Age, fill = Z.Signal)) +
   theme_bw() +
-  scale_fill_manual(name = 'Signal', values = colorblind) +
+  scale_fill_manual(name = "Signal", values = colorblind) +
   coord_cartesian(xlim = c(0, 3000)) +
   geom_density(alpha = .5, show.legend = FALSE) +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
 ```
 
 ```{r double, echo=TRUE, warning=FALSE, message=FALSE}
-#equire(patchwork) # multi-plot arrangements
+# equire(patchwork) # multi-plot arrangements
 plot.upb + plot_spacer() + plotxy + plot.ft +
-  plot_layout(guides = 'collect', ncol = 2, widths = c(3, 1), heights = c(2, 3)) +
+  plot_layout(guides = "collect", ncol = 2, widths = c(3, 1), heights = c(2, 3)) +
   plot_annotation(
-    title = 'Double dating plot',
-    subtitle = 'Mineral: zircon',
-    caption = 'Data from Dunn et al. 2017')
+    title = "Double dating plot",
+    subtitle = "Mineral: zircon",
+    caption = "Data from Dunn et al. 2017"
+  )
 ```
 Lag-time
 ```{r lag, warning=FALSE, message=FALSE}
-ggplot(dunn %>% filter(DA>0.3), aes(x=Z.FT.Age, y=DA, color=Sample)) +
-  geom_abline(slope = -1, intercept = seq(0, 300, 5), color="gray") +
-  geom_errorbarh(aes(xmin=Z.FT.Age-Z.FT.1s_err, xmax=Z.FT.Age+Z.FT.1s_err), alpha=.2) +
-  geom_errorbar(aes(ymin=DA.min, ymax=DA.max), alpha=.2) +
-  geom_point(aes(shape = Z.Signal), alpha=1) +
+ggplot(dunn %>% filter(DA > 0.3), aes(x = Z.FT.Age, y = DA, color = Sample)) +
+  geom_abline(slope = -1, intercept = seq(0, 300, 5), color = "gray") +
+  geom_errorbarh(aes(xmin = Z.FT.Age - Z.FT.1s_err, xmax = Z.FT.Age + Z.FT.1s_err), alpha = .2) +
+  geom_errorbar(aes(ymin = DA.min, ymax = DA.max), alpha = .2) +
+  geom_point(aes(shape = Z.Signal), alpha = 1) +
   scale_x_continuous(breaks = seq(0, 100, 10), position = "top") +
   scale_y_continuous(breaks = seq(0, 10, 1), trans = "reverse") +
-  coord_cartesian(xlim = c(0, 100), ylim=c(0, 10), expand = F, clip="on") +
+  coord_cartesian(xlim = c(0, 100), ylim = c(0, 10), expand = F, clip = "on") +
   scale_color_manual(values = colorblind) +
-  labs(title = "Lag time diagram: Zircon", x = "Zircon FT age (Ma)", y="Depositional Age (Ma)") +
+  labs(title = "Lag time diagram: Zircon", x = "Zircon FT age (Ma)", y = "Depositional Age (Ma)") +
   theme_classic()
 ```
 
+***
 
 ## Useful resources
 
@@ -642,11 +657,11 @@ Cluster analysis with R
 
 ```{r gc, include=FALSE}
 gc(verbose = FALSE)
+#styler:::style_active_file()
+#lintr::lint("R_tutorial_4.Rmd")
 ```
-
 
 
 ***
 
-[previous course: Statistics](R_turorial_3.html) | [next course: Maps](R_turorial_5.html)
-
+[Content](.\R_tutorial_main.html) | [previous course: Statistics](R_tutorial_3.html) | [next course: Maps](R_tutorial_5.html)

@@ -2,7 +2,7 @@
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
 subtitle: "1 - Introduction"
 author: "Tobias Stephan"
-date: "25/01/2022"
+date: "09/02/2022"
 output: 
   html_document:
     theme: "united"
@@ -47,8 +47,9 @@ Operator |	Description
  
 ```{r basics1, echo = TRUE}
 1 + 2
-1 - 2 # everything that comes after the '#' character will be ignored. People therefor use it to comment lines
-1 / 200 * 30 # Comment 
+1 - 2 # everything that comes after the '#' character will be ignored. 
+# People therefor use it to comment the lines
+1 / 200 * 30 # Comment
 (59 + 73 + 2) / 3 # Distributive property
 15 / 2
 15 %/% 2 # the integer divison (%/%) rounds the result down to the nearest whole number
@@ -142,7 +143,7 @@ b <- 200
 
 if (b > a) {
   print("b is greater than a")
-} 
+}
 ```
 
 >R uses curly brackets { } to define the scope in the code.
@@ -157,8 +158,8 @@ b <- 33
 if (b > a) {
   print("b is greater than a")
 } else if (a == b) {
-  print ("a and b are equal")
-} 
+  print("a and b are equal")
+}
 ```
 
 ### Else
@@ -173,7 +174,7 @@ if (b > a) {
   print("a and b are equal")
 } else {
   print("a is greater than b")
-} 
+}
 ```
 
 ### AND
@@ -183,9 +184,9 @@ a <- 200
 b <- 33
 c <- 500
 
-if (a > b & c > a){
+if (a > b & c > a) {
   print("Both conditions are true")
-} 
+}
 ```
 
 ### OR
@@ -196,20 +197,20 @@ a <- 200
 b <- 33
 c <- 500
 
-if (a > b | a > c){
+if (a > b | a > c) {
   print("At least one of the conditions is true")
-} 
+}
 ```
 
 
 ## Loops
 A for loop is used to iterate over a vector in R programming. 
 ```{r loop, echo=TRUE}
-#Below is an example to count the number of even numbers in a vector.
+# Below is an example to count the number of even numbers in a vector.
 x <- c(2, 5, 3, 9, 8, 11, 6)
 count <- 0
 for (i in x) {
-  if(i %% 2 == 0) {
+  if (i %% 2 == 0) {
     count <- count + 1
   }
 }
@@ -228,27 +229,27 @@ Packages can be installed from the R's own official package library **CRAN** (Co
 > There are other sources, incl. private repositories. However, I do not recommend to download packages from such resources as the packages are not tested, documented, nor is there a guarantee that they will even cause any harm to your system. 
 
 ```{r pkg2, eval=FALSE, include=TRUE, echo=TRUE}
-install.packages('remotes') # install package 'remotes' from CRAN
+install.packages("remotes") # install package 'remotes' from CRAN
 ```
 
 ```{r pkg3, eval=FALSE, include=TRUE, echo=TRUE}
-remotes::install_github('tobiste/PlateTectonicStressR') # install package 'PlateTectonicStressR' from my repositor on Github
+remotes::install_github("tobiste/PlateTectonicStressR") # install package 'PlateTectonicStressR' from my repositor on Github
 ```
 You only have to install the package once. After that you have to load the the package.
 `library()` allows to call the entire package, i.e. all the functions of the package: 
 ```{r pkg4, eval=FALSE, include=TRUE, echo=TRUE}
-library('PlateTectonicStressR') 
+library("PlateTectonicStressR")
 ```
 
-`require()` combines the install (if necessary) and the loading of a package:
+`p_load()` from the package `pacman` combines the install (if necessary) and the loading of a package:
 ```{r pkg5, eval=FALSE, include=TRUE, echo=TRUE}
-require('dplyr') 
+install.packages("pacman")
+pacman::p_load("dplyr")
 ```
 
 If you only want to use a single function from a package, you just prompt the function by adding the package's name and `::` before the function call:
 ```{r pkg6, echo = TRUE}
-# require('dadjoke') 
-dadjoke::dadjoke()
+dplyr::glimpse(iris) # "iris" is a pre-installed example dataset
 ```
 
 
@@ -266,16 +267,15 @@ help(c)
 In addition to R’s built-in functions, you can also define your own:
 
 ```{r fun, echo=TRUE}
-cube <- function(n){  
-    return(n^3)  
-}  
+cube <- function(n) {
+  return(n^3)
+}
 
-# Using this function to take the cube of 3:  
-c3 <- cube(3)  
-
+# Using this function to take the cube of 3:
+c3 <- cube(3)
 ```
 
-
+---
 
 
 # Useful resources
@@ -337,13 +337,20 @@ Structural geology, tectonics, seismicity
 Multivariable Geostatistics
 
 - [`gstat`: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation](https://r-spatial.github.io/gstat/)
-Spatial and spatio-temporal geostatistical modelling, prediction and simulation (e.g. krige, variograms)
+Spatial and spatio-temporal geostatistical modelling, prediction and simulation (e.g. interpolation, krige, variograms)
 - [`gear`]()  Geostatistical analysis in R
 - [`georob`: Robust Geostatistical Analysis of Spatial Data](https://cran.r-project.org/web/packages/georob/vignettes/georob_vignette.pdf): Provides functions for efficiently fitting linear models with spatially correlated errors by robust and Gaussian (Restricted) Maximum Likelihood and for computing robust and customary point and block external-drift Kriging predictions, along with utility functions for variogram modelling in ad hoc geostatistical analyses, model building, model evaluation by cross-validation, (conditional) simulation of Gaussian processes, unbiased back-transformation of Kriging predictions of log-transformed data.
+
+Remote Sensing 
+
+- `raster`
+- `RStoolbox`
+
 
 ## Generally helpful packages
 
 - [`ggplot2`]()
+- [`patchwork`]
 - [`ggpubr`: ‘ggplot2’ Based Publication Ready Plots](phttps://rpkgs.datanovia.com/ggpubr/)
 - [`dplyr`]()   is a data wrangling package, offering a series of functions (all called
 as verbs) for data manipulations ( select columns, filter rows, mutate
@@ -353,11 +360,13 @@ pipe, jointly with certain convenience functionality in variable selection.
 to contain spatial objects and spatial data, closely following the paradigms
 of data representation in geographic information systems (Pebesma & Bivand,
 2005).
+- `sf` similar to `sp` but it is faster and easier to handle with other R packages (e.g. `dplyr`). Might replace sp in future.
 - [`magrittr`]() Its sole contribution is to provide piping functionality to **R**. The
 pipe `%>%` allows writing `fun(X, args)` as X `%>% fun(args)`. This might
 seem to be a poor contribution, but it actually allows performing very complex
 nested calculations in such a way that they are both computationally efficient and
 easy to read.
+- [`scico`](https://www.fabiocrameri.ch/colourmaps/) Scientific colormaps that can be used with `ggplot()`
 
 ...
 
@@ -366,9 +375,8 @@ easy to read.
 
 ```{r gc, include=FALSE}
 gc(verbose = FALSE)
+#lintr::lint("R_tutorial_1.Rmd")
 ```
 
 
-
-
-[next course: Data](R_turorial_2.html)
+[Content](.\R_turorial_main.html) | [next course: Data](R_turorial_2.html)

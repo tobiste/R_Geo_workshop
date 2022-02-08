@@ -2,7 +2,7 @@
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
 subtitle: "3 - Statistics"
 author: "Tobias Stephan"
-date: "25/01/2022"
+date: "09/02/2022"
 output: 
   html_document:
     theme: "united"
@@ -20,12 +20,13 @@ knitr::opts_chunk$set(echo = FALSE)
 
 
 ```{r packages}
-# data handling
-require(dplyr)
+pacman::p_load(
+  # data manipulation
+  dplyr,
 
-#Plotting
-require(ggplot2)
-#require(ggpubr)
+  # Plotting
+  ggplot2
+)
 
 # my functions and stuff for the course
 source("course_stuff.R")
@@ -34,8 +35,8 @@ source("course_stuff.R")
 
 ```{r load, message=FALSE, warning=FALSE}
 data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
-samples <- data$isotopes %>% 
-  mutate(st.Pb206U238.perc = st.Pb206U238/t.Pb206U238)
+samples <- data$isotopes %>%
+  mutate(st.Pb206U238.perc = st.Pb206U238 / t.Pb206U238)
 
 sample1 <- samples %>% filter(Sample_ID == "Whitehorse Formation")
 ```
@@ -67,25 +68,25 @@ Types of Variables:
 Important values to characterize the distribution of the variable `sample1$st.Pb206U238.perc` are:
 ```{r univariate1, echo=TRUE}
 # minimum maximum
-min(sample1$st.Pb206U238.perc) 
+min(sample1$st.Pb206U238.perc)
 
-#maximum
-max(sample1$st.Pb206U238.perc) 
+# maximum
+max(sample1$st.Pb206U238.perc)
 
 # mean
-mean(sample1$st.Pb206U238.perc) 
+mean(sample1$st.Pb206U238.perc)
 
 # median
-median(sample1$st.Pb206U238.perc) 
+median(sample1$st.Pb206U238.perc)
 
 # quantiles
 quantile(sample1$st.Pb206U238.perc)
 
 # variance
-var(sample1$st.Pb206U238.perc) 
+var(sample1$st.Pb206U238.perc)
 
 # standard deviation
-sd(sample1$st.Pb206U238.perc) 
+sd(sample1$st.Pb206U238.perc)
 ```
 
 ***
@@ -105,46 +106,52 @@ $n$ is the number of observations (sample size)
 #### Visualization of the distibution
 ##### Boxplot
 ```{r univariate_box1, eval=FALSE, include=FALSE}
-ggpubr::ggboxplot(sample1$st.Pb206U238.perc, xlab = NULL, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+ggpubr::ggboxplot(
+  sample1$st.Pb206U238.perc, 
+  xlab = NULL, 
+  ylab = "206/238 Age uncertainties (%)", 
+  ggtheme = theme_minimal()
+  )
 ```
 
 ```{r univariate_box2, echo=TRUE}
 # simple plot
 # boxplot(sample1$st.Pb206U238.perc)
 
-#ggplot
+# ggplot
 ggplot(data = sample1, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
   geom_boxplot() +
-  labs(title = "Boxplot", x = "Sample", y = '206/238 Age uncertainties (%)' ) 
+  labs(title = "Boxplot", x = "Sample", y = "206/238 Age uncertainties (%)")
 ```
 Btw, if you want to have the boxplot for more than one sample... R automatically identifies when there are more than one sample in your data set. 
 ```{r univariate_boxs, echo=TRUE}
 ggplot(data = samples, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
   geom_boxplot() +
-  labs(title = "Boxplot", x = 'Sample', y = '206/238 Age uncertainties (%)' ) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  labs(title = "Boxplot", x = "Sample", y = "206/238 Age uncertainties (%)") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
 ##### Histogram
 ```{r univariate_hist1, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 gghistogram(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
 ```
+
 ```{r univariate_hist2, echo=TRUE}
 # simple plot
 # hist(sample1$st.Pb206U238.perc)
 
 # ggplot
 ggplot(data = sample1, aes(x = st.Pb206U238.perc)) +
-  geom_histogram(color='white') +  # adds the histogram
-  labs(title = "Histogram", x = '206/238 Age uncertainties (%)') # add description
+  geom_histogram(color = "white") + # adds the histogram
+  labs(title = "Histogram", x = "206/238 Age uncertainties (%)") # add description
 ```
 **R** finds the optimal width of the bins automatically. You can also give a specific bin width by defining `binwidth` or the number of bins by `bins` as options int in the `geom_histogram()` function. See `?geom_histogram()` for more information
 
 If you want to show more than one sample in one histogram plot and color them according to their sample, just define the `fill` option.
 ```{r histograms}
 ggplot(data = samples, aes(x = st.Pb206U238.perc, fill = Sample_ID)) +
-  geom_histogram(color='white') +  # adds the histogram
-  labs(title = "Histogram", x = '206/238 Age uncertainties (%)') # add description
+  geom_histogram(color = "white") + # adds the histogram
+  labs(title = "Histogram", x = "206/238 Age uncertainties (%)") # add description
 ```
 
 
@@ -159,14 +166,14 @@ Shapiro-Wilk test:
 - Alternative hypothesis: the data are not normally distributed
 
 ```{r shapiro, echo=TRUE}
-shapiro.test(sample1$st.Pb206U238.perc) 
+shapiro.test(sample1$st.Pb206U238.perc)
 ```
 From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribtion. 
 
 Visual inspection of the data normality using **Q-Q plots** (quantile-quantile plots). Q-Q plot draws the correlation between a given sample and the normal distribution.
 
 ```{r univariate_qq1, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-#ggqqplot(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
+# ggqqplot(x, ylab = "206/238 Age uncertainties (%)", ggtheme = theme_minimal())
 ```
 
 
@@ -182,7 +189,7 @@ Does the mean has any value for the variable?
 - Non normally distributed values: Non parametric one-sample Wilcoxon rank test  `wilcox.test()`
 
 ```{r univariate_t1, echo=TRUE}
-#t.test(sample1$st.Pb206U238.perc)
+# t.test(sample1$st.Pb206U238.perc)
 wilcox.test(sample1$st.Pb206U238.perc)
 ```
 The **p-value** of the test is 2.2x10^-16^, which is less than the significance level alpha = 0.05. We can conclude that the mean uncertainties of the reported uncertainties is significantly different from 0 with a **p-value** = 2.2x10^-16^. 
@@ -208,11 +215,11 @@ Values:
 
 ```{r bivariate1, echo=TRUE}
 # covariance
-#cov(sample1$Age_206.238, sample1$Age_206.238) identical to var() with two input variables
-var(sample1$st.Pb206U238, sample1$st.Pb207U235) 
+# cov(sample1$Age_206.238, sample1$Age_206.238) identical to var() with two input variables
+var(sample1$st.Pb206U238, sample1$st.Pb207U235)
 
 # correlation
-cor(sample1$st.Pb206U238, sample1$st.Pb207U235, method = 'pearson') # (Pearson) correlation
+cor(sample1$st.Pb206U238, sample1$st.Pb207U235, method = "pearson") # (Pearson) correlation
 ```
 
 ***
@@ -236,7 +243,7 @@ From the normality plots, we conclude that both populations may come from normal
 Testing the statistical significance of the correlation:
 
 ```{r cor.test, echo=TRUE} 
-cor.test(sample1$st.Pb206U238, sample1$st.Pb207U235, method = 'pearson')
+cor.test(sample1$st.Pb206U238, sample1$st.Pb207U235, method = "pearson")
 ```
 In the result above :
 
@@ -261,14 +268,15 @@ Correlation coefficient is comprised between -1 and 1:
 ##### Linear Regression
 
 ```{r bivariate2, eval=FALSE, message=FALSE, include=FALSE}
-ggpubr::ggscatter(data = sample1, x='st.Pb206U238', y = 'st.Pb207U235', 
+ggpubr::ggscatter(
+  data = sample1, x = "st.Pb206U238", y = "st.Pb207U235",
   color = "black", shape = 21, size = 3, # Points color, shape and size
-   add = "reg.line",  # Add regression line
-   add.params = list(color = colorblind[3], fill = "lightgray"), # Customize reg. line
-   conf.int = TRUE, # Add confidence interval
-   cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-   cor.coeff.args = list(method = "pearson", label.x = 3, label.sep = "\n")
-   )
+  add = "reg.line", # Add regression line
+  add.params = list(color = colorblind[3], fill = "lightgray"), # Customize reg. line
+  conf.int = TRUE, # Add confidence interval
+  cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+  cor.coeff.args = list(method = "pearson", label.x = 3, label.sep = "\n")
+)
 ```
 
 ```{r bivariate3, echo=TRUE}
@@ -277,10 +285,13 @@ ggpubr::ggscatter(data = sample1, x='st.Pb206U238', y = 'st.Pb207U235',
 
 ggplot(data = sample1, aes(st.Pb206U238, st.Pb207U235)) +
   coord_fixed(xlim = c(0, 80), ylim = c(0, 80)) + # x and y axis have same scaling
-  geom_abline(slope = 1, lty = 2, color = 'grey') + # drwas a diagonal line with slope = 1
-  geom_smooth(method = 'lm', formula = 'y~x') + # 'lm' : linear regression
+  geom_abline(slope = 1, lty = 2, color = "grey") + # drwas a diagonal line with slope = 1
+  geom_smooth(method = "lm", formula = "y~x") + # 'lm' : linear regression
   geom_point() + # adds points
-  labs(title = "Linear regression", x = '206/238 Age uncertainties (%)', y = '207/235 Age uncertainties (%)') # add description
+  labs(
+    title = "Linear regression", 
+    x = "206/238 Age uncertainties (%)", 
+    y = "207/235 Age uncertainties (%)") # add description
 ```
 
 A summary of the linear regression , incl. $R^2$ (goodness-of-fit), can be shown via:
@@ -295,15 +306,26 @@ summary(lm_fit)
   
 Ideally, when you plot the residuals, they should look random. Otherwise means that maybe there is a hidden pattern that the linear model is not considering. To plot the residuals, use the command `plot(lm_fit$residuals)`.
 ```{r resdiduals, echo=TRUE}
-#simple plot
+# simple plot
 plot(lm_fit$residuals)
 ```
 
 
 ### Mutliple variables (Multivariate statistics)
+*another time...*
 
 
-### Tests
+---
+
+## Useful resources
+- https://www.datacamp.com/community/tutorials/linear-regression-R
+- http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
+-  http://r-statistics.co/Statistical-Tests-in-R.html
+- [Tolosana-Delgado & Mueller (2021): "Geostatistics for Compositional Data with R", Springer, Cham](https://link.springer.com/book/10.1007/978-3-030-82568-3)
+- [P. Vermeesch: Lecture notes to "Statistics for geoscientists"](https://github.com/pvermees/geostats/blob/main/latex/geostats.pdf)
+
+
+## Appendix
 
 - **One Sample t-Test**: a parametric test used to test if the mean of a sample from a normal distribution could reasonably be a specific value.
 `t.test()`
@@ -341,19 +363,13 @@ There are more useful tests available in various other packages.
 The package `lawstat` has a good collection. The `outliers` package has a number of test for testing for presence of outliers.
 
 
-## Useful resources
-- https://www.datacamp.com/community/tutorials/linear-regression-R
-- http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
--  http://r-statistics.co/Statistical-Tests-in-R.html
-- [Tolosana-Delgado & Mueller (2021): "Geostatistics for Compositional Data with R", Springer, Cham](https://link.springer.com/book/10.1007/978-3-030-82568-3)
-- [P. Vermeesch: Lecture notes to "Statistics for geoscientists"](https://github.com/pvermees/geostats/blob/main/latex/geostats.pdf)
-
 
 ```{r gc, include=FALSE}
 gc(verbose = FALSE)
+#styler:::style_active_file()
+#lintr::lint("R_tutorial_3.Rmd")
 ```
 
+***
 
-
-
-[previous course: Data](R_turorial_2.html) | [next course: ](R_turorial_3.html)
+[Content](.\R_turorial_main.html) | [previous course: Data](R_tutorial_2.html) | [next course: Geochronology](R_tutorial_3.html)
