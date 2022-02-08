@@ -379,4 +379,4 @@ gc(verbose = FALSE)
 ```
 
 
-[Content](.\R_turorial_main.html) | [next course: Data](R_turorial_2.html)
+[Content](.\R_turorial_main.html) | [next course: Data](.\R_turorial_2.html)

@@ -664,4 +664,4 @@ gc(verbose = FALSE)
 
 ***
 
-[Content](.\R_tutorial_main.html) | [previous course: Statistics](R_tutorial_3.html) | [next course: Maps](R_tutorial_5.html)
+[Content](.\R_tutorial_main.html) | [previous course: Statistics](.\R_tutorial_3.html) | [next course: Maps](.\R_tutorial_5.html)

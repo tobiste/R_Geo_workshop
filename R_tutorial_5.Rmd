@@ -787,4 +787,4 @@ gc(verbose = FALSE)
 
 ***
 
-[Content](.\R_tutorial_main.html) | [previous course: Geochronology](R_tutorial_4.html)
+[Content](.\R_tutorial_main.html) | [previous course: Geochronology](.\R_tutorial_4.html)

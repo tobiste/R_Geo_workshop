@@ -372,4 +372,4 @@ gc(verbose = FALSE)
 
 ***
 
-[Content](.\R_turorial_main.html) | [previous course: Data](R_tutorial_2.html) | [next course: Geochronology](R_tutorial_3.html)
+[Content](.\R_turorial_main.html) | [previous course: Data](.\R_tutorial_2.html) | [next course: Geochronology](.\R_tutorial_3.html)
