@@ -1,0 +1,25 @@
+---
+title: "Programming with R --- A Beginners’ Guide for Geoscientists"
+author: "Tobias Stephan"
+date: "09/02/2022"
+output: 
+  html_document:
+    theme: "united"
+    highlight: "tango"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Content
+
+- [Tutorial 1: Basics](.\R_tutorial_1.html) 
+- [Tutorial 2: Data](.\R_tutorial_2.html) types of data, import, export, manipulation ...
+- [Tutorial 3: Decriptive statistics](.\R_tutorial_3.html) some basics on statistics
+- [Tutorial 4: Geochronology](.\R_tutorial_4.html) plotting, age calculation, statistics ...
+- [Tutorial 5: Maps](.\R_tutorial_5.html): plotting maps, projection, transformation, shapefiles ...
+
+***
+
+![](https://www.r-project.org/logo/Rlogo.png){width=200px}
