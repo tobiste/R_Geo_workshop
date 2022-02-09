@@ -318,10 +318,6 @@ plot(lm_fit$residuals)
 ```
 
 
-### Mutliple variables (Multivariate statistics)
-*another time...*
-
-
 ---
 
 ## Useful resources
@@ -330,7 +326,7 @@ plot(lm_fit$residuals)
 -  http://r-statistics.co/Statistical-Tests-in-R.html
 - [Tolosana-Delgado & Mueller (2021): "Geostatistics for Compositional Data with R", Springer, Cham](https://link.springer.com/book/10.1007/978-3-030-82568-3)
 - [P. Vermeesch: Lecture notes to "Statistics for geoscientists"](https://github.com/pvermees/geostats/blob/main/latex/geostats.pdf)
-
+- [Customizing ggplot Graphs](https://rkabacoff.github.io/datavis/Customizing.html): Graph defaults are fine for quick data exploration, but when you want to publish your results to a blog, paper, article or poster, you’ll probably want to customize the results. Customization can improve the clarity and attractiveness of a graph
 
 ## Appendix
 

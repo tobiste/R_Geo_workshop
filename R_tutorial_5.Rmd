@@ -273,8 +273,9 @@ ggplot(data = earthquakes %>% arrange(depth)) +
 ```
 
 ### Create a spatial object
-We can also create spatial objects, e.g. a line, by giving the coordinates and the CRS:
+To create spatial objects, e.g. a point, line etc., we need to specify the coordinates and the CRS.
 Create a lines object
+
 ```{r line1}
 # as a matrix
 line.pts <- cbind(
@@ -337,6 +338,7 @@ ggplot() +
   # change to a map theme
   ggthemes::theme_map()
 ```
+
 ```{r gc3, eval=TRUE, include=FALSE}
 gc()
 ```
@@ -442,30 +444,58 @@ hist(dem.df$elevation)
 
 #### Plot the raster
 To plot a raster we can use `geom_raster()` (if all raster pixels are squares) or `geom_tile()`. 
-Since we transformed the raster dataset, the pixel cells are not equally spaced anymore,. Thus, we use `geom_tile()` that allows distorted pixels:
+Since we transformed the raster dataset, the pixel cells are not equally spaced anymore,. Thus, we use `geom_tile()` that allows distorted pixels.
+
+Additionally we will add the city of Vancouver to our map
+```{r city}
+vancouver <- data.frame(city = 'Vancouver', lat = 49.3, lon = -123.1) 
+```
+
+Final plot:
 ```{r plot_raster, echo=TRUE}
 map2 <- ggplot() +
-
+  
   # add the raster with coloring (CPU intensive!!!)
   geom_tile(data = dem.df, aes(x = lon, y = lat, fill = elevation)) +
-
+  
   # the raster will cover the plot's grid lines, i.e. the latitude and longitudes. We need to add them
-  geom_hline(yintercept = seq(42, 54, 2), lwd = .1, color = "grey") +
-  geom_vline(xintercept = seq(-140, 120, 5), lwd = .1, color = "grey") +
+  geom_hline(yintercept = seq(42, 54, 2),
+             lwd = .1,
+             color = "grey") +
+  geom_vline(xintercept = seq(-140, 120, 5),
+             lwd = .1,
+             color = "grey") +
   geom_path(
     data = plates.sp,
     aes(long, lat, group = group),
     lwd = 2,
     color = colorblind[7]
   ) +
-  geom_point(
-    data = earthquakes,
-    aes(longitude, latitude, color = depth, size = mag),
-    alpha = .75
-  ) +
+  geom_point(data = earthquakes,
+             aes(longitude, latitude, color = depth, size = mag),
+             alpha = .75) +
   geom_path(data = line.df, aes(lon, lat), lty = 2) +
   geom_point(data = line.df, aes(lon, lat), size = 2) +
   geom_label_repel(data = line.df, aes(lon, lat), label = c("B", "A")) +
+  
+  # city vancouver
+  geom_point(
+    data = vancouver,
+    aes(lon, lat),
+    color = " black",
+    fill = ' white',
+    shape = 21,
+    size = 3
+  ) +
+  ggrepel::geom_text_repel(
+    data = vancouver,
+    aes(lon, lat, label = city),
+    color = 'white',
+    bg.color = 'black',
+    bg.r = .15
+  ) +
+  
+  
   scale_color_scico(
     palette = "hawaii",
     name = "Depth (km)",
@@ -473,7 +503,7 @@ map2 <- ggplot() +
     breaks = seq(0, 30, 5)
   ) +
   scale_size_binned(name = "Magnitude") +
-
+  
   # colorblind color palette for topography
   scale_fill_scico(
     palette = "oleron",
@@ -491,10 +521,8 @@ map2 <- ggplot() +
     xlim = range(earthquakes$longitude),
     ylim = range(earthquakes$latitude)
   ) + # extent of the map
-  labs(
-    title = "Seismicity of western British Columbia",
-    subtitle = "Data source: ANSS Comprehensive Earthquake Catalog"
-  ) +
+  labs(title = "Seismicity of western British Columbia",
+       subtitle = "Data source: ANSS Comprehensive Earthquake Catalog") +
   theme_map()
 
 map2
@@ -672,7 +700,7 @@ names(idw.res)[1:3] <- c("lon", "lat", "var.pred")
 Now we have our IDW output we can plot it using ggplot2. 
 ```{r idw.map, message=FALSE, warning=FALSE}
 map3 <- ggplot() +
-
+  
   # add the raster with coloring (CPU intensive!!!)
   geom_tile(data = idw.res, aes(lon, lat, fill = var.pred)) +
   geom_path(
@@ -688,7 +716,21 @@ map3 <- ggplot() +
     color = "white",
     shape = "o",
   ) +
-
+  geom_point(
+    data = vancouver,
+    aes(lon, lat),
+    color = " black",
+    fill = ' white',
+    shape = 21,
+    size = 3
+  ) +
+  ggrepel::geom_text_repel(
+    data = vancouver,
+    aes(lon, lat, label = city),
+    color = 'white',
+    bg.color = 'black',
+    bg.r = .15
+  ) +
   # colorblind-friendly color
   scale_fill_scico(palette = "tokyo", name = "Magnitude (interpolated)") +
   coord_map(
@@ -697,10 +739,8 @@ map3 <- ggplot() +
     xlim = range(earthquakes$longitude),
     ylim = range(earthquakes$latitude)
   ) +
-  labs(
-    title = "Seismicity of western British Columbia",
-    subtitle = "Data source: ANSS Comprehensive Earthquake Catalog"
-  ) +
+  labs(title = "Seismicity of western British Columbia",
+       subtitle = "Data source: ANSS Comprehensive Earthquake Catalog") +
   theme_map()
 map3
 ```
@@ -756,7 +796,7 @@ names(krige.res)[1:3] <- c("lon", "lat", "var.pred")
 Generate a plot of the kriged surface in ggplot2 in a similar way to before
 ```{r krige.plot}
 ggplot() +
-
+  
   # add the raster with coloring (CPU intensive!!!)
   geom_tile(data = krige.res, aes(lon, lat, fill = var.pred)) +
   geom_path(
@@ -772,7 +812,21 @@ ggplot() +
     color = "white",
     shape = "o",
   ) +
-
+  geom_point(
+    data = vancouver,
+    aes(lon, lat),
+    color = " black",
+    fill = ' white',
+    shape = 21,
+    size = 3
+  ) +
+  ggrepel::geom_text_repel(
+    data = vancouver,
+    aes(lon, lat, label = city),
+    color = 'white',
+    bg.color = 'black',
+    bg.r = .15
+  ) +
   # colorblind-friendly color
   scale_fill_scico(palette = "tokyo", name = "Magnitude (interpolated)") +
   coord_map(
@@ -781,10 +835,8 @@ ggplot() +
     xlim = range(earthquakes$longitude),
     ylim = range(earthquakes$latitude)
   ) +
-  labs(
-    title = "Seismicity of western British Columbia",
-    subtitle = "Data source: ANSS Comprehensive Earthquake Catalog"
-  ) +
+  labs(title = "Seismicity of western British Columbia",
+       subtitle = "Data source: ANSS Comprehensive Earthquake Catalog") +
   theme_map()
 ```
 
