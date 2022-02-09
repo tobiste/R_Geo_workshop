@@ -67,6 +67,7 @@ m <- as.matrix(
 )
 m
 ```
+
 Identify rows, columns or elements using subscripts. 
 ```{r data_matrix2, echo=TRUE}
 m[, 3] # 3rd column of matrix
@@ -172,6 +173,7 @@ isotopes <- data$isotopes
 ```{r dat2, echo=TRUE}
 head(meta)
 ```
+
 ```{r data3, echo=TRUE}
 head(isotopes)
 ```
@@ -185,6 +187,7 @@ require(dplyr)
 
 dplyr::rename(meta, "Oldest_Fraction_Date_Ma" = "Oldest_Frac._Date_Ma")
 ```
+
 ### Select columns
 
 `select(data, column1, column2, column3)`
@@ -260,6 +263,7 @@ y <-
 
 identical(x, y) # test if both sequences did the same job and produce the identical result
 ```
+
 As you can see both ways require a lot of typing and are complicated to read.
 
 The package *dplyr* offers a convenient way to do a sequcence of functions by using the "pipe" operator `%>%`:

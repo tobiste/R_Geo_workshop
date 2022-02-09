@@ -51,6 +51,7 @@ Load example data:
 data.upb <- examples$UPb # example data from the IsoplotR package
 head(data.upb$x)
 ```
+
 #### Common Pb correction
 
 `Pb0corr()` applies a common-Pb correction to a U-Pb dataset using either the Stacey-Kramers mantle evolution model (`option = 3`), isochron regression (`option = 2`), or any nominal inital Pb isotope composition (`option = 1`).
@@ -81,11 +82,13 @@ Tera-Wasserburg -– ${}^{207}Pb/{}^{206}Pb$ vs. ${}^{238}U/{}^{206}Pb$
 ```{r concordia2}
 IsoplotR::concordia(data.upb.cor, type = 2, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
 ```
+
 The concordia age:
 ```{r concordia.age}
 tconc <- IsoplotR::age(data.upb.cor, type = 2)
 tconc
 ```
+
 The result returns a list with the following values:
 
 - `x`: a named vector with the (weighted mean) U-Pb composition
@@ -179,6 +182,7 @@ data.dz <- left_join(isotopes, meta, by = "Sample_ID") %>%
 ```
 
 #### Histograms and kernel density distribution
+
 The detrital age spectrum of a sample is usually shown by histograms and density distribution. 
 Histograms are intuitive, whereas density distributions are not. Kernel Density Estimation are preferred over Probability Density Plots (Vermeesch 2012)
 ```{r kde.dz0, echo=TRUE}
@@ -212,6 +216,7 @@ dz.plot +
     bw = 75
   )
 ```
+
 Because we have a high number of samples in our dataset, this becomes quite messy. Instead we can have a density plot per sample by 
 using `facet_wrap()`:
 
@@ -264,6 +269,7 @@ data.dz2 <- geochron_to_dz(data.dz) #  my function. converts the Geochron table 
 # ?IsoplotR::mds()
 dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
 ```
+
 The function `mds()` by the `IsoplotR` packages produces a `list` that contains the dissimilarity matrix (`diss`) and the MDS configuration coordinates (`points`).
 
 The dissimilarity matrix can be shown by
@@ -289,6 +295,7 @@ ggplot(dz.mds.df) +
   ggrepel::geom_text_repel(aes(X, Y, label = Sample_ID, color = Stratigraphic_Formation_Name)) +
   scale_color_manual(values = colorblind)
 ```
+
 In the plot above, similar samples plot close together, whereas samples with contrasting detrital age spectra plot far apart.
 
 The plot above is color coded by the Stratigraphic Formation. You can also use different meta information to explore the provenance
@@ -308,6 +315,7 @@ ggplot(dz.mds.df) +
 dz.hclust <- hclust(dz.mds$diss)
 plot(dz.hclust)
 ```
+
 ##### Estimate number of Clusters
 We are going to use PAM (Partitioning Around Medoids) algorithm to cluster the data and this requires us to specify how many clusters the dataset has so the next thing to do is to estimate this.
 
@@ -320,6 +328,7 @@ We are going to use PAM (Partitioning Around Medoids) algorithm to cluster the d
 factoextra::fviz_nbclust(x = dz.mds$points, diss = dz.mds$diss, FUNcluster = cluster::pam, method = "silhouette") + theme_classic()
 factoextra::fviz_nbclust(x = dz.mds$points, diss = dz.mds$diss, FUNcluster = cluster::pam, method = "gap_stat") + theme_classic()
 ```
+
 ##### Cluster the data:
 ```{r}
 pam.res2 <- cluster::pam(dz.mds$diss, 2)
@@ -335,6 +344,7 @@ Silhouette coefficient measures how similar an object i is to the other objects 
 ```{r clust, echo=TRUE, warning=FALSE, message=FALSE}
 factoextra::fviz_silhouette(pam.res2, palette = colorblind, ggtheme = theme_classic())
 ```
+
 Our 2-cluster solution gives an average silhouette coefficient of 0.47. One of the objects in cluster 1 has a negative silhouette coefficient indicating it may be in the wrong cluster.
 
 ```{r mds_cluster, echo=TRUE, warning=FALSE, message=FALSE}
@@ -377,7 +387,8 @@ data.ft$zeta
 # rhoD
 data.ft$rhoD
 ```
-If `data.ft` has class `"fissiontracks"` and `central=FALSE`, `age()` returns a table of fission track ages and standard errors:
+
+ `data.ft` has class `"fissiontracks"` and `central=FALSE`, `age()` returns a table of fission track ages and standard errors:
 ```{r age.ft}
 data.ft.age <- IsoplotR::age(data.ft, central = FALSE) %>% as.data.frame()
 head(data.ft.age)
@@ -433,6 +444,7 @@ These dates can be more easily visualised by drawing a radial scale at some conv
 # ?IsoplotR::radialplot()
 IsoplotR::radialplot(data.ft, bg = colorblind[3], alpha = .8)
 ```
+
 The plot also gives the return values from the `central()`function (see above).
 
 #### Finite mixture modelling of geochronological dataset
@@ -461,6 +473,7 @@ IsoplotR::peakfit(data.ft, k = "auto")
 data.uthhe <- examples$UThHe
 head(data.uthhe)
 ```
+
 We can use the same functions as for the fission track data. `IsoplotR` will identify the class UThHe class and changes the default values for the functions automatically.
 
 ```{r age.he}
@@ -490,6 +503,7 @@ with
 # IsoplotR::peakfit()
 IsoplotR::peakfit(data.uthhe, k = "auto")
 ```
+
 it returns the following:
 
 - `peaks`: a 3 x k matrix with the following rows:
@@ -552,10 +566,6 @@ IsoplotR::helioplot(
 )
 ```
 
-
-age per eU
-
-age vs. Rs
 
 ### Doube-dating
 

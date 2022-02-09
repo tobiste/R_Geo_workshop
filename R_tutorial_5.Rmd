@@ -78,6 +78,7 @@ map1 <- ggplot() + # extent of the map
   )
 map1
 ```
+
 `ggplot()` treats the data as any other. It does not know yet, that the data is actually geospatial.
 
 In the geograohic coordinate system, latitudes and lLongitudes are equally spaced. We can assign this property by using `coord_equal()` instead of ` coord_cartesian()`. Here we use the same map and just add the new plot assignment, it will overwrite the previous settings for the axes.
@@ -172,6 +173,7 @@ map2 <- ggplot(data = earthquakes) +
   theme_bw()
 map2
 ```
+
 The plot above will produce some default outputs (colors). 
 
 We can modify the colors and aesthetics by using `scale_[aesthetics]`, 
@@ -187,6 +189,7 @@ map2.2 <- map2 +
   scale_size_binned(name = "Magnitude")
 map2.2
 ```
+
 We do not have to define the color palette. `ggplot()` offers a variety of pre-installed color palettes.
 
 ```{r colors, echo = TRUE, message = FALSE, warning = FALSE}
@@ -354,10 +357,12 @@ dem <- raster::raster("Data/Map/ETOPO_vancouver.tif")
 # first glimpse
 plot(dem)
 ```
+
 The raster resolution, i.e. the pixel cell size can be retrieved by `res()`
 ```{r resolution1}
 raster::res(dem)
 ```
+
 The raster resolution is 0.3 x 0.3 degree.
 
 We can decrease and increase the resolution with `aggregate()` and `disaggregate()`, respectively.
@@ -507,7 +512,8 @@ Thus, the calculation will be CPU intensive, in particular for large and high re
 Our example data set should be doable on most computers... (I hope).
 
 
-`swathR` calculates the elevation data in our swath. To define the swath we have to define `k` -- the number of lines parallel to our profile line ("line.pts"), `dist` -- the distance of the lines to our profile line, and the cordinate reference system -- `crs`.
+`swathR` calculates the elevation data in our swath. To define the swath we have to define `k` -- the number of lines parallel to our profile line ("line.pts"), `dist` -- the distance of the lines to our profile line, and the coordinate reference system -- `crs`.
+
 ```{r swath, echo=TRUE, message=FALSE, warning=FALSE}
 # extracts the swath profile and some statistics
 # WARNING CPU-intensive
@@ -519,6 +525,7 @@ swath.list <- swathR(
   k = 1
 )
 ```
+
 The function returns a list of the lines coordinates, some statistics, and the elevation data along the lines. I coded a function `swathR_profile`  that extracts the swath profile (i.e. the elevation data along the center line, the minimum and maximum elevation within the swath) from this list. 
 
 ```{r extract_swath, warning=FALSE, message=FALSE}
@@ -584,7 +591,7 @@ swath.plot <-
   theme_bw()
 ```
 
-.. and combine it together with our map
+... and combine it together with our map
 ```{r combine_plots}
 map.combo <-
   map2 /
@@ -703,15 +710,13 @@ plot(semivariog)
 semivariog
 ```
 
-From the empirical semivariogram plot and the information contained in the semivariog gstat object, we can estimate the sill, range and nugget to use in our model semivariogram.
+From the empirical semivariogram plot and the information contained in the `semivariog`` *gstat* object, we can estimate the sill, range and nugget to use in our model semivariogram.
 
-In this case, the range (the point on the distance axis where the semivariogram starts to level off) is around the value of the last lag -- 380.53028	-- so we’ll use Range = 380
+- In this case, the **range** (the point on the distance axis where the semivariogram starts to level off) is around the value of the last lag -- 380.53028	-- so we’ll use Range = 380
+- The **Sill** (the point on the y axis where the semivariogram starts to level off) is around 0.25
+- The **nugget** looks to be around 0.20 (so the partial sill is around 0.2).
 
-The Sill (the point on the y axis where the semivariogram starts to level off) is around 0.25
-
-The nugget looks to be around 0.20 (so the partial sill is around 0.2).
-
-Using this information we’ll generate a model semivariogram using the vgm() function in gstat.
+Using this information we’ll generate a model semivariogram using the `vgm()` function in *gstat*.
 
 
 ```{r vgm}
@@ -723,6 +728,7 @@ We can now fit this model to a sample variogram to see how well it fits and plot
 fit.variog <- gstat::fit.variogram(semivariog, model.variog)
 plot(semivariog, fit.variog)
 ```
+
 Use the `krige()` function in gstat along with the model semivariogram just generated to generate an ordinary/simple Kriged surface -- again, check ` ?krige` to see what the various options in the function are.
 ```{r kriging}
 krige.res <- gstat::krige(formula = mag ~ 1, locations = earthquakes.geo, newdata = grid, model = model.variog) %>%

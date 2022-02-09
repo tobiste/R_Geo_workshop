@@ -123,6 +123,7 @@ ggplot(data = sample1, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
   geom_boxplot() +
   labs(title = "Boxplot", x = "Sample", y = "206/238 Age uncertainties (%)")
 ```
+
 Btw, if you want to have the boxplot for more than one sample... R automatically identifies when there are more than one sample in your data set. 
 ```{r univariate_boxs, echo=TRUE}
 ggplot(data = samples, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
@@ -145,6 +146,7 @@ ggplot(data = sample1, aes(x = st.Pb206U238.perc)) +
   geom_histogram(color = "white") + # adds the histogram
   labs(title = "Histogram", x = "206/238 Age uncertainties (%)") # add description
 ```
+
 **R** finds the optimal width of the bins automatically. You can also give a specific bin width by defining `binwidth` or the number of bins by `bins` as options int in the `geom_histogram()` function. See `?geom_histogram()` for more information
 
 If you want to show more than one sample in one histogram plot and color them according to their sample, just define the `fill` option.
@@ -168,6 +170,7 @@ Shapiro-Wilk test:
 ```{r shapiro, echo=TRUE}
 shapiro.test(sample1$st.Pb206U238.perc)
 ```
+
 From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribtion. 
 
 Visual inspection of the data normality using **Q-Q plots** (quantile-quantile plots). Q-Q plot draws the correlation between a given sample and the normal distribution.
@@ -181,6 +184,7 @@ Visual inspection of the data normality using **Q-Q plots** (quantile-quantile p
 # simple R plot
 qqnorm(sample1$st.Pb206U238.perc)
 ```
+
 From the normality plots, we conclude that the data does not come from normal distributions.
 
 Does the mean has any value for the variable? 
@@ -236,6 +240,7 @@ If both variables do not come from a bivariate normal distribution, you have to 
 qqnorm(sample1$st.Pb206U238)
 qqnorm(sample1$st.Pb207U235)
 ```
+
 From the normality plots, we conclude that both populations may come from normal distributions.
 
 
@@ -245,6 +250,7 @@ Testing the statistical significance of the correlation:
 ```{r cor.test, echo=TRUE} 
 cor.test(sample1$st.Pb206U238, sample1$st.Pb207U235, method = "pearson")
 ```
+
 In the result above :
 
 - `t` is the t-test statistic value (t = 11.675),
@@ -299,6 +305,7 @@ A summary of the linear regression , incl. $R^2$ (goodness-of-fit), can be shown
 lm_fit <- lm(data = sample1, st.Pb206U238 ~ st.Pb207U235)
 summary(lm_fit)
 ```
+
 - $R$: The correlation between the observed values of the response variable and the predicted values of the response variable made by the model. 
 - $R^2$: The proportion of the variance in the response variable that can be explained by the predictor variables in the regression model.
 

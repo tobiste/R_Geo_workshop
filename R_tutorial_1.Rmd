@@ -55,6 +55,7 @@ Operator |	Description
 15 %/% 2 # the integer divison (%/%) rounds the result down to the nearest whole number
 364 %% 360 # Modulo operation
 ```
+
 ## Logical Operators
 In programming, you often need to know if an expression is true or false.
 You can evaluate any expression in R, and get one of two answers, `TRUE` or `FALSE`.
@@ -82,6 +83,7 @@ You can create new objects with `<-`:
 ```{r basics3, echo = TRUE}
 x <- 3 * 4
 ```
+
 All R statements where you create objects, assignment statements, have the same form:
 
 `object_name <- value`
@@ -235,6 +237,7 @@ install.packages("remotes") # install package 'remotes' from CRAN
 ```{r pkg3, eval=FALSE, include=TRUE, echo=TRUE}
 remotes::install_github("tobiste/PlateTectonicStressR") # install package 'PlateTectonicStressR' from my repositor on Github
 ```
+
 You only have to install the package once. After that you have to load the the package.
 `library()` allows to call the entire package, i.e. all the functions of the package: 
 ```{r pkg4, eval=FALSE, include=TRUE, echo=TRUE}
@@ -349,10 +352,10 @@ Remote Sensing
 
 ## Generally helpful packages
 
-- [`ggplot2`]()
-- [`patchwork`]
+- [`ggplot2`](https://ggplot2.tidyverse.org/reference/)
+- [`patchwork`] Easy assembling of plots into one figure
 - [`ggpubr`: ‘ggplot2’ Based Publication Ready Plots](phttps://rpkgs.datanovia.com/ggpubr/)
-- [`dplyr`]()   is a data wrangling package, offering a series of functions (all called
+- [`dplyr`]   is a data wrangling package, offering a series of functions (all called
 as verbs) for data manipulations ( select columns, filter rows, mutate
 variables into new ones, etc.). This has the advantage to nicely integrate with the
 pipe, jointly with certain convenience functionality in variable selection.
