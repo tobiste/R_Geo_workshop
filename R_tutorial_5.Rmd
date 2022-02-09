@@ -422,7 +422,6 @@ plot(dem.aea)
 raster::writeRaster(dem.aea, "Data/Map/dem_cropped.tif", overwrite = TRUE)
 ```
 
-
 Next, we will convert the dataset to a dataframe for plotting with ggplot.
 ```{r raster.df}
 dem.df <- as(dem.cropped, "SpatialPixelsDataFrame") %>%
@@ -450,10 +449,9 @@ map2 <- ggplot() +
   # add the raster with coloring (CPU intensive!!!)
   geom_tile(data = dem.df, aes(x = lon, y = lat, fill = elevation)) +
 
-
   # the raster will cover the plot's grid lines, i.e. the latitude and longitudes. We need to add them
-  geom_hline(yintercept = seq(42, 54, 2), lty = .1, color = "grey") +
-  geom_vline(xintercept = seq(-140, 120, 5), lty = .1, color = "grey") +
+  geom_hline(yintercept = seq(42, 54, 2), lwd = .1, color = "grey") +
+  geom_vline(xintercept = seq(-140, 120, 5), lwd = .1, color = "grey") +
   geom_path(
     data = plates.sp,
     aes(long, lat, group = group),
@@ -501,6 +499,25 @@ map2 <- ggplot() +
 
 map2
 ```
+#### Hillshade
+To create a DEM with a hillshade background, we use the functions `terrain()` and `hillshade()` from the *raster* package:
+```{r hillshade}
+terr <- raster::terrain(dem.aea, c("slope", "aspect"))
+hill <- raster::hillShade(terr[["slope"]], terr[["aspect"]])
+
+RStoolbox::ggR(hill) +
+  RStoolbox::ggR(dem.aea, geom_raster = TRUE, ggLayer = TRUE, alpha = 0.5) +
+  scale_fill_scico(
+    palette = "oleron",
+    name = "Topography (m a.s.l.)",
+    limits = c(-max(dem.df$elevation), max(dem.df$elevation)),
+    oob = scales::squish,
+    breaks = seq(-5000, 5000, 1000)
+  ) +
+  theme_void()
+```
+
+>Unfortunately, the `RStoolbox::ggR()` cannot be combined with `coord_map()`. It requires `coord_equal()`.
 
 
 ### Elevation profile (Swath)
