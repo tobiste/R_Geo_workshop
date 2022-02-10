@@ -136,11 +136,6 @@ Excel files can be imported by the function `read_excel()` from the *readxl* pac
 readxl::read_excel("path/to/file/table.xlsx", sheet = NULL)
 ```
 
-### ESRI shape files
-```{r import_shp, eval=FALSE, include=TRUE, echo=TRUE}
-
-```
-
 ### more
 There are some more import functions for special datasets:
 ```{r import_special, eval=FALSE, include=TRUE, echo=TRUE}
@@ -213,7 +208,7 @@ dplyr::filter(meta, Province == "British Columbia")
 ### Calculate a new column
 New columns can be calculated the following:
 `mutate(data, new_column1 = "Word", new_column2 = old_column1 + 1, new_column_3 = old_column2 / olc_column3)`.
-```{r mutate, message = FALSE, warning = FALSE}
+```{r mutate, message = FALSE, warning = FALSE, echo=TRUE}
 # calculate the concordance of the U-Pb ages:
 x <- dplyr::mutate(isotopes, conc = ifelse(
   t.Pb206U238 > 1000,
@@ -279,14 +274,14 @@ isotopes %>%
 ```
 
 ### Merge tables
-```{r merge, message = FALSE, warning = FALSE}
+```{r merge, message = FALSE, warning = FALSE, echo=TRUE}
 require(dplyr)
 combined <- dplyr::left_join(isotopes, meta, by = "Sample_ID")
 ```
 
 
 ### Grouped calculations or statistics
-```{r group, message = FALSE, warning = FALSE}
+```{r group, message = FALSE, warning = FALSE, echo=TRUE}
 combined %>%
   group_by(Sample_ID) %>%
   summarise(length(na.omit(t.Pb206U238)))

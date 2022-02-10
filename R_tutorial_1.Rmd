@@ -346,25 +346,24 @@ Spatial and spatio-temporal geostatistical modelling, prediction and simulation 
 
 Remote Sensing 
 
-- `raster`
-- `RStoolbox`
+- [`raster`](https://rspatial.org/raster/spatial/8-rastermanip.html)
+- [`RStoolbox`](https://bleutner.github.io/RStoolbox/)
 
 
 ## Generally helpful packages
 
-- [`ggplot2`](https://ggplot2.tidyverse.org/reference/)
-- [`patchwork`] Easy assembling of plots into one figure
-- [`ggpubr`: ‘ggplot2’ Based Publication Ready Plots](phttps://rpkgs.datanovia.com/ggpubr/)
-- [`dplyr`]   is a data wrangling package, offering a series of functions (all called
+- [`ggplot2`](https://ggplot2.tidyverse.org/index.html) ggplot2 is a system for declaratively creating graphics, based on The Grammar of Graphics. You provide the data, tell ggplot2 how to map variables to aesthetics, what graphical primitives to use, and it takes care of the details.
+- [`patchwork`](https://patchwork.data-imaginist.com/) Easy assembling of plots into one figure
+- [`dplyr`](https://dplyr.tidyverse.org/)   is a data wrangling package, offering a series of functions (all called
 as verbs) for data manipulations ( select columns, filter rows, mutate
 variables into new ones, etc.). This has the advantage to nicely integrate with the
 pipe, jointly with certain convenience functionality in variable selection.
-- [`sp`]() is a cornerstone of spatial analysis in **R**, as it brings a set of data classes
+- [`sp`](https://cengel.github.io/R-spatial/intro.html) is a cornerstone of spatial analysis in **R**, as it brings a set of data classes
 to contain spatial objects and spatial data, closely following the paradigms
 of data representation in geographic information systems (Pebesma & Bivand,
 2005).
-- `sf` similar to `sp` but it is faster and easier to handle with other R packages (e.g. `dplyr`). Might replace sp in future.
-- [`magrittr`]() Its sole contribution is to provide piping functionality to **R**. The
+- [`sf`](https://r-spatial.github.io/sf/) similar to `sp` but it is faster and easier to handle with other R packages (e.g. `dplyr`). Might replace sp in future.
+- [`magrittr`](https://magrittr.tidyverse.org/) Its sole contribution is to provide piping functionality to **R**. The
 pipe `%>%` allows writing `fun(X, args)` as X `%>% fun(args)`. This might
 seem to be a poor contribution, but it actually allows performing very complex
 nested calculations in such a way that they are both computationally efficient and

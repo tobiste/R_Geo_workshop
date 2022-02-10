@@ -56,7 +56,7 @@ source("course_stuff.R")
 In this tutorial, we want to produce a map of the western coast of Canada and its seismicity.
 First we load the earthquake table (*.csv) that I downloaded from the USGS earthquake database.
 
-```{r data}
+```{r data, echo=TRUE}
 earthquakes <- read.csv("Data/Map/earthquakes_2000-2020.csv", sep = ",") %>%
   arrange(depth)
 head(earthquakes)
@@ -65,7 +65,7 @@ head(earthquakes)
 
 ### Basic maps
 Now we start to set up a very basic map where we only show the earthquake locations. 
-```{r map0}
+```{r map0, echo=TRUE}
 map1 <- ggplot() + # extent of the map
   borders() + # political borders
   geom_point(
@@ -155,7 +155,7 @@ Let's use the equal area projection.
 In the next step, we will modify the earthquake symbols. 
 We can just add some properties of the data set (columns of the data.frame) into the aesthetic (`aes()`), such as the color, the shape, the size, or the opacity (`alpha`).
 
-```{r map2}
+```{r map2, echo=TRUE}
 map2 <- ggplot(data = earthquakes) +
   borders(fill = alpha("grey", .25)) + # political borders
   geom_point(aes(longitude, latitude, color = depth, size = mag), alpha = .75) +
@@ -219,14 +219,14 @@ map2.2 + scico::scale_color_scico(
 
 ### Import Shape-files
 Now we want to add the plate boundaries to the map. The plate boundaries are stored in a ESRI shape file that can be imported using `st_read()` from the sf package.
-```{r read.shp, message=FALSE}
+```{r read.shp, message=FALSE, echo=TRUE}
 # load shape file as 'simple feature'
 plates <- sf::st_read("Data/Map/plate_boundaries.shp") # plate boundaries
 sf::st_crs(plates) <- "WGS84" # set the CRS
 ```
 
 There are some more additional steps requiered to add the plate boundaries to our map. This includes to convert the sf feature into a data.frame
-```{r shp.prepare, message=FALSE, warning=FALSE}
+```{r shp.prepare, message=FALSE, warning=FALSE, echo=TRUE}
 plates.df <-
   sf::st_drop_geometry(plates) %>%
   mutate(id = as.character(seq_along(plates$Code)))
@@ -236,12 +236,12 @@ plates.sp <- sf::as_Spatial(plates) %>% # convert into "sp" feature
   left_join(plates.df)
 ```
 
-```{r gc2, eval=TRUE, include=FALSE}
+```{r gc2, eval=TRUE, include=FALSE, echo=TRUE}
 gc()
 ```
 
 Now add the plate boundaries to our map:
-```{r map.plate}
+```{r map.plate, echo=TRUE}
 ggplot(data = earthquakes %>% arrange(depth)) +
   geom_path(
     data = plates.sp,
@@ -276,7 +276,7 @@ ggplot(data = earthquakes %>% arrange(depth)) +
 To create spatial objects, e.g. a point, line etc., we need to specify the coordinates and the CRS.
 Create a lines object
 
-```{r line1}
+```{r line1, echo=TRUE}
 # as a matrix
 line.pts <- cbind(
   lon = c(-120, -130),
@@ -293,7 +293,7 @@ line.sf <- sf::st_linestring(line.pts) %>%
 ```
 
 Plot the new object as a profile line and add to the map:
-```{r plot_line}
+```{r plot_line, echo=TRUE}
 ggplot() +
   geom_path(
     data = plates.sp,
@@ -339,13 +339,13 @@ ggplot() +
   ggthemes::theme_map()
 ```
 
-```{r gc3, eval=TRUE, include=FALSE}
+```{r gc3, eval=TRUE, include=FALSE, echo=TRUE}
 gc()
 ```
 
 ### Save ESRI shape file
 Save line into ESRI shapefile:
-```{r line2, echo=FALSE, eval=FALSE, include=TRUE}
+```{r line2, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 sf::st_write(line.sf, "Data/Map/my_line.shp")
 ```
 
@@ -353,7 +353,7 @@ sf::st_write(line.sf, "Data/Map/my_line.shp")
 ### Import Raster
 To import and handle raster datasets, we need the **raster** package.
 The import is done by using `raster()`
-```{r raster_load}
+```{r raster_load, echo=TRUE}
 dem <- raster::raster("Data/Map/ETOPO_vancouver.tif")
 
 # first glimpse
@@ -361,14 +361,14 @@ plot(dem)
 ```
 
 The raster resolution, i.e. the pixel cell size can be retrieved by `res()`
-```{r resolution1}
+```{r resolution1, echo=TRUE}
 raster::res(dem)
 ```
 
 The raster resolution is 0.3 x 0.3 degree.
 
 We can decrease and increase the resolution with `aggregate()` and `disaggregate()`, respectively.
-```{r resolution2}
+```{r resolution2, echo=TRUE}
 # lower the resolution by factor 2:
 dem.low <- raster::aggregate(dem, fact = 2)
 raster::res(dem.low)
@@ -381,7 +381,7 @@ plot(dem.low)
 
 #### Crop a raster
 To crop or clip a raster along a spatial feature (e.g. the extent of our earthquake dataset), we can use `crop()`:
-```{r raster_crop}
+```{r raster_crop, echo=TRUE}
 crop_extent <- sf::st_bbox(c(
   xmin = min(earthquakes$longitude),
   xmax = max(earthquakes$longitude),
@@ -409,7 +409,7 @@ To use the `projectRaster()` function, we need to define two things:
 The syntax is `raster::projectRaster(RasterObject, crs = CRSToReprojectTo)`
 
 Here, we want to transform the raster (in WGS84) into an equal area projection (aea). 
-```{r}
+```{r aea, echo=TRUE}
 aea <- "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
 dem.aea <- raster::projectRaster(dem.cropped, crs = raster::crs(aea))
@@ -420,19 +420,19 @@ plot(dem.aea)
 
 
 #### Save raster
-```{r write_raster, eval=FALSE, include=TRUE}
+```{r write_raster, eval=FALSE, include=TRUE, echo=TRUE}
 raster::writeRaster(dem.aea, "Data/Map/dem_cropped.tif", overwrite = TRUE)
 ```
 
 Next, we will convert the dataset to a dataframe for plotting with ggplot.
-```{r raster.df}
+```{r raster.df, echo=TRUE}
 dem.df <- as(dem.cropped, "SpatialPixelsDataFrame") %>%
   as.data.frame()
 colnames(dem.df) <- c("elevation", "lon", "lat")
 ```
 
 Thereby, we can also do some statistics on the raster's "z" value (here the elevation):
-```{r raster_stats, warning=FALSE, message=FALSE}
+```{r raster_stats, warning=FALSE, message=FALSE, echo=TRUE}
 # Stats numbers
 dem.df$elevation %>% summary()
 
@@ -447,7 +447,7 @@ To plot a raster we can use `geom_raster()` (if all raster pixels are squares) o
 Since we transformed the raster dataset, the pixel cells are not equally spaced anymore,. Thus, we use `geom_tile()` that allows distorted pixels.
 
 Additionally we will add the city of Vancouver to our map
-```{r city}
+```{r city, echo=TRUE}
 vancouver <- data.frame(city = 'Vancouver', lat = 49.3, lon = -123.1) 
 ```
 
@@ -527,9 +527,10 @@ map2 <- ggplot() +
 
 map2
 ```
+
 #### Hillshade
 To create a DEM with a hillshade background, we use the functions `terrain()` and `hillshade()` from the *raster* package:
-```{r hillshade}
+```{r hillshade, echo=TRUE}
 terr <- raster::terrain(dem.aea, c("slope", "aspect"))
 hill <- raster::hillShade(terr[["slope"]], terr[["aspect"]])
 
@@ -573,7 +574,7 @@ swath.list <- swathR(
 
 The function returns a list of the lines coordinates, some statistics, and the elevation data along the lines. I coded a function `swathR_profile`  that extracts the swath profile (i.e. the elevation data along the center line, the minimum and maximum elevation within the swath) from this list. 
 
-```{r extract_swath, warning=FALSE, message=FALSE}
+```{r extract_swath, warning=FALSE, message=FALSE, echo=TRUE}
 swath.profile <- swath_profile(swath.list)
 ```
 
@@ -606,17 +607,17 @@ ggplot(swath.profile, aes(distance, elevation)) +
 
 Because our input data is in the geographical coordinate system, the distances are given in degrees. 
 You can use my function `orthodrome` (= great circle distance) to get the distance between two locations on earth:
-```{r orthodrome}
+```{r orthodrome, echo=TRUE}
 distance.km <- orthodrome(line.pts[1, ], line.pts[2, ])
 ```
 
 Next, we scale the original distance values (in degree) to values ranging from 0 to the just claculated distance in km:
-```{r}
+```{r swath.resc, echo=TRUE}
 swath.profile$distance.km <- scales::rescale(swath.profile$distance, to = c(0, distance.km))
 ```
 
 Now we can set up the profile plot ...
-```{r swath2}
+```{r swath2, echo=TRUE}
 swath.plot <-
   ggplot(swath.profile, aes(distance.km, elevation)) +
   coord_cartesian(expand = FALSE) +
@@ -637,7 +638,7 @@ swath.plot <-
 ```
 
 ... and combine it together with our map
-```{r combine_plots}
+```{r combine_plots, echo=TRUE}
 map.combo <-
   map2 /
   (swath.plot + scale_y_reverse()) +
@@ -647,7 +648,7 @@ map.combo
 
 To save a plot, we can use `ggsave()` by giving the file path and the output size. It automatically identifies the file format from your file name.
 ### Save a map
-```{r save_map, echo=FALSE, eval=FALSE, include=TRUE}
+```{r save_map, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 ggplot2::ggsave(map.combo, filename = "Data/DEM/my_map.pdf", width = 11, height = 8.5, scale = 0.5)
 ```
 
@@ -658,7 +659,7 @@ A "heat map" refers to a spatially interpolated value.
 In our example we want to interpolate the magnitude of the eartquakes for the entire area in derive a somewhat "seismic hazard map".
 
 In order to perform a (geo)spatial interpolation, we need to transform our objects into spatial objects:
-```{r eq.sp}
+```{r eq.sp, echo=TRUE}
 earthquakes.geo <- earthquakes
 coordinates(earthquakes.geo) <- ~ longitude + latitude
 sp::proj4string(earthquakes.geo) <-
@@ -666,12 +667,12 @@ sp::proj4string(earthquakes.geo) <-
 ```
 
 
-```{r, eval=FALSE, include=FALSE}
+```{r, eval=FALSE, include=FALSE, echo=TRUE}
 earthquakes.aea <- sp::spTransform(earthquakes.geo, sp::CRS(aea))
 ```
 
 Next we need to create the interpolation grid where we want to interpolate onto.
-```{r grid}
+```{r grid, echo=TRUE}
 # define the raster's bounding box
 extent <- sp::bbox(earthquakes.geo)
 
@@ -691,14 +692,14 @@ Now we have set up our points and a grid to interpolate onto, we are ready carry
 
 To generate a surface using inverse distance weighting, use the IDW function in gstat. Check the help file for IDW -- `?idw` -- for information about what this formula is doing.
 
-```{r idw}
+```{r idw, echo=TRUE}
 idw.res <- gstat::idw(formula = mag ~ 1, newdata = grid, locations = earthquakes.geo) %>%
   as.data.frame()
 names(idw.res)[1:3] <- c("lon", "lat", "var.pred")
 ```
 
 Now we have our IDW output we can plot it using ggplot2. 
-```{r idw.map, message=FALSE, warning=FALSE}
+```{r idw.map, message=FALSE, warning=FALSE, echo=TRUE}
 map3 <- ggplot() +
   
   # add the raster with coloring (CPU intensive!!!)
@@ -746,7 +747,7 @@ map3
 ```
 
 Save the map into png
-```{r, echo=FALSE, eval=FALSE, include=TRUE}
+```{r, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 ggsave(map3, filename = "Data/DEM/my_heatmap.png", width = 11, height = 8.5)
 ```
 
@@ -755,13 +756,13 @@ ggsave(map3, filename = "Data/DEM/my_heatmap.png", width = 11, height = 8.5)
 
 Kriging is a little more involved than IDW as it requires the construction of a semivariogram model to describe the spatial autocorrelation pattern for your particular variable.
 
-```{r variocloud}
+```{r variocloud, echo=TRUE}
 variogcloud <- gstat::variogram(mag ~ 1, locations = earthquakes.geo, data = earthquakes.geo, cloud = TRUE)
 plot(variogcloud)
 ```
 
 The values in the cloud can be binned into lags with and plotted with a very similar function
-```{r semivariog}
+```{r semivariog, echo=TRUE}
 semivariog <- gstat::variogram(mag ~ 1, locations = earthquakes.geo, data = earthquakes.geo)
 plot(semivariog)
 semivariog
@@ -776,25 +777,25 @@ From the empirical semivariogram plot and the information contained in the `semi
 Using this information we’ll generate a model semivariogram using the `vgm()` function in *gstat*.
 
 
-```{r vgm}
+```{r vgm, echo=TRUE}
 model.variog <- gstat::vgm(psill = 0.25, model = "Exp", nugget = 0.2, range = 380)
 ```
 
 We can now fit this model to a sample variogram to see how well it fits and plot it
-```{r fit.variogram}
+```{r fit.variogram, echo=TRUE}
 fit.variog <- gstat::fit.variogram(semivariog, model.variog)
 plot(semivariog, fit.variog)
 ```
 
 Use the `krige()` function in gstat along with the model semivariogram just generated to generate an ordinary/simple Kriged surface -- again, check ` ?krige` to see what the various options in the function are.
-```{r kriging}
+```{r kriging, echo=TRUE}
 krige.res <- gstat::krige(formula = mag ~ 1, locations = earthquakes.geo, newdata = grid, model = model.variog) %>%
   as.data.frame()
 names(krige.res)[1:3] <- c("lon", "lat", "var.pred")
 ```
 
 Generate a plot of the kriged surface in ggplot2 in a similar way to before
-```{r krige.plot}
+```{r krige.plot, echo=TRUE}
 ggplot() +
   
   # add the raster with coloring (CPU intensive!!!)

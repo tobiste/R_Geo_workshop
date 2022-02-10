@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-```{r packages}
+```{r packages, echo=TRUE}
 pacman::p_load(
   # data manipulation
   dplyr,
@@ -33,7 +33,7 @@ source("course_stuff.R")
 ```
 
 
-```{r load, message=FALSE, warning=FALSE}
+```{r load, message=FALSE, warning=FALSE, echo=TRUE}
 data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
 samples <- data$isotopes %>%
   mutate(st.Pb206U238.perc = st.Pb206U238 / t.Pb206U238)
@@ -150,7 +150,7 @@ ggplot(data = sample1, aes(x = st.Pb206U238.perc)) +
 **R** finds the optimal width of the bins automatically. You can also give a specific bin width by defining `binwidth` or the number of bins by `bins` as options int in the `geom_histogram()` function. See `?geom_histogram()` for more information
 
 If you want to show more than one sample in one histogram plot and color them according to their sample, just define the `fill` option.
-```{r histograms}
+```{r histograms, echo=TRUE}
 ggplot(data = samples, aes(x = st.Pb206U238.perc, fill = Sample_ID)) +
   geom_histogram(color = "white") + # adds the histogram
   labs(title = "Histogram", x = "206/238 Age uncertainties (%)") # add description

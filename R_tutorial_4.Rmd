@@ -47,7 +47,7 @@ source("course_stuff.R")
 
 ### U-Pb
 Load example data:
-```{r}
+```{r load, echo=TRUE}
 data.upb <- examples$UPb # example data from the IsoplotR package
 head(data.upb$x)
 ```
@@ -55,15 +55,15 @@ head(data.upb$x)
 #### Common Pb correction
 
 `Pb0corr()` applies a common-Pb correction to a U-Pb dataset using either the Stacey-Kramers mantle evolution model (`option = 3`), isochron regression (`option = 2`), or any nominal inital Pb isotope composition (`option = 1`).
-```{r}
+```{r pb, echo=TRUE}
 # ?Pb0corr()
-data.upb.cor <- Pb0corr(data.upb, option = 3)
+data.upb.cor <- IsoplotR::Pb0corr(data.upb, option = 3)
 head(data.upb.cor$x)
 ```
 
 
 Calculate the individual ages of the individual aliquots:
-```{r ages.upb}
+```{r ages.upb, echo=TRUE}
 # age per each U-Pb analysis:
 # ?IsoplotR::age()
 tUPb <- IsoplotR::age(data.upb.cor, type = 1) %>% as.data.frame()
@@ -73,18 +73,18 @@ head(tUPb)
 #### Concordia diagram
 
 Wetherill -– ${}^{206}Pb/{}^{238}U$ vs. ${}^{207}Pb/{}^{235}U$
-```{r concordia1}
+```{r concordia1, echo=TRUE}
 # ?IsoplotR::concordia()
 IsoplotR::concordia(data.upb.cor, type = 1, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
 ```
 
 Tera-Wasserburg -– ${}^{207}Pb/{}^{206}Pb$ vs. ${}^{238}U/{}^{206}Pb$
-```{r concordia2}
+```{r concordia2, echo=TRUE}
 IsoplotR::concordia(data.upb.cor, type = 2, ellipse.fill = alpha(colorblind[3], .5), concordia.col = colorblind[2])
 ```
 
 The concordia age:
-```{r concordia.age}
+```{r concordia.age, echo=TRUE}
 tconc <- IsoplotR::age(data.upb.cor, type = 2)
 tconc
 ```
@@ -104,20 +104,28 @@ The result returns a list with the following values:
 
 
 #### Age spectrum (histrogram and density)
-```{r upb.spectrum}
-n <- provenance::botev(tUPb$t.68) # get the optimal bandwidth using the diffusion algorithm of Zdravko Botev (2011)
-
+```{r upb.spectrum, echo=TRUE}
+# get the optimal bandwidth using the diffusion 
+# algorithm of Zdravko Botev (2011)
+n <-
+  provenance::botev(tUPb$t.68) 
 ggplot(tUPb) +
   theme_minimal() + # minimal design
   coord_cartesian(expand = FALSE) + # set the range of the x axis
   labs(
     x = "Age (Ma)",
     caption = paste(
-      "Kernel bandwidth: ", round(n, 1),
-      "\nConcordia age: ", round(tconc$age[1], 2), " \u00B1 ", round(tconc$age[2], 2), "Ma"
+      "Kernel bandwidth: ",
+      round(n, 1),
+      "\nConcordia age: ",
+      round(tconc$age[1], 2),
+      " \u00B1 ",
+      round(tconc$age[2], 2),
+      "Ma"
     )
   ) + # axis label
-  geom_histogram( # histogram
+  geom_histogram(
+    # histogram
     aes(t.68, y = ..density..),
     color = "white",
     fill = "grey",
@@ -133,6 +141,7 @@ ggplot(tUPb) +
   ) +
   geom_vline(xintercept = tconc$age[1], lty = 2)
 ```
+
 #### Finite mixture modelling of geochronological dataset
 Discrete mixture modelling algorithms of Galbraith and Laslett (1993) by using `peakfit()`.
 
@@ -144,7 +153,7 @@ with
 - `k`	is the number of discrete age components to be sought. Setting this parameter to `'auto'` automatically selects the optimal number of components (up to a maximum of 5) using the Bayes Information Criterion (BIC).
 
 
-```{r peak.fit.upb}
+```{r peak.fit.upb, echo=TRUE}
 # ?IsoplotR::peakfit()
 IsoplotR::peakfit(data.upb.cor, k = "auto")
 ```
@@ -273,7 +282,7 @@ dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
 The function `mds()` by the `IsoplotR` packages produces a `list` that contains the dissimilarity matrix (`diss`) and the MDS configuration coordinates (`points`).
 
 The dissimilarity matrix can be shown by
-```{r diss, echo=FALSE}
+```{r diss, echo=TRUE}
 dz.mds$diss
 ```
 
@@ -311,7 +320,7 @@ ggplot(dz.mds.df) +
 #### Cluster the dissimilarity matrix
 
 ##### Hierarchical agglomerative clustering 
-```{r cluster}
+```{r cluster, echo=TRUE}
 dz.hclust <- hclust(dz.mds$diss)
 plot(dz.hclust)
 ```
@@ -330,7 +339,7 @@ factoextra::fviz_nbclust(x = dz.mds$points, diss = dz.mds$diss, FUNcluster = clu
 ```
 
 ##### Cluster the data:
-```{r}
+```{r clustering, echo=TRUE}
 pam.res2 <- cluster::pam(dz.mds$diss, 2)
 ```
 
@@ -364,7 +373,7 @@ ggplot(dz.mds.df) +
 ### Thermochron
 #### Fission track data 
 
-```{r}
+```{r ft, echo=TRUE}
 data.ft <- read_geochron(path = "Data/Geochron_sample_download_AFT.xlsx", method = "Fission Track")
 data.ft <- list(
   format = 1,
@@ -389,14 +398,14 @@ data.ft$rhoD
 ```
 
  `data.ft` has class `"fissiontracks"` and `central=FALSE`, `age()` returns a table of fission track ages and standard errors:
-```{r age.ft}
+```{r age.ft, echo=TRUE}
 data.ft.age <- IsoplotR::age(data.ft, central = FALSE) %>% as.data.frame()
 head(data.ft.age)
 ```
 
 
 The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
-```{r central.ft}
+```{r central.ft, echo=TRUE}
 # age(data.ft, central = TRUE) # identical to central()
 IsoplotR::central(data.ft)
 ```
@@ -410,7 +419,7 @@ The return value is a list containing the following items:
 
 
 Plotting the histogram and density of the age distribution:
-```{r hist.ft}
+```{r hist.ft, echo=TRUE}
 n <- provenance::botev(data.ft.age$t) # get the optimal bandwidth using the diffusion algorithm of Zdravko Botev (2011)
 
 ggplot(data.ft.age) +
@@ -461,7 +470,7 @@ with
 - `log`: take the logs of the data before applying the mixture model?
 - `alpha`: cutoff value for confidence intervals
 
-```{r}
+```{r peakfit.ft, echo=TRUE}
 IsoplotR::peakfit(data.ft, k = "auto")
 ```
 
@@ -469,20 +478,20 @@ IsoplotR::peakfit(data.ft, k = "auto")
 
 #### U-Th-He Data
 
-```{r}
+```{r he_load, echo=TRUE}
 data.uthhe <- examples$UThHe
 head(data.uthhe)
 ```
 
 We can use the same functions as for the fission track data. `IsoplotR` will identify the class UThHe class and changes the default values for the functions automatically.
 
-```{r age.he}
+```{r age.he, echo=TRUE}
 data.uthhe.ages <- IsoplotR::age(data.uthhe, central = FALSE) %>% as.data.frame()
 head(data.uthhe.ages)
 ```
 
 The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
-```{r central.he}
+```{r central.he, echo=TRUE}
 # age(data.ft, central = TRUE) # identical to central()
 IsoplotR::central(data.uthhe)
 ```
@@ -519,7 +528,7 @@ it returns the following:
 
 Plotting the histogram and density of the age distribution:
 
-```{r hist.he}
+```{r hist.he, echo=TRUE}
 n <- provenance::botev(data.uthhe.ages$t) # get the optimal bandwidth using the diffusion algorithm of Zdravko Botev (2011)
 
 ggplot(data.uthhe.ages) +
@@ -569,7 +578,7 @@ IsoplotR::helioplot(
 
 ### Doube-dating
 
-```{r}
+```{r dd, echo=TRUE}
 dunn.meta <- read_excel("Data/dunn2017.xlsx", sheet = "meta") %>%
   tidyr::separate(col = Age.range, into = c("DA.min", "DA.max"), sep = "–", remove = FALSE, convert = TRUE)
 dunn.zrn <- read_excel("Data/dunn2017.xlsx", sheet = "zrn")
@@ -630,7 +639,7 @@ plot.upb + plot_spacer() + plotxy + plot.ft +
   )
 ```
 Lag-time
-```{r lag, warning=FALSE, message=FALSE}
+```{r lag, warning=FALSE, message=FALSE, echo=TRUE}
 ggplot(dunn %>% filter(DA > 0.3), aes(x = Z.FT.Age, y = DA, color = Sample)) +
   geom_abline(slope = -1, intercept = seq(0, 300, 5), color = "gray") +
   geom_errorbarh(aes(xmin = Z.FT.Age - Z.FT.1s_err, xmax = Z.FT.Age + Z.FT.1s_err), alpha = .2) +
