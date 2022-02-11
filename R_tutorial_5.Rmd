@@ -647,6 +647,7 @@ map.combo
 ```
 
 To save a plot, we can use `ggsave()` by giving the file path and the output size. It automatically identifies the file format from your file name.
+
 ### Save a map
 ```{r save_map, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 ggplot2::ggsave(map.combo, filename = "Data/DEM/my_map.pdf", width = 11, height = 8.5, scale = 0.5)
