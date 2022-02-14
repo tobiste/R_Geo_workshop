@@ -606,9 +606,9 @@ ggplot(swath.profile, aes(distance, elevation)) +
 ```
 
 Because our input data is in the geographical coordinate system, the distances are given in degrees. 
-You can use my function `orthodrome` (= great circle distance) to get the distance between two locations on earth:
+You can use my function `haversine()` to get the distance between two locations on earth:
 ```{r orthodrome, echo=TRUE}
-distance.km <- orthodrome(line.pts[1, ], line.pts[2, ])
+distance.km <- haversine(line.pts[1, ], line.pts[2, ])
 ```
 
 Next, we scale the original distance values (in degree) to values ranging from 0 to the just claculated distance in km:
