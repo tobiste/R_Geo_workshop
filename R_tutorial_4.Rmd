@@ -1,17 +1,17 @@
 ---
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
-subtitle: "4 - Geo-/Thermochronology"
 author: "Tobias Stephan"
 date: "10/02/2022"
-output: 
+output:
   html_document:
-    theme: "united"
-    highlight: "tango"
-    toc: true
+    highlight: tango
+    theme: united
+    toc: yes
     toc_depth: 3
-    toc_float: 
-      collapsed: false
-      smooth_scroll: true
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+subtitle: 4 - Geo-/Thermochronology
 ---
 
 ```{r setup, include=FALSE}
@@ -99,8 +99,8 @@ The result returns a list with the following values:
 - `age`:  a 4-element vector with:
   - `t`: the concordia age (in Ma)
   - `s[t]`: the estimated uncertainty of `t`
-  - `ci[t]`: the *100(1-$\alpha$)*\% confidence interval of `t` for the appropriate degrees of freedom
-  - `disp[t]`: the studentised *100(1-$\alpha$)*\% confidence interval for `t` augmented by $\sqrt{\text{mswd}}$ to account for overdispersed datasets.
+  - `ci[t]`: the $100(1-\alpha)\%$ confidence interval of `t` for the appropriate degrees of freedom
+  - `disp[t]`: the studentised $100(1-\alpha)\%$ confidence interval for `t` augmented by $\sqrt{\text{mswd}}$ to account for overdispersed datasets.
 
 
 #### Age spectrum (histrogram and density)
@@ -329,9 +329,9 @@ plot(dz.hclust)
 We are going to use PAM (Partitioning Around Medoids) algorithm to cluster the data and this requires us to specify how many clusters the dataset has so the next thing to do is to estimate this.
 
 
-- The *silhouette coefficient* estimates the average distance between clusters. The silhouette plot shows the silhouette co efficient over values of k ranging from 1 to 10. This plot shows the highest average silhouette co-efficient occurring when k=2.
+- The *silhouette coefficient* estimates the average distance between clusters. The silhouette plot shows the silhouette co efficient over values of $k$ ranging from 1 to 10. This plot shows the highest average silhouette co-efficient occurring when $k=2$.
 
-- The *gap statistic* compares intra-cluster variation for different values of k with expected intra-cluster variation under null distribution. Ideally we should be choosing the value of k which maximizes the gap statistic however in real world datasets where clusters are not so well defined it may be more parsimonious to choose the k value to be the one where the rate of increase of the statistic begins to slow down (i.e. value lowest value of k that is greater than or equal to the value of k+1 minus the standard error).
+- The *gap statistic* compares intra-cluster variation for different values of k with expected intra-cluster variation under null distribution. Ideally we should be choosing the value of $k$ which maximizes the gap statistic however in real world datasets where clusters are not so well defined it may be more parsimonious to choose the k value to be the one where the rate of increase of the statistic begins to slow down (i.e. value lowest value of $k$ that is greater than or equal to the value of $k+1$ minus the standard error).
 
 ```{r nclust, echo=TRUE, warning=FALSE, message=FALSE}
 factoextra::fviz_nbclust(x = dz.mds$points, diss = dz.mds$diss, FUNcluster = cluster::pam, method = "silhouette") + theme_classic()
@@ -408,10 +408,10 @@ IsoplotR::central(data.ft)
 ```
 The return value is a list containing the following items:
 
-- `age` gives the central age (`t`), the standard error of t (`s[t]`),  and the width of a *100(1-$\alpha$)\%* confidence interval for t (`ci[t]`). 
-- `disp` is a a three-element vector with the overdispersion (standard deviation) of the excess scatter, and the upper and lower half-widths of its *100(1-$\alpha$)\%* confidence interval.
-- `mswd` is the reduced Chi-square statistic of data concordance, i.e. *mswd=$\chi$^2^/`df`*, where X^2^ is a Chi-square statistic of the EDM data or ages
-- `df` is the degrees of freedom (*n-2*)
+- `age` gives the central age (`t`), the standard error of t (`s[t]`),  and the width of a $100(1-\alpha)\%$ confidence interval for t (`ci[t]`). 
+- `disp` is a a three-element vector with the overdispersion (standard deviation) of the excess scatter, and the upper and lower half-widths of its $100(1-\alpha)\%$ confidence interval.
+- `mswd` is the reduced Chi-square statistic of data concordance, i.e. $\text{mswd}=\chi^2/\text{df}$, where X^2^ is a Chi-square statistic of the EDM data or ages
+- `df` is the degrees of freedom ($n-2$)
 - `p.value` is the p-value of a Chi-square test with `df` degrees of freedom
 
 

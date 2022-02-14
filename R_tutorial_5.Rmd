@@ -1,17 +1,20 @@
 ---
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
-subtitle: "5 - Maps"
 author: "Tobias Stephan"
 date: "10/02/2022"
-output: 
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
-    theme: "united"
-    highlight: "tango"
-    toc: true
+    highlight: tango
+    theme: united
+    toc: yes
     toc_depth: 3
-    toc_float: 
-      collapsed: false
-      smooth_scroll: true
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+subtitle: 5 - Maps
 ---
 
 ```{r setup, include=FALSE}
@@ -608,7 +611,7 @@ ggplot(swath.profile, aes(distance, elevation)) +
 Because our input data is in the geographical coordinate system, the distances are given in degrees. 
 You can use my function `haversine()` to get the distance between two locations on earth:
 ```{r orthodrome, echo=TRUE}
-distance.km <- haversine(line.pts[1, ], line.pts[2, ])
+distance.km <- greatcircle_distance(line.pts[1, ], line.pts[2, ])
 ```
 
 Next, we scale the original distance values (in degree) to values ranging from 0 to the just claculated distance in km:

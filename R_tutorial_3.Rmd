@@ -1,17 +1,20 @@
 ---
 title: "Programming with R --- A Beginners’ Guide for Geoscientists"
-subtitle: "3 - Statistics"
 author: "Tobias Stephan"
 date: "09/02/2022"
-output: 
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
-    theme: "united"
-    highlight: "tango"
-    toc: true
+    highlight: tango
+    theme: united
+    toc: yes
     toc_depth: 3
-    toc_float: 
-      collapsed: false
-      smooth_scroll: true
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+subtitle: 3 - Statistics
 ---
 
 ```{r setup, include=FALSE}

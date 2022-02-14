@@ -29,4 +29,11 @@ vignettes/*.pdf
 .Rproj.user
 .Rdata
 .DS_Store
-R-Workshop_material.zip
+.zip
+.html
+.pdf
+R_tutorial_1.R
+R_tutorial_2.R
+R_tutorial_3.R
+R_tutorial_4.R
+R_tutorial_5.R

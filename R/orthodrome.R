@@ -1,5 +1,5 @@
 #' @title Distance
-#' @description This uses the "**haversine**" formula to calculate the great-circle
+#' @description This uses the **haversine** formula to calculate the great-circle
 #' distance between two points – that is, the shortest distance over the earth’s
 #' surface – giving an ‘as-the-crow-flies’ distance between the points
 #' (ignoring any hills they fly over, of course!).
@@ -11,7 +11,7 @@
 #' berlin <- c(52.517, 13.4)
 #' tokyo <- c(35.7, 139.767)
 #' haversine(berlin, tokyo)
-haversine <- function(a, b) {
+greatcircle_distance <- function(a, b) {
   r <- 6371.00887714 # km
 
   # convert deg into rad
