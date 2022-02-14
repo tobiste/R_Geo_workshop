@@ -33,13 +33,6 @@ source("course_stuff.R")
 ```
 
 
-```{r load, message=FALSE, warning=FALSE, echo=TRUE}
-data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
-samples <- data$isotopes %>%
-  mutate(st.Pb206U238.perc = st.Pb206U238 / t.Pb206U238)
-
-sample1 <- samples %>% filter(Sample_ID == "Whitehorse Formation")
-```
 
 ---
 
@@ -64,6 +57,13 @@ Types of Variables:
   
 ***
 
+```{r load, message=FALSE, warning=FALSE, echo=TRUE}
+data <- read_geochron("Data/Geochron_sample_download_UPb.xls")
+samples <- data$isotopes %>%
+  mutate(st.Pb206U238.perc = st.Pb206U238 / t.Pb206U238)
+
+sample1 <- samples %>% filter(Sample_ID == "Whitehorse Formation")
+```
 
 Important values to characterize the distribution of the variable `sample1$st.Pb206U238.perc` are:
 ```{r univariate1, echo=TRUE}
@@ -171,7 +171,7 @@ Shapiro-Wilk test:
 shapiro.test(sample1$st.Pb206U238.perc)
 ```
 
-From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribtion. 
+From the output, the p-value is less than the significance level 0.05 implying that the distribution of the data is significantly different from a normal distribution. 
 
 Visual inspection of the data normality using **Q-Q plots** (quantile-quantile plots). Q-Q plot draws the correlation between a given sample and the normal distribution.
 
@@ -321,8 +321,9 @@ plot(lm_fit$residuals)
 ---
 
 ## Useful resources
-- https://www.datacamp.com/community/tutorials/linear-regression-R
-- http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
+- **RECOMMENDED**: Hadley Wickham (the master developer of R) briefly demonstrates data analysis with R in a 22 min youtube video:  https://www.youtube.com/watch?v=go5Au01Jrvs&t=10s
+- Linear Regression: https://www.datacamp.com/community/tutorials/linear-regression-R
+- Correlation tests: http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
 -  http://r-statistics.co/Statistical-Tests-in-R.html
 - [Tolosana-Delgado & Mueller (2021): "Geostatistics for Compositional Data with R", Springer, Cham](https://link.springer.com/book/10.1007/978-3-030-82568-3)
 - [P. Vermeesch: Lecture notes to "Statistics for geoscientists"](https://github.com/pvermees/geostats/blob/main/latex/geostats.pdf)

@@ -282,7 +282,7 @@ dz.mds <- IsoplotR::mds(data.dz2, plot = FALSE)
 The function `mds()` by the `IsoplotR` packages produces a `list` that contains the dissimilarity matrix (`diss`) and the MDS configuration coordinates (`points`).
 
 The dissimilarity matrix can be shown by
-```{r diss, echo=TRUE}
+```{r diss, echo=FALSE, include=TRUE}
 dz.mds$diss
 ```
 
@@ -369,7 +369,6 @@ ggplot(dz.mds.df) +
 ```
 
 
-
 ### Thermochron
 #### Fission track data 
 
@@ -384,7 +383,6 @@ data.ft <- list(
 class(data.ft) <- "fissiontracks"
 # data.ft <- examples$FT1
 ```
-
 
 ```{r thermo0, echo=TRUE}
 # counts
@@ -402,7 +400,6 @@ data.ft$rhoD
 data.ft.age <- IsoplotR::age(data.ft, central = FALSE) %>% as.data.frame()
 head(data.ft.age)
 ```
-
 
 The central age, i.e. the geometric mean composition of a continuous mixture of fission track (or U-Th-He data) and the corresponding age and fitting parameters can be calculated through:
 ```{r central.ft, echo=TRUE}
@@ -445,9 +442,9 @@ ggplot(data.ft.age) +
 
 
 #### Radial plot
-The radial plot (Galbraith, 1988, 1990) is a graphical device that was specifically designed to display heteroscedastic data.
+The radial plot (*Galbraith, 1988, 1990*) is a graphical device that was specifically designed to display heteroscedastic data.
 
-These dates can be more easily visualised by drawing a radial scale at some convenient distance from the origin and annotating it with labelled ticks at the appropriate angles. While the angular position of each data point represents the date, its horizontal distance from the origin is proportional to the precision. Imprecise measurements plot on the left hand side of the radial plot, whereas precise age determinations are found further towards the right. Thus, radial plots allow the observer to assess both the magnitude and the precision of quantitative data in one glance.
+These dates can be more easily visualized by drawing a radial scale at some convenient distance from the origin and annotating it with labelled ticks at the appropriate angles. While the angular position of each data point represents the date, its horizontal distance from the origin is proportional to the precision. Imprecise measurements plot on the left hand side of the radial plot, whereas precise age determinations are found further towards the right. Thus, radial plots allow the observer to assess both the magnitude and the precision of quantitative data in one glance.
 
 ```{r radial, echo=TRUE}
 # ?IsoplotR::radialplot()
@@ -577,7 +574,6 @@ IsoplotR::helioplot(
 
 
 ### Doube-dating
-
 ```{r dd, echo=TRUE}
 dunn.meta <- read_excel("Data/dunn2017.xlsx", sheet = "meta") %>%
   tidyr::separate(col = Age.range, into = c("DA.min", "DA.max"), sep = "–", remove = FALSE, convert = TRUE)
@@ -628,6 +624,8 @@ plot.upb <- ggplot(dunn, aes(Z.UPb.Age, fill = Z.Signal)) +
   )
 ```
 
+#### Composite plot
+To combine and arrange several plots into one figure, the package *patchwork* provides simple syntax: we just add the plots with `+`: 
 ```{r double, echo=TRUE, warning=FALSE, message=FALSE}
 # equire(patchwork) # multi-plot arrangements
 plot.upb + plot_spacer() + plotxy + plot.ft +
@@ -638,7 +636,11 @@ plot.upb + plot_spacer() + plotxy + plot.ft +
     caption = "Data from Dunn et al. 2017"
   )
 ```
-Lag-time
+
+Notice that `plot_spacer()` adds a blank space.
+`plot_layout()` specifies some arrangement options, such as the number of columns (`ncol`), the relative heights and weights of the rows and columns. `guides = "collect"` brings all of the individual legends of each plot together
+
+#### Lag-time diagram
 ```{r lag, warning=FALSE, message=FALSE, echo=TRUE}
 ggplot(dunn %>% filter(DA > 0.3), aes(x = Z.FT.Age, y = DA, color = Sample)) +
   geom_abline(slope = -1, intercept = seq(0, 300, 5), color = "gray") +
@@ -664,7 +666,7 @@ IsoplotR
 
 Statistics for geochronology
 
--Vermeesch, P. (2012). On the visualisation of detrital age distributions. Chemical Geology, 312–313, 190–194. https://doi.org/10.1016/j.chemgeo.2012.04.021
+- Vermeesch, P. (2012). On the visualisation of detrital age distributions. Chemical Geology, 312–313, 190–194. https://doi.org/10.1016/j.chemgeo.2012.04.021
 - Vermeesch, P. (2013). Multi-sample comparison of detrital age distributions. Chemical Geology, 341, 140–146. https://doi.org/10.1016/j.chemgeo.2013.01.010
 - Vermeesch, P. (2017). Statistics for LA-ICP-MS based fission track dating. Chemical Geology, 456, 19–27. https://doi.org/https://doi.org/10.1016/j.chemgeo.2017.03.002
 - Vermeesch, P. (2019). Statistics for Fission-Track Thermochronology. In M. G. Malusà & P. G. Fitzgerald (Eds.), Fission-Track Thermochronology and its Application to Geology (pp. 109–122). Cham: Springer Textbooks in Earth Sciences, Geography and Environment. https://doi.org/10.1007/978-3-319-89421-8_6

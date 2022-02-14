@@ -285,7 +285,7 @@ c3 <- cube(3)
 
 - **R for Data Science**
 written by Hadley Wickham -- the ....
-This **free** book will teach you how to do data science with R: You’ll learn how to get your data into R, get it into the most useful structure, transform it, visualise it and model it.
+This **free** book will teach you how to do data science with R: You’ll learn how to get your data into R, get it into the most useful structure, transform it, visualize it and model it.
 https://r4ds.had.co.nz/
 
 - **Cheatsheets**
@@ -305,7 +305,7 @@ https://www.r-bloggers.com/
 Geochemistry
 
 - [`rgr`: Applied Geochemistry EDA (by Geological Survey of Canada (GSC))](https://cran.r-project.org/web/packages/rgr/rgr.pdf):
-Geological Survey of Canada (GSC) functions for exploratory data analysis with applied geochemical data, with special application to the estimation of background ranges and identification of outliers, 'anomalies', to support mineral exploration and environmental studies. Additional functions are provided to support analytical data QA/QC, ANOVA for investigations of field sampling and analytical variability, and utility tasks. NOTE: function caplot() for concentration-area plots employs package 'akima', however, 'akima' is only licensed for not-for-profit use. Therefore, not-for-profit users of 'rgr' will have to independently make package 'akima' available through library(....); and use of function caplot() by for-profit users will fail.
+Geological Survey of Canada (GSC) functions for exploratory data analysis with applied geochemical data, with special application to the estimation of background ranges and identification of outliers, 'anomalies', to support mineral exploration and environmental studies. Additional functions are provided to support analytical data QA/QC, ANOVA for investigations of field sampling and analytical variability, and utility tasks.
 `install.packages(rgr)`
 
 - [`gmGeostats`: Geostatistics for Compositional Analysis](https://cran.r-project.org/web/packages/gmGeostats/vignettes/gmGeostats.html):
@@ -342,7 +342,7 @@ Multivariable Geostatistics
 - [`gstat`: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation](https://r-spatial.github.io/gstat/)
 Spatial and spatio-temporal geostatistical modelling, prediction and simulation (e.g. interpolation, krige, variograms)
 - [`gear`]()  Geostatistical analysis in R
-- [`georob`: Robust Geostatistical Analysis of Spatial Data](https://cran.r-project.org/web/packages/georob/vignettes/georob_vignette.pdf): Provides functions for efficiently fitting linear models with spatially correlated errors by robust and Gaussian (Restricted) Maximum Likelihood and for computing robust and customary point and block external-drift Kriging predictions, along with utility functions for variogram modelling in ad hoc geostatistical analyses, model building, model evaluation by cross-validation, (conditional) simulation of Gaussian processes, unbiased back-transformation of Kriging predictions of log-transformed data.
+- [`georob`: Robust Geostatistical Analysis of Spatial Data](https://cran.r-project.org/web/packages/georob/vignettes/georob_vignette.pdf): Provides functions for efficiently fitting linear models with spatially correlated errors by robust and Gaussian (Restricted) Maximum Likelihood and for computing robust and customary point and block external-drift Kriging predictions, along with utility functions for variogram modelling in ad hoc geo-statistical analyses, model building, model evaluation by cross-validation, (conditional) simulation of Gaussian processes, unbiased back-transformation of Kriging predictions of log-transformed data.
 
 Remote Sensing 
 
