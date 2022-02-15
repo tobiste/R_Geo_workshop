@@ -197,6 +197,6 @@ greatcircle_distance <- function(a, b) {
 #' @export
 deg_2_km <- function(x, start, end) {
   distance.km <- greatcircle_distance(start, end)
-  scales::rescale(x, to = c(0, distance.km)
+  scales::rescale(x, to = c(0, distance.km))
 }
 
