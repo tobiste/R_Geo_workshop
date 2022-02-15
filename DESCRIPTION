@@ -10,10 +10,9 @@ Depends:
     R (>= 3.5.0)
 Imports: 
     dplyr,
-    pracma,
     raster,
     readxl,
-    rgeos,
+    scales,
     sp,
     stringr
 Suggests: 

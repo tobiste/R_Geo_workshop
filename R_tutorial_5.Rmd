@@ -575,7 +575,7 @@ swath.list <- swathR(
 )
 ```
 
-The function returns a list of the lines coordinates, some statistics, and the elevation data along the lines. I coded a function `swathR_profile`  that extracts the swath profile (i.e. the elevation data along the center line, the minimum and maximum elevation within the swath) from this list. 
+The function returns a list of the lines coordinates, some statistics, and the elevation data along the lines. I coded a function `swathR_profile` that extracts the swath profile (i.e. the elevation data along the center line, the minimum and maximum elevation within the swath) from this list. 
 
 ```{r extract_swath, warning=FALSE, message=FALSE, echo=TRUE}
 swath.profile <- swath_profile(swath.list)
@@ -604,19 +604,13 @@ ggplot(swath.profile, aes(distance, elevation)) +
 
   # elevtion along the center line
   geom_line() +
-  labs(title = "Swath profile", x = "Distance (km)", y = "Elevation (m)") +
+  labs(title = "Swath profile", x = "Distance (degree)", y = "Elevation (m)") +
   theme_bw()
 ```
 
-Because our input data is in the geographical coordinate system, the distances are given in degrees. 
-You can use my function `haversine()` to get the distance between two locations on earth:
+Because our input data is in the geographical coordinate system, the distances are given in degrees. You can use my function `greatcircle_distance()` to get the distances in km along the line:
 ```{r orthodrome, echo=TRUE}
-distance.km <- greatcircle_distance(line.pts[1, ], line.pts[2, ])
-```
-
-Next, we scale the original distance values (in degree) to values ranging from 0 to the just claculated distance in km:
-```{r swath.resc, echo=TRUE}
-swath.profile$distance.km <- scales::rescale(swath.profile$distance, to = c(0, distance.km))
+swath.profile$distance.km <- deg_2_km(swath.profile$distance, line.pts[1, ], line.pts[2, ]) %>% 
 ```
 
 Now we can set up the profile plot ...

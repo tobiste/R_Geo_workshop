@@ -14,7 +14,7 @@ end point of the baseline; each point in one row
 \item{column 2}{ycoordinates}
 }}
 
-\item{raster}{raster file (loaded with \code{raster()} from package 'raster')}
+\item{raster}{raster file (loaded with \code{\link[raster:raster]{raster::raster()}})}
 
 \item{k}{integer; number of lines on each side of the baseline}
 
@@ -23,14 +23,14 @@ end point of the baseline; each point in one row
 \item{crs}{string; CRS}
 
 \item{method}{string; method for extraction of raw data, see
-\code{extract()} from package 'raster': default value: 'bilinear'}
+\code{\link[raster:extract]{raster::extract()}}: default value: "bilinear"}
 }
 \description{
 Calculate swath-profile values perpendicular to a straight baseline. The
 baseline is generated between two user-defined points (X|Y), see argument
-\code{'coords'}. The distance between samples and the number of samples can be
-specified, see arguments \code{'k'} and \code{'dist'}. Values of the swath-profile are
-extracted from a given raster file, see argument \code{'raster'}. CRS of raster
+\code{coords}. The distance between samples and the number of samples can be
+specified, see arguments \code{k} and \code{dist}. Values of the swath-profile are
+extracted from a given raster file, see argument \code{raster}. CRS of raster
 and points have to be the same.
 }
 \author{

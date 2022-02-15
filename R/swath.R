@@ -2,9 +2,9 @@
 #' @author V. Haburaj
 #' @description Calculate swath-profile values perpendicular to a straight baseline. The
 #' baseline is generated between two user-defined points (X|Y), see argument
-#' \code{'coords'}. The distance between samples and the number of samples can be
-#' specified, see arguments \code{'k'} and \code{'dist'}. Values of the swath-profile are
-#' extracted from a given raster file, see argument \code{'raster'}. CRS of raster
+#' \code{coords}. The distance between samples and the number of samples can be
+#' specified, see arguments \code{k} and \code{dist}. Values of the swath-profile are
+#' extracted from a given raster file, see argument \code{raster}. CRS of raster
 #' and points have to be the same.
 #' @param coords matrix(ncol=2, nrow=2) with x and y coordinates of beginning and
 #' end point of the baseline; each point in one row
@@ -12,20 +12,16 @@
 #'   \item{column 1}{xcoordinates}
 #'   \item{column 2}{ycoordinates}
 #' }
-#' @param raster raster file (loaded with \code{raster()} from package 'raster')
+#' @param raster raster file (loaded with [raster::raster()])
 #' @param k integer; number of lines on each side of the baseline
 #' @param dist numeric; distance between lines
 #' @param crs string; CRS
 #' @param method string; method for extraction of raw data, see
-#' \code{extract()} from package 'raster': default value: 'bilinear'
-#' @import sp
-#' @import rgeos
-#' @import raster
+#' [raster::extract()]: default value: "bilinear"
+#' @importFrom sp SpatialPoints CRS
+#' @importFrom raster extract spLines
 #' @export
 swathR <- function(coords, raster, k, dist, crs, method) {
-  require(sp)
-  require(rgeos)
-  require(raster)
   message("Initializing ...")
   # set default method:
   if (missing(method)) {
@@ -130,7 +126,7 @@ swathR <- function(coords, raster, k, dist, crs, method) {
 #'
 #' @param x list. an return object from \code{swathR}
 #' @return data.frame
-#' @import dplyr
+#' @importFrom dplyr "%>%" c_across rowwise ungroup mutate
 #' @export
 swath_profile <- function(x) {
   elevs <- c()
@@ -158,3 +154,49 @@ swath_profile <- function(x) {
   names(elevs.df) <- c("distance", "elevation", "min", "max")
   return(elevs.df)
 }
+
+#' @title Distance
+#' @description This uses the **haversine** formula to calculate the great-circle
+#' distance between two points – that is, the shortest distance over the earth’s
+#' surface – giving an ‘as-the-crow-flies’ distance between the points
+#' (ignoring any hills they fly over, of course!).
+#' @param a lon, lat coordinate of point 1
+#' @param b lon, lat coordinate of point 2
+#' @return distance in km
+#' @export
+#' @examples
+#' berlin <- c(52.517, 13.4)
+#' tokyo <- c(35.7, 139.767)
+#' haversine(berlin, tokyo)
+greatcircle_distance <- function(a, b) {
+  r <- 6371.00887714 # km
+
+  # convert deg into rad
+  phi1 <- pi/180 * a[2]
+  phi2 <- pi/180 * b[2]
+  phi.delta <- (b[2] - a[2]) * (pi/180)
+  lambda.delta <- (b[1] - a[1]) * (pi/180)
+
+  a <- sin(phi.delta/2) * sin(phi.delta/2) +
+    cos(phi1) * cos(phi2) *
+    sin(lambda.delta/2) * sin(lambda.delta/2)
+
+  c <- 2 * atan2(sqrt(a), sqrt(1-a))
+
+  r * c
+}
+
+#' Distances in degree to kilometer
+#'
+#' Converts distances along a great circle path from degree into kilometer
+#'
+#' @param x numeric vector of distances in degree
+#' @param start,end start and end point as vectors with lon, lat
+#' @return numeric vector
+#' @importFrom  scales rescale
+#' @export
+deg_2_km <- function(x, start, end) {
+  distance.km <- greatcircle_distance(start, end)
+  distance.km <- scales::rescale(x, to = c(0, distance.km))
+}
+
