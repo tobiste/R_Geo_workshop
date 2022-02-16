@@ -287,7 +287,7 @@ c3 <- cube(3)
 # Useful resources
 
 - **R for Data Science**
-written by Hadley Wickham -- the ....
+written by Hadley Wickham -- the chief scientist of RStudio and many packages.
 This **free** book will teach you how to do data science with R: You’ll learn how to get your data into R, get it into the most useful structure, transform it, visualize it and model it.
 https://r4ds.had.co.nz/
 
