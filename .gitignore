@@ -32,18 +32,14 @@ vignettes/*.pdf
 .zip
 .html
 .pdf
+# specific files
+*.zip
+*.html
+*.pdf
 R_tutorial_1.R
 R_tutorial_2.R
 R_tutorial_3.R
 R_tutorial_4.R
 R_tutorial_5.R
 73a24760
-R-Workshop_material.zip
-R_tutorial_1.html
-R_tutorial_1.pdf
-R_tutorial_2.pdf
-R_tutorial_3.html
-R_tutorial_3.pdf
-R_tutorial_4.html
-R_tutorial_5.html
-R_tutorial_5.pdf
+
