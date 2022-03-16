@@ -238,7 +238,7 @@ install.packages("remotes") # install package 'remotes' from CRAN
 ```
 
 ```{r pkg3, eval=FALSE, include=TRUE, echo=TRUE}
-remotes::install_github("tobiste/PlateTectonicStressR") # install package 'PlateTectonicStressR' from my repositor on Github
+remotes::install_github("tobiste/tectonicr") # install package 'tectonicr' from my repository on Github
 ```
 
 You only have to install the package once. After that you have to load the the package.
