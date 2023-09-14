@@ -21,7 +21,7 @@ clean_header <- function(x) {
 #' "Ar-Ar", "Fission Track", "(U-Th)/He", and "U-Pb"
 #' @return list
 #' @export
-#' @importFrom dplyr "%>%" filter select
+#' @importFrom dplyr filter select
 #' @importFrom stringr str_replace
 #' @importFrom readxl read_excel
 read_geochron <- function(path, method = "U-Pb") {
@@ -60,9 +60,9 @@ read_geochron <- function(path, method = "U-Pb") {
     meta.header <- colnames(meta0)
     colnames(meta0) <- clean_header(colnames(meta0))
 
-    meta <- meta0 %>%
-      filter(!is.na(Country)) %>%
-      filter(Unique_ID != "Unique ID") %>%
+    meta <- meta0 |>
+      filter(!is.na(Country)) |>
+      filter(Unique_ID != "Unique ID") |>
       mutate(
         Longitude = as.numeric(Longitude),
         Latitude = as.numeric(Latitude),
@@ -109,8 +109,8 @@ read_geochron <- function(path, method = "U-Pb") {
         isotopes <- rbind(isotopes, isotopes.i)
       }
     }
-    isotopes <- isotopes %>%
-      dplyr::select(na.omit(isotopes.header)) %>%
+    isotopes <- isotopes |>
+      dplyr::select(na.omit(isotopes.header)) |>
       mutate(
         `206.238_Age` = as.numeric(`206.238_Age`),
         `206.238_Age_Error` = as.numeric(`206.238_Age_Error`),

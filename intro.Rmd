@@ -1,0 +1,133 @@
+---
+title: "Freiberg short course -- Exploration of earth science data"
+author: "Tobias Stephan"
+date: "9 - 13 October 2023"
+output:
+  # word_document:
+  #   toc: no
+  html_document:
+    highlight: tango
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+#subtitle: 0 - Overview
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+---
+
+## Context
+
+### 
+
+Earth science data are complex because the research relies on indirect observations of geological processes that  usually span several millions of years. Some geologic systems exhibit complex behavior including earthquakes and tectonic systems.
+Analyzing such tectonic processes often requires the integration of geological observation of all sorts, geochemical and geophysical interpretation, as well as experimental and numerical modelling results. 
+The combination of these disciplines usually provides qualitative and quantitative information of depth, pressure, temperature, structure, kinematics, time and many more. 
+The data, however, 
+
+- have fractal geometries (i.e. they cover various scales, e.g. from the microscale to the plate-scale or planet-scale),
+- have (large) uncertainties and non-gaussian distributions,
+- include strongly independent variables that have multidimensional (and non-linear) relationships,
+- are the result of the superposition of an unknown number of processes, 
+- might by affected by angular and area distortions due to the spherical shape of the Earth,
+- are a function of time (young vs. old, fast ($< 10^{-8}$ yrs) vs. slow ($> 10^6$ yrs) processes),
+- ... 
+
+The interpretation of such a complex system is very often too difficult to be described, predicted, and managed. Recent developments in data exploration provide some useful approaches using dimension-reduction methods, graphical visualization to better understand complicated and complex tectonic systems.
+
+
+
+### Audience
+
+This short course is meant for undergraduate and postgraduate students of geology with focus on tectonics, structural geology, economic geology, or geochemistry.
+
+I present a collections of methods that I gathered, learned, or developed during the past years. 
+Those will be useful tips and simple methods to explore, analyse and make sense of (large and complicated) earth science data. 
+
+
+### Skills and concepts that students must have mastered
+<!-- Before doing this, students have already used TWQ to calculate and plot simple PT diagrams. And, they have already used Excel for some chemical calculations.  -->
+It is recommended to bring some programming skills in R or other languages (Python, Matlab, …) albeit I will give a short introduction to using and programming in R.
+
+
+
+## Goals
+### Content/concepts goals for this activity
+After completing this project, students will be able to
+
+1. use R to explore and visualize data
+2. use modern statistical concepts to analyse data
+3. combine various types of geological information for interpretation 
+4. analyse and interpret large geochronology data
+5. understand the concepts of reconstructing (recent and ancient) plate motion 
+6. use GPlates to reconstruct plate motion
+7. interpret orientation data
+8. students may also learn how to make good looking (publication ready) diagrams from computer output
+
+So, students learn lots of skills at the same time. But, an overarching strength of this project is that all the different skill integrate together to produce a final product. 
+
+### Higher order thinking skills goals for this activity
+Because this project involves several different skills, all aimed at the same thing, students learn how to integrate/synthesize knowledge and thinking of different sorts. In this case, the whole is much more than the individual parts. They also must compare different approaches to problem solving, as they develop their computing skills. (And, perhaps, their artistic skills.)
+
+They also must interpret the results of their model calculations and determine what the implications are for real world rocks. 
+
+### Other skills goals for this activity
+Students learn about using computers for modeling, and about data and file manipulation. 
+
+### Description of the activity/assignment
+several subsection (each day) we will introduce the concepts and the methods... After that, the students will work in groups on some selected datasets. 
+This multidimensional project involves several aspects:
+
+1. students learn how to use R (or other computer languageus) for statistical analysis and for visualization of geodata (GIS)
+2. students learn how to  analyse large geochronological data
+3. students will learn about the conseqeuences of a spherical earth for geometricaal and orientation analysis
+4. students will analyse the stress and strain fields
+5. students will also learn how to produce quickly good-looking (publication ready) diagrams
+
+So, students learn lots of skills at the same time. But, an overarching strength of this project is that all the different skill integrate together to produce a final product. 
+
+
+### Determining whether students have met the goals
+Evaluation is done at several levels:
+
+1. We check the diagrams and other products that students produce to see if they have obtained reasonable results.
+2. We carefully evaluate the interpretations they made to see if they understand their results.
+3. We ask them to explain their results by posing hypothetical questions on exams and quizzes. 
+
+
+## Schedule:
+### 1st Day – Introduction
+
+-	Brief summary of short course
+- Complex and complicated systems, uncertainties and distortions of data
+-	Introduction into R
+    * Use, structure, data types, data import/export
+    * Basic statistics
+    * Plotting in R
+    * GIS compatibility
+
+
+### 2nd and 3rd day --  Geochronology (provenance analysis)
+- Introducing provenance analysis using geochronology (detrital zircon U-Pb)
+- How to analyse large zircon U-Pb datasets?
+- how to use R (e.g. *IsoplotR*)
+- (3rd day:) Students will apply the software on selected datasets and present the results + interpretation
+
+### 4rd and 5th day – Structural geology / tectonics (**in collab with Uwe?**)
+- Geometrical consequences of a spherical earth for earth science data
+- Plate motion, history, concepts, geometry 
+- *GPlates*
+    – reconstructing paleogeography and visualizing plate motion
+    - how to use the software
+    - examples
+- My R package *rectonicr* - stress-strain analysis using plate motion
+    - reprojecting data into the reference frame of plate motion
+    – stress-strain analysis using plate motion
+    - how to interpret the results
+- (Last day:) Students will apply the software on selected areas and present the results + interpretation
+

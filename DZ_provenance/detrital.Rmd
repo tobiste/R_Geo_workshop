@@ -1,0 +1,211 @@
+---
+title: "Freiberg Short Sourse -- Exploration of Earth Science Data"
+author: "Tobias Stephan"
+date: "9 - 13 October 2023"
+output:
+  # word_document:
+  #   toc: no
+  html_document:
+    highlight: tango
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+subtitle: "Detrital Zircon Provenance Analysis"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+The subjective comparison of individual zircon age
+spectra with each other or with likely source areas is in many cases inadequate, as the pattern may be changed during erosion of the source and transport to the sink and, therefore, the similarity of pattern alone is not always conclusive (e.g. Blatt, 1967; Dickinson & Gehrels, 2009a; Hietpas et al. 2011; Zimmermann et al. 2015).
+
+Some of these problems may be reduced or avoided by using large, compiled datasets and applying quantitative filtering and data evaluation techniques. Statistical data analysis has become possible because of the increasing number of high-quality datasets on the age distribution of detrital zircons.
+
+
+```{r load, message=FALSE, include=TRUE, echo = TRUE}
+library(readxl)
+library(IsoplotR)
+library(provenance)
+library(dplyr)
+library(tidyr)
+library(qpcR)
+library(ggplot2)
+library(patchwork)
+library(factoextra)
+```
+
+## The pre-orogenic detrital zircon record the Variscides
+
+load ages and samples from Stephan et al. (2019)
+```{r import, include=TRUE, echo = TRUE}
+samples_all <- readxl::read_xlsx("Stephan2019_samples.xlsx", skip = 2)
+ages_all <- read_xlsx("Stephan2019_ages.xlsx") |>
+  mutate(Error_percent = Error_2s / Age * 100)
+
+nrow(samples_all)
+```
+
+```{r summary, include=TRUE, echo = TRUE}
+ages_all |>
+  summary()
+```
+
+Filter
+
+1. Pre-orogenic samples (i.e. deposition age of samples older than 400 Ma -- the onset of Variscan orogeny)
+2. Concordant DZ ages (Concordance = 1-Discordance, Discordance filter = [-10%, 20%]))
+3. Most of the Gondwana shelf was delivered by Cadomian detritus (not a diagnostic provenance feature), thus, DZ age >= 700 Ma
+4. Statistical significance: only include samples with >= 30 DZ ages
+
+```{r ages_filter1, include=TRUE, echo = TRUE}
+ages <- ages_all |>
+  filter(
+    Error_2s <= 50,
+    between(Discordance, -10, 20),
+    between(Age, 700, 4500)
+  ) |>
+  dplyr::select(c(Sample, Age, Error_2s)) 
+```
+
+
+samples that do have enough ages to be significant (>=30)
+```{r signif, include=TRUE, echo = TRUE}
+signif_samples <- ages |>
+  group_by(Sample) |>
+  summarise(n = n()) |>
+  filter(n >= 30) |> 
+  pull(Sample)
+
+length(signif_samples)
+```
+
+join filtered age dataset with sample dataset and omit the insignificant samples
+```{r sample_info, warning=FALSE, include=TRUE, echo = TRUE}
+data <- left_join(samples_all, ages, by = "Sample") %>%
+  filter(
+    Sample %in% signif_samples,
+    `Sample age` >= 400
+    ) %>%
+  slice_sample(prop = 1)
+```
+
+For analysis we follow Vermeesch (2013)
+
+Prepare for P. Vermeesch's `provenance` package
+```{r prepare, include=TRUE, echo = TRUE}
+c_ages <- c_error <- c()
+for (i in unique(data$Sample)) {
+  ai <- filter(data, Sample == i)
+  agesi <- c(ai$Age)
+  erri <- c(ai$Error_2s)
+  c_ages <- qpcR:::cbind.na(c_ages, agesi)
+  c_error <- qpcR:::cbind.na(c_error, agesi)
+}
+c_ages <- c_ages[, -1]
+c_error <- c_error[, -1]
+colnames(c_ages) <- colnames(c_error) <- unique(data$Sample)
+
+DZ <- list()
+class(DZ) <- "distributional"
+for (i in 1:ncol(c_ages)) {
+  good <- !is.na(c_ages[, i])
+  if (any(good)) {
+    DZ$x[[colnames(c_ages)[i]]] <- c_ages[good, i]
+  }
+  DZ$err[[colnames(c_ages)[i]]] <- c_error[good, i]
+}
+```
+
+### Quantify the dissimilarities 
+
+Create a **matrix dissimilarity matrix** representing the "distances" between pairs of objects.
+
+Calculate the dissimilarities of each sample pair using the "Wasserstein-2 distance" (Lipp & Vermeesch, 2021, *Geochronology*)
+```{r diss, include=TRUE, echo = TRUE}
+DZ_diss <- provenance::Wasserstein.diss(DZ)
+```
+
+Visualize the dissimilarities matrix:
+```{r diss_plot}
+fviz_dist(DZ_diss) +
+  coord_equal()
+```
+
+### Multidimensional scaling (MDS)
+Multidimensional scaling (**MDS**) is a multivariate data analysis approach that is used to visualize the similarity/dissimilarity between samples by plotting points in two dimensional plots.
+
+MDS returns an optimal solution to represent the data in a lower-dimensional space, where the number of dimensions k is pre-specified by the analyst. For example, choosing `k = 3` optimizes the object locations for a two-dimensional scatter plot.
+
+The MDS algorithm takes as an input data the dissimilarity matrix:
+
+```{r mds, include=TRUE, echo = TRUE}
+DZ_mds <- provenance::MDS(DZ_diss, k = 3)
+plot(DZ_mds)
+```
+
+### Cluster analysis
+Cluster the dissimilarity matrix to group similar samples 
+
+Density-based Spatial Clustering of Applications with Noise (**DBSCAN**)
+
+```{r cluster, include=TRUE, echo = TRUE}
+DZ_clust <- dbscan::dbscan(DZ_diss, eps = 190, minPts = 5)
+DZ_clust
+```
+
+### Plot the final results
+```{r join, warning=FALSE, message=FALSE, include=TRUE, echo = TRUE}
+DZ_res <- DZ_mds$points |>
+  as_tibble() |>
+  mutate(
+    Sample = rownames(DZ_mds$points),
+    cluster = DZ_clust$cluster,
+    cluster = as.factor(ifelse(cluster == 0, NA, cluster))
+  ) |>
+  rename(Dim1 = V1, Dim2 = V2, Dim3 = V3) |>
+  left_join(samples_all)
+```
+
+Plot the MDS dimension `Dim1`, `Dim2`, and `Dim3` as biplots:
+```{r mds_plot, include=TRUE, echo = TRUE}
+plot1 <- ggplot(data = DZ_res, aes(Dim1, Dim2, label = Location, color = cluster)) + # Dim1 vs Dim 2
+  geom_text(size = 3)
+plot2 <- ggplot(data = DZ_res, aes(Dim3, Dim2, label = Location, color = cluster)) + # Dim3 vs Dim 2
+  geom_text(size = 3)
+plot3 <- ggplot(data = DZ_res, aes(Dim1, Dim3, label = Location, color = cluster)) + # Dim1 vs Dim 3
+  geom_text(size = 3)
+
+# combine the three plots into one 
+plot1 + plot2 + plot3 + guide_area() +
+  plot_layout(guides = "collect") & 
+  theme_bw()
+```
+
+Show the spatial distribution of the DZ clusters
+```{r map, warning=FALSE, message=FALSE, include=TRUE, echo = TRUE}
+library(rnaturalearth)
+coastlines <- rnaturalearth::ne_coastline(returnclass = "sf")
+states <- rnaturalearth::ne_countries(returnclass = "sf")
+
+DZ_res |>
+  sf::st_as_sf(coords = c("Long WGS", "Lat WGS"), crs = "WGS84", remove = FALSE) |>
+  ggplot() +
+  geom_sf(data = states, fill = NA, lty = 2, color = "lightgrey", inherit.aes = FALSE) +
+  geom_sf(data = coastlines, inherit.aes = FALSE) +
+  geom_sf(aes(color = cluster)) +
+  coord_sf(xlim = c(-15, 40), ylim = c(20, 65), crs = "EPSG:3035", default_crs = "WGS84")
+```
+
+Show the age spectra of the DZ cluster using KDE density diagrams (Vermeesch, 2012)
+```{r kde, warning=FALSE, message=FALSE, include=TRUE, echo = TRUE}
+left_join(ages, DZ_res) |> # merge the ages dataset with the statistical results
+  filter(!is.na(cluster)) |> # remove the statistical outliers
+  ggplot() +
+  geom_density(aes(Age, fill = cluster), bw = 30) + # density of ages for binwidth "bw"
+  facet_wrap(vars(cluster), scales = "free_y") + # create a plot for each unique feature in "cluster"
+  coord_cartesian(xlim = c(700, 4000)) # limits of the x axis
+```

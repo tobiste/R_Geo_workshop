@@ -21,16 +21,14 @@
 #' @importFrom sp SpatialPoints CRS
 #' @importFrom raster extract spLines
 #' @export
-swathR <- function(coords, raster, k, dist, crs, method) {
+swathR <- function(coords, raster, k = 1, dist = .2, crs = "+proj=longlat", method = "bilinear") {
   message("Initializing ...")
   # set default method:
-  if (missing(method)) {
-    method <- "bilinear"
-  }
+
   # create SpatialPoints from coords:
-  spt <- SpatialPoints(coords, proj4string = CRS(crs))
+  spt <- sp::SpatialPoints(coords, proj4string = sp::CRS(crs))
   # get slope of baseline:
-  m <- (ymin(spt[1]) - ymin(spt[2])) / (xmin(spt[1]) - xmin(spt[2]))
+  m <- (raster::ymin(spt[1]) - raster::ymin(spt[2])) / (raster::xmin(spt[1]) - raster::xmin(spt[2]))
   # get slope of normal function:
   m1 <- -(1 / m)
   # get slope-angle from slope:
@@ -56,7 +54,7 @@ swathR <- function(coords, raster, k, dist, crs, method) {
   # list for spatial lines:
   allLines <- list()
   # add baseline:
-  allLines[[k + 1]] <- spLines(coords, crs = crs)
+  allLines[[k + 1]] <- raster::spLines(coords, crs = crs)
   # set distance for baseline:
   swath[k + 1, 1] <- 0
   # generate k lines parallel to baseline:
@@ -67,7 +65,7 @@ swathR <- function(coords, raster, k, dist, crs, method) {
     cn[1, ] <- cbind(coords[1, 1] - (deltax * n), coords[1, 2] - (deltay * n))
     cn[2, ] <- cbind(coords[2, 1] - (deltax * n), coords[2, 2] - (deltay * n))
     # line between points:
-    allLines[[k + 1 - n]] <- spLines(cn, crs = crs)
+    allLines[[k + 1 - n]] <- raster::spLines(cn, crs = crs)
     # distance value:
     swath[k + 1 - n, 1] <- -1 * n * dist
     # ABOVE BASELINE:
@@ -76,17 +74,15 @@ swathR <- function(coords, raster, k, dist, crs, method) {
     cn[1, ] <- cbind(coords[1, 1] + (deltax * n), coords[1, 2] + (deltay * n))
     cn[2, ] <- cbind(coords[2, 1] + (deltax * n), coords[2, 2] + (deltay * n))
     # line between points:
-    allLines[[k + n + 1]] <- spLines(cn, crs = crs)
+    allLines[[k + n + 1]] <- raster::spLines(cn, crs = crs)
     # distance value:
     swath[k + n + 1, 1] <- n * dist
   }
-  gc(verbose = FALSE)
   # get raw data:
   message("Extracting raw data (this may take some time) ...")
   raw.data <- sapply(allLines, FUN = function(x) {
-    extract(raster, x, method = method)
+    raster::extract(raster, x, method = method)
   })
-  gc(verbose = FALSE)
   # generalise data:
   message("Generalising data ...")
   swath[, 2] <- sapply(raw.data, function(x) {
@@ -114,7 +110,6 @@ swathR <- function(coords, raster, k, dist, crs, method) {
   results <- list(swath = swath, data = raw.data, lines = allLines)
   message("Operation finished successfully!")
   message('Structure of results (list): "swath": swath profile data (matrix, numeric), "data": raw data (list, numeric), "lines": generated lines (list, spLines)')
-  gc(verbose = FALSE)
   return(results)
 }
 
@@ -126,7 +121,7 @@ swathR <- function(coords, raster, k, dist, crs, method) {
 #'
 #' @param x list. an return object from \code{swathR}
 #' @return data.frame
-#' @importFrom dplyr "%>%" c_across rowwise ungroup mutate
+#' @importFrom dplyr c_across rowwise ungroup mutate
 #' @export
 swath_profile <- function(x) {
   elevs <- c()
@@ -137,13 +132,13 @@ swath_profile <- function(x) {
   elevs.df <- as.data.frame(elevs)
   names(elevs.df) <- seq_along(x$data)
 
-  elevs.df <- elevs.df %>%
-    rowwise() %>%
-    mutate(
-      min = min(c_across()),
-      max = max(c_across())
+  elevs.df <- elevs.df |>
+    dplyr::rowwise()  |>
+    dplyr::mutate(
+      min = min(dplyr::c_across()),
+      max = max(dplyr::c_across())
     ) %>%
-    ungroup()
+    dplyr::ungroup()
   elevs.df <-
     data.frame(
       seq_along(elevs.df$min),
@@ -193,7 +188,7 @@ greatcircle_distance <- function(a, b) {
 #' @param x numeric vector of distances in degree
 #' @param start,end start and end point as vectors with lon, lat
 #' @return numeric vector
-#' @importFrom  scales rescale
+#' @importFrom scales rescale
 #' @export
 deg_2_km <- function(x, start, end) {
   distance.km <- greatcircle_distance(start, end)
