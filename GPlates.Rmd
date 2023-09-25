@@ -1,0 +1,105 @@
+---
+title: "GPlates"
+author: "Tobias Stephan"
+date: "09/10/2023"
+output:
+  # pdf_document:
+  #   toc: yes
+  #   toc_depth: '3'
+  html_document:
+    highlight: tango
+    theme: united
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+subtitle: 1 - Introduction
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# GPlates
+
+`GPlates` is a plate tectonics program developed by The GPlates Development Team, formerly EarthByte Group (University of Sydney). 
+The program offers a combination of interactive plate-tectonic reconstructions, geographic information system (GIS) functionality and raster data visualization. 
+The user can manipulate reconstructions of geological and paleogeographic features through geological time.
+
+
+Download the desktop software: https://www.gplates.org/download/
+
+Tutorial: https://tutorials.gplates.org/
+
+
+## Definitions
+
+**Finite rotation** rotation between within a time range
+
+**Stage rotation** a finite rotation
+
+**(Total) reconstruction rotation** a finite rotation from 0 to a given time
+
+> Be careful: In the software and documentation of `GPlates` the term "finite rotation" is used synonymously with "reconstruction rotation"
+
+**Relative motion** The (absolute) motion of a plate observed from another plate.
+
+**Absolute motion** The motion of a plate *relative* to something fixed, i.e. a reference frame (e.g. hot-spot-reference frame - fixed mantle, celestial reference frame - fixed quasars, ...)
+
+**Anchored plate** fixed plate or the reference frame
+
+**Equivalent rotation** a relative motion A-B observed from a third (anchored) plate C, i.e. the transformation of A-B to A-C (when C-B is known)
+
+
+## Reconstructions
+
+Plate reconstructions in `GPlates` require a set of instructions, stored in the rotation file (.rot), that allow the software to rotate and move geometries through time. Each motion is defined by a **finite rotation**; each line in the rotation file contains a Plate ID, an assigned time, Euler rotation and relative Plate ID. Such a framework allows plate motion models to be hierarchically structured, with relative plate motions embedded in an absolute reference frame – where Africa tends to be the trunk of the hierarchy in the Earthbyte models. 
+The resulting absolute plate motions are a cumulative motion of all plates higher up in the rotation hierarchy. 
+
+### Basics of a rotation file
+The columns are space or tab-delimited. `GPlates` treats anything following the exclamation mark (“!”) as a comment, and ignores any lines that have a Plate ID of 999. This is a legacy code from the PLATES rotation scheme where lines beginning with 999 are ignored. This will become useful, as it will be necessary to “comment out” particular lines in the rotation file. 
+
+The extracted portion of the rotation file from Kroner et al. (2021), *GSA* indicates that there is no relative motion between African part of Gondwana (AFR) and the East European Craton (EEC) during the 0 to 170 Ma time interval, while there is some motion between 170 and 530 Ma. If consecutive lines in a rotation file have the same Euler rotation (i.e., columns 3 to 5), it means that there has been no relative motion between the plate pairs during that time interval (e.g. between 530 and 540 Ma. 
+
+Plate ID | Age (Ma) | Lat (degrees) | Lon (degrees) | Angle of rotation (degrees) | Relative Plate ID | Comment
+--- | ---  | --------- | --------- | --------- | --- | -------------------------- 
+*integer* | *float* | *float* |  *float* |  *float* |  *integer* |  *character*
+701 | 0 | 90 | 0 | 0 | 301 | !AFR relative to EEC
+701 | 170 | 50.2952 | 0.1042 | -54.6214 | 301 | !Greiner and Neugebauer 2013
+701 | 250 | 48.2195 | 1.7134 | -62.924 | 301 | !AFR-EEC
+701 | 300 | -41.9521 | -176.4475 | 43.74 | 301 | !AFR-EEC NT-rot Kroner et al. 2016
+701 | 370 | -39.6756 | 167.2003 | 28.5389 | 301 | !AFR-EEC PT-rot Kroner et al. 2016
+701 | 430 | -45.6905 | 143.7738 | 41.6836 | 301 | !AFR-EEC nach PanthalassaII
+701 | 500 | -25.0716 | 163.5821 | 122.1799 | 301 | !AFR-EEC Rheic II
+701 | 530 | -27.6943 | 147.0194 | 154.8927 | 301 | !AFR-EEC Rheic I
+701 | 540 | -27.6943 | 147.0194 | 154.8927 | 301 | !AFR-EEC
+702 | 0 | 90 | 0 | 0 | 301 | !Madagascar relative o EEC
+702 | 250 | 49.6741 | 24.3398 | -60.3961 | 301 | !MAD-EEC
+... | ... | ... | ... | ... | ... | ...
+
+
+> How to read: 
+>
+> [Euler rotation of Plate ID from *0* Ma to Age] + [rotation of Relative plate ID from *0* to Age]
+>
+> Remember, in `GPlates` deals with reconstruction rotations, and not stage rotations. However, stage rotations can be exported from GPlates.
+
+
+### Crossover
+The complicating factor is a scenario where one tectonic element changes from moving relative to one plate to moving with another. This is particularly the case when continental fragments collide and accrete, and their motion “crosses-over” to move relative to another plate. In such situations, the rotation file must contain two entries for a single time. Both entries are equivalent reconstruction rotations with different Relative Plate IDs.
+
+In our example, Armorica (AM) is part of the African part of Gondwana (AFR) prior to 370 Ma. Then it collides with EEC. Thus, from now on AM moves relatively to EEC. The accretion is completed at 300 Ma and there is no relative movement between AM and EEC.
+
+Plate ID | Age | Lat | Lon | Angle of rotation | Relative Plate ID | Comment
+--- | ---  | --------- | --------- | --------- | --- | -------------------------- 
+391 | 0 | 90 | 0 | 0 | 301 | !Armorica relative to EEC
+391 | 250 | 90 | 0 | 0 | 301|  !AM-EEC
+391 | 300 | 90 | 0 | 0 | 301 | !AM-EEC
+391 | 310 | 10.2617 | 104.5704 | 1.0037 | 301 | !100km N-S shortening Culm-Basin
+391 | 340 | 24.9935 | 75.6779 | 1.4332 | 301 | !50km NW-SE shortening Devonian-Basins
+391 | 370 | 32.8791 | 113.1502 | 3.3729 | 301 | !Lizard thrusting
+391 | 370 | -45.5875 | 171.868 | -28.623 | 701 | !**AM-AFR crossover**
+391 | 550 | -45.5875 | 171.868 | -28.623 | 701 | !AM-AFR
+
+
