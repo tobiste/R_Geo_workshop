@@ -1,6 +1,6 @@
 ---
-title: "Programming with R --- A Beginners’ Guide for Geoscientists"
-author: "Tobi"
+title: "Analyzing the horizontal orientation of the crustal stress adjacent to plate boundaries"
+author: "Tobias Stephan"
 date: "2023-08-06"
 output:
   html_document:
@@ -11,7 +11,7 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: yes
-subtitle: 1 - Introduction
+#subtitle: 1 - Introduction
 ---
 
 ```{r setup, include=FALSE}
@@ -23,19 +23,170 @@ library(ggplot2)
 library(patchwork)
 ```
 
-## R Markdown
+## Some terms and definitions
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Angular data
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+Directional data (0-360$^{\circ}$)
+e.g. dip direction, paleocurrent direction, ...
 
-## Slide with Bullets
+Axial data (0-180$^{\circ}$)
+e.g. strike, trend, ...
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+homogeneous or uniform stress field = all angles have similar trends, i.e. sampled from a uniform distribution with low dispersion
 
-## Slide with R Output
+> Angles can be expressed either in radians or degrees
+$1 rad =  1^{\circ} * \frac{\pi}{180^{\circ}}$
+
+
+## Problem 1: Circular statistics for angular data
+
+- Angular data are periodical, linear data are not.
+- Angular data are distributed along a circle $\theta \subset \mathbb{R}, 0 \leq \theta \leq 2\pi]$ -- linear data are distributed along a line $x \subset \mathbb{R},  -\infty \leq x \leq \infty$
+- requires different mathematics to describe the distribution (e.g. mean and variance):
+
+
+```{r, echo = TRUE}
+x <-  c(1, 359)
+
+mean(x)
+sd(x)
+```
+### The mean direction 
+
+#### Angles to Vectors
+Using trigonometry functions:
+
+\begin{align*}
+x &= \cos{\theta}  / r \\
+y &= \sin{\theta} / r
+\end{align*}
+we get the rectangular coordinates of the vector in the circle of radius $r$ represented by the angle $\theta$. 
+For simplification, $r = 1$.
+
+#### Mean direction $\bar{\theta}$                                                                                                                          
+The mean direction \bar{\theta} of a set of angles  $\theta_1, ..., \theta_n$ is given by the resultant vector $R$ spanned by all the vectors.
+
+
+Coordinates of resultant vector $R$:
+\begin{align*}
+x_R &= \sum_{i=1}^{n} \cos{\theta_i} \\
+y_R &= \sum_{i=1}^{n} \sin{\theta_i}
+\end{align*}
+
+$n$ is the number of angles
+
+Using trigonometry functions:
+$$\tan{\bar{\theta}} = \frac{y_R}{x_R}$$
+
+#### Variance
+
+Variance is expressed by the length of the mean resultant vector $R$:
+
+Using theorem of Pythagoras:
+$$R = \sqrt{x_R^2 + y_R^2}$$
+
+Length of R depends on **variance** of $\theta_i$ and the number of angles $n$.
+Thus, we "normalize" $R$ by $n$:
+
+$$\bar{R} = \frac{R}{n} = \sqrt{\bar{x_R}^2 + \bar{y_R}^2}$$
+
+$\bar{R}$ has length = 1,  when all angles $\theta_i$ are equal, and length = 0 when, the angle are randomly distributed (along the circumference of the circle).
+Thus, the variance of the angles is:
+
+$$\sigma^2  = 1 - \bar{R}$$
+
+The standard deviation is:
+$$
+\sigma = \sqrt{-2  \log{(1-\sigma^2)}} = \sqrt{-2  \log{\bar{R}}}
+$$
+
+```{r, echo = TRUE}
+circular_mean(x, axial = FALSE)
+circular_sd(x, axial = FALSE)
+```
+
+#### Normal distribution
+##### (Linear) normal distribution: $f(x | \mu, \sigma)$
+
+```{r normal, echo = TRUE}
+x <- rnorm(1000, mean = 0, sd = 1) # sample from normal distribution
+hist(x, prob = TRUE)
+lines(density(x), col = "red")
+```
+```{r}
+mean(x)
+sd(x)
+```
+
+##### (circular normal distribution ("von Mises Distribution"): $f(\theta | \mu, \kappa)$
+
+$\kappa$ is the concentration parameter, ($\kappa > 0$, low values = random, high values = high concentration). Thus, $\frac{1}{kappa} \sim \sigma^2$.
+
+```{r vonmises, echo = TRUE}
+cols = hcl.colors(6)
+names(cols) <- as.character(c(.1, .5, 1, 2, 4, 8))
+
+theta <- rvm(1000, mean = 180, kappa = 0.1)-180 # sample from von Mises distribution
+plot(theta, dvm(theta, mean = 0, kappa = 8), type = "p", col = cols[as.character(8)])
+
+for(k in c(4, 2, 1, 0.5)){
+theta <- rvm(1000, mean = 180, kappa = k)-180 # sample from von Mises distribution
+lines(theta, dvm(theta, mean = 0, kappa = k), type = "p", col = cols[as.character(k)])
+}
+```
+
+Better as rose diagram:
+```{r vm_roses, echo = TRUE}
+par(mfrow = c(2, 3))
+for(k in c(0.1, .5, 1, 2, 4, 8)){
+  rose(rvm(1000, mean = 0, kappa = k), main = paste("k =", k), col = cols[as.character(k)])
+}
+```
+
+
+
+The parameter $\kappa$ is difficult to measure directly, but the concentration of the sample can be estimated from $\bar{R}$ (MLE). `tectonicr:::est.kappa()` estimates the parameter from the sample:
+
+```{r kappa, echo = TRUE}
+tectonicr:::est.kappa(theta)
+```
+
+
+#### Dispersion from an expected value
+The "distance" measurement for two given angles $\theta$ and $\xi$ is the angular distance d:
+
+$$ d(\theta, \xi) = 1 - \cos{\theta - \xi}$$
+The dispersion of angles $\theta_1, ..., \theta_n$ about a given angle $\alpha$ is:
+
+$$D(\alpha) = \frac{1}{n} \sum_{i=1}^{n} d(\theta_i, \alpha)$$  
+```{r dispersion, echo = TRUE}
+theta <- rvm(1000, mean = 45, kappa = 10) # sample from von Mises distribution
+circular_dispersion(theta, 45)
+```
+
+
+> Note that $D(\bar{\theta}) = \sigma^2$
+
+
+
+
+#### Note on axial data
+Axial data only range between 0 and 180$^{\circ}$ (or 0 and $\pi/2$). 
+In order, to use the same measurements as for orientation data, one doubles the angles, calculates the mean, and eventually divides the result by 2.
+
+
+
+
+
+## Problem 2: Geo-Data
+
+Angles are measured from North pole
+
+Angles measured on different geo-locations are affected by distortion
+
+
+### Synthetic dataset
 
 ```{r data, echo = TRUE}
 # Synthetic dataset ####
@@ -47,24 +198,24 @@ mean <- 90
 data_90_0 <- tibble(
   lat = runif(n.data, 80, 90),
   lon = runif(n.data, 0, 360),
-  azi = rvm(n.data, mean = 90, kappa = 100),
+  azi = rvm(n.data, mean = mean, kappa = 10), # sample from von Mises distribution
   prd = mean,
   x = lon,
   y = lat
-) %>%
-  sf::st_as_sf(coords = c("x", "y"), crs = "WGS84") %>%
+) |>
+  sf::st_as_sf(coords = c("x", "y"), crs = "WGS84") |>
   mutate(
     dev = abs(90 - azi),
     cdist = circular_distance(azi, prd)
   )
 ```
 
-## Slide with Plot
 
-```{r stat_funct, echo = TRUE}
+Statistics of our dataset
+```{r stat_funct}
 circular_summary <- function(x) {
-  x %>%
-    sf::st_drop_geometry() %>%
+  x |>
+    sf::st_drop_geometry() |>
     summarise(
       mean = circular_mean(azi),
       median = circular_median(azi),
@@ -99,9 +250,9 @@ rotate_to_new_coordinate <- function(x0, lat0 = 90, lon0 = 0, lat1 = 0, lon1 = 0
 
   x1 <- cbind(
     x1,
-    sf::st_coordinates(x1) %>% as.data.frame() %>% rename(lon = X, lat = Y)
-  ) %>%
-    select(lat.1, lon.1) %>%
+    sf::st_coordinates(x1) |> as.data.frame() |> rename(lon = X, lat = Y)
+  ) |>
+    select(lat.1, lon.1) |>
     rename(lat = lat.1, lon = lon.1)
 
   x1$azi <- PoR_shmax(x0, northpole_por)
@@ -116,17 +267,17 @@ data_45_0 <- rotate_to_new_coordinate(data_90_0, lat1 = 45)
 data_67_0 <- rotate_to_new_coordinate(data_90_0, lat1 = 67.5, lon1 = -33)
 
 rbind(
-  circular_summary(data_90_0) %>% mutate(lat = 90),
-  circular_summary(data_67_0) %>% mutate(lat = 67.5),
-  circular_summary(data_45_0) %>% mutate(lat = 5),
-  circular_summary(data_22_0) %>% mutate(lat = 22.5),
-  circular_summary(data_0_0) %>% mutate(lat = 0)
+  circular_summary(data_90_0) |> mutate(lat = 90),
+  circular_summary(data_67_0) |> mutate(lat = 67.5),
+  circular_summary(data_45_0) |> mutate(lat = 5),
+  circular_summary(data_22_0) |> mutate(lat = 22.5),
+  circular_summary(data_0_0) |> mutate(lat = 0)
 )
 ```
 
 ```{r p0, echo = TRUE}
 ggplot() +
-  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 0, lon = 0), n = 90) %>% filter(between(d, 0, 10)), aes(color = as.factor(d)), lty = 1) +
+  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 0, lon = 0), n = 90) |> filter(between(d, 0, 10)), aes(color = as.factor(d)), lty = 1) +
   geom_point(data = NULL, aes(0, 0, color = as.factor(0)), size = 7.5, show.legend = FALSE) +
   geom_spoke(data = data_0_0, aes(lon, lat, angle = deg2rad(90 - azi)), radius = 1, lwd = 1, position = "center_spoke") +
   geom_sf(data = data_0_0) +
@@ -141,15 +292,15 @@ ggplot() +
 ```
 
 ```{r p1, echo = TRUE}
-world <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf") %>% sf::st_geometry()
+world <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf") |> sf::st_geometry()
 
 data_plot <- ggplot() +
   geom_sf(data = world, alpha = .75, color = NA) +
-  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 90, lon = 0), n = 90) %>% filter(between(d, 0, 10)), aes(color = "centered at 90°N"), lty = 1) +
-  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 67.5, lon = -33), n = 90) %>% filter(between(d, 0, 10)), aes(color = "centered at 67.5°N"), lty = 1) +
-  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 45, lon = 0), n = 90) %>% filter(between(d, 0, 10)), aes(color = "centered at 45°N"), lty = 1) +
-  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 22.5, lon = 33), n = 90) %>% filter(between(d, 0, 10)), aes(color = "centered at 22.5°N"), lty = 1) +
-  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 0, lon = 0), n = 90) %>% filter(between(d, 0, 10)), aes(color = "centered at 0°N"), lty = 1) +
+  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 90, lon = 0), n = 90) |> filter(between(d, 0, 10)), aes(color = "centered at 90°N"), lty = 1) +
+  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 67.5, lon = -33), n = 90) |> filter(between(d, 0, 10)), aes(color = "centered at 67.5°N"), lty = 1) +
+  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 45, lon = 0), n = 90) |> filter(between(d, 0, 10)), aes(color = "centered at 45°N"), lty = 1) +
+  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 22.5, lon = 33), n = 90) |> filter(between(d, 0, 10)), aes(color = "centered at 22.5°N"), lty = 1) +
+  geom_sf(data = eulerpole_smallcircles(data.frame(lat = 0, lon = 0), n = 90) |> filter(between(d, 0, 10)), aes(color = "centered at 0°N"), lty = 1) +
   scico::scale_color_scico_d(NULL) +
   theme_bw()
 
@@ -175,23 +326,32 @@ data_plot + coord_sf(
   plot_layout(guides = "collect")
 ```
 
-
+Let's have a look at the rose diagrams for the different locations:
 
 ```{r p2, echo = TRUE}
-par(mfrow = c(3, 2))
-rose(data_90_0$azi, col = "grey", main = "90°N", sub = paste0("Var: ", round(circular_var(data_90_0$azi), 3)), binwidth = 20)
-rose(data_67_0$azi, col = "grey", main = "67.5°N", sub = paste0("Var: ", round(circular_var(data_67_0$azi), 3)), binwidth = 20)
-rose(data_45_0$azi, col = "grey", main = "45°N", sub = paste0("Var: ", round(circular_var(data_45_0$azi), 3)), binwidth = 20)
-rose(data_22_0$azi, col = "grey", main = "22.5°N", sub = paste0("Var: ", round(circular_var(data_22_0$azi), 3)), binwidth = 20)
-rose(data_0_0$azi, col = "grey", main = "0°N", sub = paste0("Var: ", round(circular_var(data_0_0$azi), 3)), binwidth = 20)
+lats <- seq(0, 90, 22.5)
+cols <- scico::scico(length(lats), palette = "batlow")
+names(cols) <- as.character(lats)
+
+
+par(mfrow = c(2, 3))
+rose(data_90_0$azi, main = "90°N", sub = paste0("Var: ", round(circular_var(data_90_0$azi), 3)), binwidth = 20, col = cols["90"])
+rose(data_67_0$azi, main = "67.5°N", sub = paste0("Var: ", round(circular_var(data_67_0$azi), 3)), binwidth = 20, col = cols["67.5"])
+rose(data_45_0$azi, main = "45°N", sub = paste0("Var: ", round(circular_var(data_45_0$azi), 3)), binwidth = 20, col = cols["45"])
+rose(data_22_0$azi, main = "22.5°N", sub = paste0("Var: ", round(circular_var(data_22_0$azi), 3)), binwidth = 20, col = cols["22.5"])
+rose(data_0_0$azi, main = "0°N", sub = paste0("Var: ", round(circular_var(data_0_0$azi), 3)), binwidth = 20, col = cols["0"])
 ```
 
+Ooops, it seems like the distribution changes with latitude????
+
+
+Let's have a closer look. I model the same stress field for s sequence of latitude from -90 to 90 with a smaller increment. Then I plot the distribution parameters variance and mean against the latitude:
 ```{r loop, warning = FALSE, echo = TRUE}
 increment <- 1
-stats <- circular_summary(data_90_0) %>% mutate(lat = 90)
+stats <- circular_summary(data_90_0) |> mutate(lat = 90)
 for (i in seq(increment, 180, increment)) {
- xi <-  rotate_to_new_coordinate(data_90_0, lat1 = 90 - i) %>% 
-    circular_summary() %>% 
+ xi <-  rotate_to_new_coordinate(data_90_0, lat1 = 90 - i) |> 
+    circular_summary() |> 
     mutate(lat = 90 - i)
   stats <- rbind(stats, xi)
 }
@@ -208,3 +368,5 @@ ggplot(stats, aes(var, abs(lat))) +
   coord_cartesian(ylim = c(0, 90), expand = F) +
   scale_color_viridis_c()
 ```
+
+We see that there is a clear dependence of both variance and mean on the geographic latitude.
