@@ -30,9 +30,9 @@ Analyzing such tectonic processes often requires the integration of geological o
 The combination of these disciplines usually provides qualitative and quantitative information of depth, pressure, temperature, structure, kinematics, time and many more. 
 The data, however, 
 
-- have fractal geometries (i.e. they cover various scales, e.g. from the microscale to the plate-scale or planet-scale),
+- have fractal geometries (e.g. they cover various scales, e.g. from the microscale to the plate-scale or planet-scale),
 - have (large) uncertainties and non-gaussian distributions,
-- include strongly independent variables that have multidimensional (and non-linear) relationships,
+- include strongly dependent variables that have multidimensional (and non-linear) relationships,
 - are the result of the superposition of an unknown number of processes, 
 - might by affected by angular and area distortions due to the spherical shape of the Earth,
 - are a function of time (young vs. old, fast ($< 10^{-8}$ yrs) vs. slow ($> 10^6$ yrs) processes),
