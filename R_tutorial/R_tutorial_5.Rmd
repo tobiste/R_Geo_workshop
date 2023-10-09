@@ -3,9 +3,9 @@ title: "Programming with R --- A Beginners’ Guide for Geoscientists"
 author: "Tobias Stephan"
 date: "10/02/2022"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
+  # pdf_document:
+  #   toc: yes
+  #   toc_depth: '3'
   html_document:
     highlight: tango
     theme: united
@@ -19,6 +19,7 @@ subtitle: 5 - Maps
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_knit$set(root.dir = here::here())
 ```
 
 Packages we need:
@@ -49,7 +50,7 @@ pacman::p_load(
 )
 
 # my functions and stuff for the course
-source("course_stuff.R")
+source("R/swath.R")
 ```
 
 ## Maps
@@ -425,7 +426,7 @@ hill <- terra::shade(slope, aspect,
               angle = c(45, 45, 45, 80), 
               direction = c(225, 270, 315, 135)
               )
-hill <- terra::Reduce(mean, hill) 
+hill <- Reduce(mean, hill) 
 ```
 
 

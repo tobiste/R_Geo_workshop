@@ -152,7 +152,7 @@ To write data or tables into a file, we can use similar functions as in the impo
 write.table(object, file = "path/to/file/table.txt", sep = " ", row.names = FALSE)
 write.csv(object, file = "path/to/file/table.txt", row.names = FALSE)
 writeClipboard(object) # write to the MS clipboard (MS only)
-saveRDS(object, file = "path/to/file/table.Rdata") # wrtie to a R object file
+saveRDS(object, file = "path/to/file/table.Rdata") # write to a R object file
 ```
 
 ## Explore and manipulate datasets

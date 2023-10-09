@@ -42,7 +42,8 @@ pacman::p_load(
 )
 
 # my functions and stuff for the course
-source("course_stuff.R")
+source("R/colorblind_discrete.R")
+source("R/read_geochron.R")
 ```
 
 ### U-Pb
