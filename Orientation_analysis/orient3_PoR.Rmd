@@ -545,7 +545,7 @@ Plate Motions" *Geophysical Journal International* 101 (2): 425--78.
 doi:
 [10.1111/j.1365-246x.1990.tb06579.x](https://doi.org/10.1111/j.1365-246x.1990.tb06579.x).
 
-Heidbach, Oliver, Mojtaba Rajabi, Karsten Reiter, Moritz Ziegler, and
+Heidbach, Oliver; Rajabi, Mojtaba; Reiter, Karsten; Ziegler, Moritz; and
 WSM Team. 2016. "World Stress Map Database Release 2016. V. 1.1." GFZ
 Data Services. doi:
 [10.5880/WSM.2016.001](https://doi.org/10.5880/WSM.2016.001).
