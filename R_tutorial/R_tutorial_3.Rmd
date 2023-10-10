@@ -128,14 +128,14 @@ ggpubr::ggboxplot(
 
 # ggplot
 ggplot(data = sample1, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
-  geom_boxplot() +
+  geom_boxplot(fill = "red") +
   labs(title = "Boxplot", x = "Sample", y = "206/238 Age uncertainties (%)")
 ```
 
 Btw, if you want to have the boxplot for more than one sample... R automatically identifies when there are more than one sample in your data set. 
 
 ```{r univariate_boxs, echo=TRUE}
-ggplot(data = samples, aes(x = Sample_ID, y = st.Pb206U238.perc)) +
+ggplot(data = samples, aes(x = Sample_ID, y = st.Pb206U238.perc, fill = Sample_ID)) +
   geom_boxplot() +
   labs(title = "Boxplot", x = "Sample", y = "206/238 Age uncertainties (%)") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
@@ -156,7 +156,8 @@ ggpubr::gghistogram(x,
 # ggplot
 ggplot(data = sample1, aes(x = st.Pb206U238.perc)) +
   geom_histogram(color = "white") + # adds the histogram
-  labs(title = "Histogram", x = "206/238 Age uncertainties (%)") 
+  labs(title = "Histogram", x = "206/238 Age uncertainties (%)") +
+  theme_bw()
 ```
 
 **R** finds the optimal width of the bins automatically. You can also give a specific bin width by defining `binwidth` or the number of bins by `bins` as options int in the `geom_histogram()` function. See `?geom_histogram()` for more information

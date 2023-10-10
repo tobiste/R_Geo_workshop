@@ -23,7 +23,7 @@ library(ggplot2)
 library(patchwork)
 ```
 
-![Figure 1: Global compilation of stress data showing the direction of the maximum horizontal stress ($\sigma_{Hmax}$) from the WSM2016 database (Robinson projection). The orientation of σHmax with respect to focal earthquake mechanisms and the three Andersonian fault is shown. From Stephan et al. (2023).](C:/Users/tobis/Documents/GIT_repos/R_Geo_workshop/Orientation_analysis/Figure_13_stress_world.png)
+![Figure 1: Global compilation of stress data showing the direction of the maximum horizontal stress ($\sigma_{Hmax}$) from the WSM2016 database (Robinson projection). The orientation of σHmax with respect to focal earthquake mechanisms and the three Andersonian fault is shown. From Stephan et al. (2023).](Figure_13_stress_world.png)
 
 
 ### Some terms and definitions
@@ -48,14 +48,14 @@ absolute vs. relative plate motion
 
 ### Plate boundary displacement vs. stress
 
-![Figure 2: Sketch of the three types of displacement across plate boundaries due to relative plate motion. With respect to the interior of plate X, displacements across the boundaries of X are inward, outward, and tangentially in the direction of the motion of X relative to the neighboring plates (modified after Ref.16). Note that each boundary segment of X has differently oriented displacement trajectories (black arrows) and can have a different type of displacement. Outward displacement only occurs on the rift axis of a divergent plate boundary, but with increasing distance to the plate boundary, ridge push dominates. This creates an inward-moving plate boundary displacement.  From Stephan et al. (2023).](C:/Users/tobis/Documents/GIT_repos/R_Geo_workshop/Orientation_analysis/Figure_03_boundary_displacement.png)
+![Figure 2: Sketch of the three types of displacement across plate boundaries due to relative plate motion. With respect to the interior of plate X, displacements across the boundaries of X are inward, outward, and tangentially in the direction of the motion of X relative to the neighboring plates (modified after Ref.16). Note that each boundary segment of X has differently oriented displacement trajectories (black arrows) and can have a different type of displacement. Outward displacement only occurs on the rift axis of a divergent plate boundary, but with increasing distance to the plate boundary, ridge push dominates. This creates an inward-moving plate boundary displacement.  From Stephan et al. (2023).](Figure_03_boundary_displacement.png)
 
 
-![Figure 3: Sketch of the angular relationship between the direction of relative plate motion (blue arrows), the strike of faults (black lines), and the orientation of the maximum horizontal stress ($\sigma_{Hmax}$, colored solid lines) in the deforming area adjacent to the three types of displacement across plate boundaries: (A) $\sigma_{Hmax}$ is perpendicular to the direction of relative plate motion adjacent to an outward-moving boundary between two plates C and X. Predominant normal faults strike perpendicular to relative plate motion. Sketch shows the example of a divergent plate boundary (outward displacement only occurs on the rift axis of a divergent plate boundary. With increasing distance to the plate boundary, ridge push dominates. This creates an inward- directed plate boundary displacement where σHmax opposes the direction of relative plate motion. (B) $\sigma_{Hmax}$ is parallel to the direction of the relative plate motion adjacent to an inward-moving boundary between two plates A and X. Predominant thrust faults strike perpendicular to relative plate motion. (C) $\sigma_{Hmax}$ is at an angle of $\pm45^{\circ}$ to the direction of the relative plate motion adjacent to the tangentially displaced boundary between two plates A and X. Predominant strike-slip faults strike parallel to relative plate motion. The trajectories of the relative plate motions (small circles) are displayed as stippled blue lines. Maps are shown in the Mercator projection.  From Stephan et al. (2023).](C:/Users/tobis/Documents/GIT_repos/R_Geo_workshop/Orientation_analysis/Figure_04_stress_trajectories.png)
+![Figure 3: Sketch of the angular relationship between the direction of relative plate motion (blue arrows), the strike of faults (black lines), and the orientation of the maximum horizontal stress ($\sigma_{Hmax}$, colored solid lines) in the deforming area adjacent to the three types of displacement across plate boundaries: (A) $\sigma_{Hmax}$ is perpendicular to the direction of relative plate motion adjacent to an outward-moving boundary between two plates C and X. Predominant normal faults strike perpendicular to relative plate motion. Sketch shows the example of a divergent plate boundary (outward displacement only occurs on the rift axis of a divergent plate boundary. With increasing distance to the plate boundary, ridge push dominates. This creates an inward- directed plate boundary displacement where σHmax opposes the direction of relative plate motion. (B) $\sigma_{Hmax}$ is parallel to the direction of the relative plate motion adjacent to an inward-moving boundary between two plates A and X. Predominant thrust faults strike perpendicular to relative plate motion. (C) $\sigma_{Hmax}$ is at an angle of $\pm45^{\circ}$ to the direction of the relative plate motion adjacent to the tangentially displaced boundary between two plates A and X. Predominant strike-slip faults strike parallel to relative plate motion. The trajectories of the relative plate motions (small circles) are displayed as stippled blue lines. Maps are shown in the Mercator projection.  From Stephan et al. (2023).](Figure_04_stress_trajectories.png)
 
-![Figure 4: Geometries of stress trajectories. (A) Stress trajectories in an orthographic projection are viewed from an oblique angle to the pole of rotation, PoR. Great circles are lines along the shortest distance between two data points. Small circles connect points with a constant distance to a point (e.g. PoR), producing concentric lines around that point. Loxodromes are lines of constant bearing that cut both small and great circles at a constant angle. (B) Exemplified geometries of stress trajectories. Left: conformal Mercator projections in the geographical coordinate reference system (CRS) (North Pole at the top of the map). Right: oblique Mercator projection in the PoR CRS with the PoR rotated to the top of the map. Inset visualizes the transformation between the two CRSs in orthographic projection.  From Stephan et al. (2023).](C:/Users/tobis/Documents/GIT_repos/R_Geo_workshop/Orientation_analysis/Figure_05_euler_circles.png)
+![Figure 4: Geometries of stress trajectories. (A) Stress trajectories in an orthographic projection are viewed from an oblique angle to the pole of rotation, PoR. Great circles are lines along the shortest distance between two data points. Small circles connect points with a constant distance to a point (e.g. PoR), producing concentric lines around that point. Loxodromes are lines of constant bearing that cut both small and great circles at a constant angle. (B) Exemplified geometries of stress trajectories. Left: conformal Mercator projections in the geographical coordinate reference system (CRS) (North Pole at the top of the map). Right: oblique Mercator projection in the PoR CRS with the PoR rotated to the top of the map. Inset visualizes the transformation between the two CRSs in orthographic projection.  From Stephan et al. (2023).](Figure_05_euler_circles.png)
 
-![Figure 5: (A) Geometry for the determination of the angular distance along the great circle between point P and the pole of rotation PoR (N North Pole, O center of the Earth, r Earth’s radius). (B) Angular relations of the spherical triangle in (A) which are used in deriving the transformed $\sigma_{Hmax}$ azimuth $\alpha′$.  From Stephan et al. (2023).](C:/Users/tobis/Documents/GIT_repos/R_Geo_workshop/Orientation_analysis/Figure_06_spherical_triangle.png)
+![Figure 5: (A) Geometry for the determination of the angular distance along the great circle between point P and the pole of rotation PoR (N North Pole, O center of the Earth, r Earth’s radius). (B) Angular relations of the spherical triangle in (A) which are used in deriving the transformed $\sigma_{Hmax}$ azimuth $\alpha′$.  From Stephan et al. (2023).](Figure_06_spherical_triangle.png)
 
 Displacement of plate boundary | Stress regime | $\sigma_{Hmax}$ azimuth | Geometry of trajectories
 ------------ | ----------- | ----------- | -----------------------
@@ -76,7 +76,7 @@ pa_abs <- filter(absolute_motions, plate.rot == "pa")
 ```
 
 ```{r abs_trajectories, echo=TRUE, warning=FALSE, message=FALSE}
-plate_polygons <- sf::read_sf("C:/Users/tobis/Documents/GIT_repos/R_Geo_workshop/Data/pb2002_plates.shp")
+plate_polygons <- sf::read_sf("Data/pb2002_plates.shp")
 
 na <- filter(plate_polygons, Code == "NA") |> mutate(name = "na")
 pa <- filter(plate_polygons, Code == "PA") |> mutate(name = "pa")
@@ -105,8 +105,9 @@ world_map +
   geom_sf(data = rbind(na_trajectories, pa_trajectories), aes(color = name), lty = 2, lwd = 1, alpha = .5) +
   labs(title = "Absolute plate motion")
 ```
+
 ```{r relative, echo=TRUE}
-na_pa_rel <- equivalent_rotation(absolute_motions, fixed = "na", rot = "pa")
+na_pa_rel <- equivalent_rotation(absolute_motions, fixed = "pa", rot = "na")
 
 sf::sf_use_s2(FALSE)
 na_pa_trajectories <- eulerpole_smallcircles(na_pa_rel) |> sf::st_intersection(rbind(na, pa))

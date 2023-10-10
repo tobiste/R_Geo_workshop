@@ -15,6 +15,9 @@ output:
       collapsed: no
       smooth_scroll: yes
 subtitle: 5 - Maps
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ```{r setup, include=FALSE}
@@ -23,6 +26,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Packages we need:
+
 ```{r packages, echo = TRUE, message = FALSE, warning = FALSE}
 pacman::p_load(
   dplyr,
@@ -36,6 +40,7 @@ pacman::p_load(
   ggrepel,
   ggthemes,
   rnaturalearth,
+  rnaturalearthdata,
   ggnewscale,
 
   # geospatial packages
@@ -46,7 +51,10 @@ pacman::p_load(
   raster,
 
   # spatial interpolation
-  gstat
+  gstat,
+  
+  maps
+  
 )
 
 # my functions and stuff for the course
@@ -58,7 +66,7 @@ source("R/swath.R")
 ### Seismics at BC coast
 
 In this tutorial, we want to produce a map of the western coast of Canada and its seismicity.
-First we load the earthquake table (*.csv) that I downloaded from the USGS earthquake database.
+First we load the earthquake table (\*.csv) that I downloaded from the USGS earthquake database.
 
 ```{r data, echo=TRUE}
 earthquakes <- read.csv("Data/Map/earthquakes_2000-2020.csv", sep = ",")  |> 
@@ -66,9 +74,10 @@ earthquakes <- read.csv("Data/Map/earthquakes_2000-2020.csv", sep = ",")  |>
 head(earthquakes)
 ```
 
-
 ### Basic maps
-Now we start to set up a very basic map where we only show the earthquake locations. 
+
+Now we start to set up a very basic map where we only show the earthquake locations.
+
 ```{r map0, echo=TRUE}
 map0 <- ggplot() + # extent of the map
   borders() + # political borders
@@ -83,9 +92,11 @@ map0 <- ggplot() + # extent of the map
 map0
 ```
 
-`ggplot()` treats the data as any other. It does not know yet that the data is actually geo-spatial.
+`ggplot()` treats the data as any other.
+It does not know yet that the data is actually geo-spatial.
 
 To convert the data into spatial data, we need the package `sf` and define the coordinates and its coordinate system:
+
 ```{r sf}
 earthquakes_sf <- earthquakes |>
   sf::st_as_sf(
@@ -99,8 +110,9 @@ earthquakes_sf <- earthquakes |>
 coastlines <- rnaturalearth::ne_coastline(50, returnclass = "sf") 
 ```
 
+Now the data is georeferenced!
+To plot the data with `ggplot()` we use `geom_sf()` and plot extents can be changed with `coord_sf()`:
 
-Now the data is georeferenced! To plot the dat awith `ggplot()` we use ` geom_sf()` and plot extents can be changed with `coord_sf()`:
 ```{r coord_sf, echo = TRUE, message = FALSE, warning = FALSE}
 map1 <- ggplot() +
   geom_sf(data = coastlines) +
@@ -115,7 +127,6 @@ map1
 ```
 
 `ggplot()` allows us to reproject our spatial data into any coordinate reference system (CRS) by using `coord_sf(crs = ...)`
-
 
 ```{r reproj, echo = TRUE, message = FALSE, warning = FALSE}
 map1 +
@@ -182,11 +193,12 @@ map1 +
   ) +
   plot_layout(guides = "collect")
 ```
-R uses the *offical* projection/transformation parameters, either as EPSG, PROJ4 or WKT notation (they are used by ArcGIS or QGIS as well). A list of these CRS parameters can be found at: https://proj.org/en/9.3/operations/index.html
 
+R uses the *offical* projection/transformation parameters, either as EPSG, PROJ4 or WKT notation (they are used by ArcGIS or QGIS as well).
+A list of these CRS parameters can be found at: <https://proj.org/en/9.3/operations/index.html>
 
-Let's use the Albers equal area projection. 
-In the next step, we will modify the earthquake symbols. 
+Let's use the Albers equal area projection.
+In the next step, we will modify the earthquake symbols.
 We can just add some properties of the data set (columns of the data.frame) into the aesthetic (`aes()`), such as the color, the shape, the size, or the opacity (`alpha`).
 
 ```{r map2, echo=TRUE}
@@ -208,9 +220,9 @@ map2 <- ggplot() +
 map2
 ```
 
-The plot above will produce some default outputs (colors). 
+The plot above will produce some default outputs (colors).
 
-We can modify the colors and aesthetics by using `scale_[aesthetics]`, 
+We can modify the colors and aesthetics by using `scale_[aesthetics]`,
 
 ```{r map2_legend, echo = TRUE, message = FALSE, warning = FALSE}
 map2 +
@@ -223,7 +235,8 @@ map2 +
   scale_size_binned(name = "Magnitude")
 ```
 
-We do not have to define the color palette. `ggplot()` offers a variety of pre-installed color palettes.
+We do not have to define the color palette.
+`ggplot()` offers a variety of pre-installed color palettes.
 
 ```{r colors, echo = TRUE, message = FALSE, warning = FALSE}
 map2 +
@@ -233,13 +246,14 @@ map2 +
     breaks = seq(0, 30, 5)
   )
 ```
-Many scientific journals already require (or at least recommend) to use readable colors for colour-vision deficient or colorblind people.  
+
+Many scientific journals already require (or at least recommend) to use readable colors for colour-vision deficient or colorblind people.
 
 The package `scico` provides a list of scientific color palettes that are
 
-- colorblind-friendly
-- perceptually uniform and ordered to represent data both fairly, without visual distortion, and intuitively, and 
-- still readable when printed in black and white
+-   colorblind-friendly
+-   perceptually uniform and ordered to represent data both fairly, without visual distortion, and intuitively, and
+-   still readable when printed in black and white
 
 ```{r colorblind, echo = TRUE, message = FALSE, warning = FALSE}
 map2 + scico::scale_color_scico(
@@ -251,7 +265,10 @@ map2 + scico::scale_color_scico(
 ```
 
 ### Import Shape-files
-Now we want to add the plate boundaries to the map. The plate boundaries are stored in a ESRI shape file that can be imported using `st_read()` from the sf package.
+
+Now we want to add the plate boundaries to the map.
+The plate boundaries are stored in a ESRI shape file that can be imported using `st_read()` from the sf package.
+
 ```{r read.shp, message=FALSE, echo=TRUE}
 # load shape file as 'simple feature'
 plates <- st_read("Data/Map/plate_boundaries.shp") |> 
@@ -260,6 +277,7 @@ st_crs(plates) <- "WGS84" # set the CRS
 ```
 
 Now add the plate boundaries to our map:
+
 ```{r map.plate, echo=TRUE}
 map3 <- ggplot() +
   geom_sf(
@@ -293,6 +311,7 @@ map3 <- ggplot() +
 ```
 
 ### Create a spatial object
+
 To create spatial objects, e.g. a point, line etc., we need to specify the coordinates and the CRS.
 Create a lines object
 
@@ -313,6 +332,7 @@ line_sf <- points_sf |>
 ```
 
 Plot the new object as a profile line and add to the map:
+
 ```{r plot_line, echo=TRUE}
 map3 +
   # adds the profile line
@@ -335,15 +355,18 @@ map3 +
 ```
 
 ### Save ESRI shape file
+
 Save line into ESRI shapefile:
+
 ```{r line2, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 st_write(line_sf, "Data/Map/my_line.shp")
 ```
 
-
 ### Import Raster
+
 To import and handle raster datasets, we need the **terra** package.
 The import is done by using `rast()`
+
 ```{r raster_load, echo=TRUE}
 dem <- terra::rast("Data/Map/ETOPO_vancouver.tif")
 
@@ -351,9 +374,10 @@ dem <- terra::rast("Data/Map/ETOPO_vancouver.tif")
 plot(dem)
 ```
 
-
 #### Crop a raster
+
 To crop or clip a raster along a spatial feature (e.g. the extent of our earthquake dataset), we can use `crop()`:
+
 ```{r raster_crop, echo=TRUE}
 crop_extent <- st_bbox(earthquakes_sf) + c(-1,-1,1,1)
 crop_extent
@@ -362,6 +386,7 @@ dem_cropped <- terra::crop(dem, crop_extent)
 ```
 
 The raster resolution, i.e. the pixel cell size can be retrieved by `res()`
+
 ```{r resolution1, echo=TRUE}
 terra::res(dem_cropped)
 ```
@@ -369,26 +394,27 @@ terra::res(dem_cropped)
 The raster resolution is 0.3 x 0.3 degree.
 
 We can decrease and increase the resolution with `aggregate()` and `disaggregate()`, respectively.
+
 ```{r resolution2, echo=TRUE}
-# lower the resolution by factor 5:
+# lower the resolution by factor 2:
 dem_low <- terra::aggregate(dem_cropped, fact = 2)
 terra::res(dem_low)
 plot(dem_low)
 ```
 
-
-
 #### Reproject the raster
+
 Raster data can also be transformed or reprojected into different CRSs.
 
 To use the `project()` function, we need to define two things:
 
-- the object we want to reproject and
-- the CRS that we want to reproject it to.
+-   the object we want to reproject and
+-   the CRS that we want to reproject it to.
 
 The syntax is `terra::project(RasterObject, CRSToReprojectTo)`
 
-Here, we want to transform the raster (in WGS84) into an Albers equal area projection. 
+Here, we want to transform the raster (in WGS84) into an Albers equal area projection.
+
 ```{r aea, echo=TRUE}
 dem_aea <- terra::project(
   dem_low, 
@@ -397,16 +423,18 @@ dem_aea <- terra::project(
 plot(dem_aea)
 ```
 
-> When we reproject a raster, we move it from one “grid” to another. Thus, we are modifying the data! Keep this in mind as we work with raster data.
-
+> When we reproject a raster, we move it from one "grid" to another.
+> Thus, we are modifying the data!
+> Keep this in mind as we work with raster data.
 
 #### Save raster
+
 ```{r write_raster, eval=FALSE, include=TRUE, echo=TRUE}
 terra::writeRaster(dem_aea, "Data/Map/dem_cropped.tif", overwrite = TRUE)
 ```
 
-
 Thereby, we can also do some statistics on the raster's "z" value (here the elevation):
+
 ```{r raster_stats, warning=FALSE, message=FALSE, echo=TRUE}
 # Stats numbers
 elevation <- terra::values(dem_cropped)
@@ -429,18 +457,19 @@ hill <- terra::shade(slope, aspect,
 hill <- Reduce(mean, hill) 
 ```
 
-
-
 #### Plot the raster
-To plot a raster we can use `tidyterra::geom_spatraster()`. 
+
+To plot a raster we can use `tidyterra::geom_spatraster()`.
 
 Additionally we will add the city of Vancouver to our map
+
 ```{r city, echo=TRUE}
 vancouver <- data.frame(city = "Vancouver", lat = 49.3, lon = -123.1) |>
   st_as_sf(coords = c("lon", "lat"), crs = "WGS84")
 ```
 
 Final plot:
+
 ```{r plot_raster, echo=TRUE}
 map4 <- ggplot() +
   tidyterra::geom_spatraster(data = hill, show.legend = FALSE) +
@@ -490,17 +519,17 @@ map4 <- ggplot() +
 map4
 ```
 
-
 ### Elevation profile (Swath)
-Swath profiles are used to condense topographic information from a rectangular area (swath) to an elevation profile. 
 
-Technically, they are not so simple to create ([see here for more details](https://sites.google.com/site/sorsbysj/geospatial-processing/geospatial-analyses/swath-profiles). 
+Swath profiles are used to condense topographic information from a rectangular area (swath) to an elevation profile.
 
-Thus, the calculation will be CPU intensive, in particular for large and high resolution raster data! 
+Technically, they are not so simple to create ([see here for more details](https://sites.google.com/site/sorsbysj/geospatial-processing/geospatial-analyses/swath-profiles).
+
+Thus, the calculation will be CPU intensive, in particular for large and high resolution raster data!
 Our example data set should be doable on most computers... (I hope).
 
-
-`swathR` calculates the elevation data in our swath. To define the swath we have to define `k` -- the number of lines parallel to our profile line ("line.pts"), `dist` -- the distance of the lines to our profile line, and the coordinate reference system -- `crs`.
+`swathR` calculates the elevation data in our swath.
+To define the swath we have to define `k` -- the number of lines parallel to our profile line ("line.pts"), `dist` -- the distance of the lines to our profile line, and the coordinate reference system -- `crs`.
 
 ```{r swath, echo=TRUE, message=FALSE, warning=FALSE}
 # extracts the swath profile and some statistics
@@ -510,7 +539,8 @@ swath.list <- swathR(
 )
 ```
 
-The function returns a list of the lines coordinates, some statistics, and the elevation data along the lines. I coded a function `swathR_profile` that extracts the swath profile (i.e. the elevation data along the center line, the minimum and maximum elevation within the swath) from this list. 
+The function returns a list of the lines coordinates, some statistics, and the elevation data along the lines.
+I coded a function `swathR_profile` that extracts the swath profile (i.e. the elevation data along the center line, the minimum and maximum elevation within the swath) from this list.
 
 ```{r extract_swath, warning=FALSE, message=FALSE, echo=TRUE}
 swath.profile <- swath_profile(swath.list)
@@ -541,12 +571,15 @@ ggplot(swath.profile, aes(distance, elevation)) +
   theme_bw()
 ```
 
-Because our input data is in the geographical coordinate system, the distances are given in degrees. You can use my function `greatcircle_distance()` to get the distances in km along the line:
+Because our input data is in the geographical coordinate system, the distances are given in degrees.
+You can use my function `greatcircle_distance()` to get the distances in km along the line:
+
 ```{r orthodrome, echo=TRUE}
 swath.profile$distance.km <- deg_2_km(swath.profile$distance, c(points[1, 2], points[1, 1]), c(points[2, 2], points[2, 1]))
 ```
 
 Now we can set up the profile plot ...
+
 ```{r swath2, echo=TRUE}
 swath.plot <-
   ggplot(swath.profile, aes(distance.km, elevation)) +
@@ -569,6 +602,7 @@ swath.plot <-
 ```
 
 ... and combine it together with our map
+
 ```{r combine_plots, echo=TRUE}
 map.combo <-
   map4 /
@@ -577,9 +611,11 @@ map.combo <-
 map.combo
 ```
 
-To save a plot, we can use `ggsave()` by giving the file path and the output size. It automatically identifies the file format from your file name.
+To save a plot, we can use `ggsave()` by giving the file path and the output size.
+It automatically identifies the file format from your file name.
 
 ### Save a map
+
 ```{r save_map, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 ggsave(
   map.combo, filename = "Data/DEM/my_map.pdf", 
@@ -587,24 +623,24 @@ ggsave(
   )
 ```
 
-
 ### Spatial interpolation
 
-A "heat map" refers to a spatially interpolated value. 
+A "heat map" refers to a spatially interpolated value.
 In our example we want to interpolate the magnitude of the earthquakes for the entire area in derive a somewhat "seismic hazard map".
 
-
 Next we need to create the interpolation grid where we want to interpolate onto.
+
 ```{r grid, echo=TRUE}
 grid <- st_make_grid(earthquakes_sf, cellsize = .5, what = "centers")
 ```
 
-
 #### Inverse distance weigthing
 
-Now we have set up our points and a grid to interpolate onto, we are ready carry out some interpolation. The first method we will try is inverse distance weighting (IDW) as this will not require any special modelling of spatial relationships.
+Now we have set up our points and a grid to interpolate onto, we are ready carry out some interpolation.
+The first method we will try is inverse distance weighting (IDW) as this will not require any special modelling of spatial relationships.
 
-To generate a surface using inverse distance weighting, use the IDW function in gstat. Check the help file for IDW -- `?idw` -- for information about what this formula is doing.
+To generate a surface using inverse distance weighting, use the IDW function in gstat.
+Check the help file for IDW -- `?idw` -- for information about what this formula is doing.
 
 ```{r idw, echo=TRUE}
 idw_res <- gstat::idw(
@@ -617,7 +653,8 @@ idw_rast <- terra::rasterize(
   field = "var1.pred")
 ```
 
-Now we have our IDW output we can plot it using ggplot2. 
+Now we have our IDW output we can plot it using ggplot2.
+
 ```{r idw.map, message=FALSE, warning=FALSE, echo=TRUE}
 ggplot() +
     tidyterra::geom_spatraster(data = hill, show.legend = FALSE) +
@@ -645,10 +682,10 @@ ggplot() +
 ```
 
 Save the map into png
+
 ```{r, echo=FALSE, eval=FALSE, include=TRUE, echo=TRUE}
 ggsave(map3, filename = "Data/DEM/my_heatmap.png", width = 11, height = 8.5)
 ```
-
 
 #### Kriging
 
@@ -663,6 +700,7 @@ plot(variogcloud)
 ```
 
 The values in the cloud can be binned into lags with and plotted with a very similar function
+
 ```{r semivariog, echo=TRUE}
 semivariog <- gstat::variogram(
   mag ~ 1, locations = earthquakes_sf, data = earthquakes_sf
@@ -672,26 +710,27 @@ plot(semivariog)
 semivariog
 ```
 
-From the empirical semivariogram plot and the information contained in the `semivariog`` *gstat* object, we can estimate the sill, range and nugget to use in our model semivariogram.
+From the empirical semivariogram plot and the information contained in the \`semivariog\`\` *gstat* object, we can estimate the sill, range and nugget to use in our model semivariogram.
 
-- In this case, the **range** (the point on the distance axis where the semivariogram starts to level off) is around the value of the last lag -- 380.53028	-- so we’ll use Range = 380
-- The **Sill** (the point on the y axis where the semivariogram starts to level off) is around 0.25
-- The **nugget** looks to be around 0.20 (so the partial sill is around 0.2).
+-   In this case, the **range** (the point on the distance axis where the semivariogram starts to level off) is around the value of the last lag -- 380.53028 -- so we'll use Range = 380
+-   The **Sill** (the point on the y axis where the semivariogram starts to level off) is around 0.25
+-   The **nugget** looks to be around 0.20 (so the partial sill is around 0.2).
 
-Using this information we’ll generate a model semivariogram using the `vgm()` function in *gstat*.
-
+Using this information we'll generate a model semivariogram using the `vgm()` function in *gstat*.
 
 ```{r vgm, echo=TRUE}
 model.variog <- gstat::vgm(psill = 0.25, model = "Exp", nugget = 0.2, range = 380)
 ```
 
 We can now fit this model to a sample variogram to see how well it fits and plot it
+
 ```{r fit.variogram, echo=TRUE}
 fit.variog <- gstat::fit.variogram(semivariog, model.variog)
 plot(semivariog, fit.variog)
 ```
 
-Use the `krige()` function in gstat along with the model semivariogram just generated to generate an ordinary/simple Kriged surface -- again, check ` ?krige` to see what the various options in the function are.
+Use the `krige()` function in gstat along with the model semivariogram just generated to generate an ordinary/simple Kriged surface -- again, check `?krige` to see what the various options in the function are.
+
 ```{r kriging, echo=TRUE}
 krige_res <- gstat::krige(
   formula = mag ~ 1, locations = earthquakes_sf, newdata = grid, model = model.variog
@@ -704,6 +743,7 @@ krige_rast <- terra::rasterize(
 ```
 
 Generate a plot of the kriged surface in ggplot2 in a similar way to before
+
 ```{r krige.plot, echo=TRUE}
 ggplot() +
   tidyterra::geom_spatraster(data = hill, show.legend = FALSE) +
@@ -732,17 +772,17 @@ ggplot() +
 
 This completes your very short guide to creating spatial surfaces in R.
 
-***
+------------------------------------------------------------------------
 
 ## Useful resources
 
-- Raster plotting: https://erinbecker.github.io/r-raster-vector-geospatial/02-raster-plot/index.html
-- Crop a raster: https://www.earthdatascience.org/courses/earth-analytics/lidar-raster-data-r/crop-raster-data-in-r/
-- Raster reprojection: https://datacarpentry.org/r-raster-vector-geospatial/03-raster-reproject-in-r/
-- Spatial interpolation with R: https://rspatial.org/raster/analysis/4-interpolation.html
-- Kriging with R: https://rstudio-pubs-static.s3.amazonaws.com/46259_d328295794034414944deea60552a942.html
-- Swath profile: https://jjvhab.github.io/swathR/
-- "Beautify" a map : https://timogrossenbacher.ch/2016/12/beautiful-thematic-maps-with-ggplot2-only/
+-   Raster plotting: <https://erinbecker.github.io/r-raster-vector-geospatial/02-raster-plot/index.html>
+-   Crop a raster: <https://www.earthdatascience.org/courses/earth-analytics/lidar-raster-data-r/crop-raster-data-in-r/>
+-   Raster reprojection: <https://datacarpentry.org/r-raster-vector-geospatial/03-raster-reproject-in-r/>
+-   Spatial interpolation with R: <https://rspatial.org/raster/analysis/4-interpolation.html>
+-   Kriging with R: <https://rstudio-pubs-static.s3.amazonaws.com/46259_d328295794034414944deea60552a942.html>
+-   Swath profile: <https://jjvhab.github.io/swathR/>
+-   "Beautify" a map : <https://timogrossenbacher.ch/2016/12/beautiful-thematic-maps-with-ggplot2-only/>
 
 ```{r gc4, include=FALSE}
 gc(verbose = FALSE)
@@ -750,6 +790,6 @@ gc(verbose = FALSE)
 # lintr::lint("R_tutorial_5.Rmd")
 ```
 
-***
+------------------------------------------------------------------------
 
-[Content](.\R_tutorial_main.html) | [previous course: Geochronology](.\R_tutorial_4.html)
+[Content](.\R_tutorial_main.html) \| [previous course: Geochronology](.\R_tutorial_4.html)

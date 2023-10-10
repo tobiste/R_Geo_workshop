@@ -12,6 +12,9 @@ output:
       collapsed: no
       smooth_scroll: yes
 subtitle: 3 - Orientation analysis in the Pole of Rotation (PoR) Reference Frame
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -24,7 +27,6 @@ library(patchwork)
 library(rnaturalearth)
 ```
 
-
 ```{r load_wsm2016, echo=TRUE}
 data("san_andreas")
 head(san_andreas)
@@ -33,7 +35,6 @@ head(san_andreas)
 ```{r rose1, echo = TRUE}
 rose(san_andreas$azi, weights = 1 / san_andreas$unc)
 ```
-
 
 Let's visualize the spatial distribution of the stress measurements.
 
@@ -67,90 +68,113 @@ map +
     position = "center_spoke",
     na.rm = TRUE
   ) +
-  scale_color_manual(name = "Tectonic regime", values = stress_colors(), breaks = names(stress_colors())) +
+  scale_color_manual(
+    name = "Tectonic regime", values = stress_colors(), 
+    breaks = names(stress_colors())
+    ) +
   coord_sf(
     xlim = range(san_andreas$lon),
     ylim = range(san_andreas$lat)
   )
 ```
 
-Modeling the stress directions (wrt. to the geographic North pole) using the 
-Pole of Oration (PoR) of the motion of North America relative to the Pacific Pate.
-We test the dataset against a right-laterally tangential displacement type.
+Modeling the stress directions (wrt. to the geographic North pole) using
+the Pole of Oration (PoR) of the motion of North America relative to the
+Pacific Pate. We test the dataset against a right-laterally tangential
+displacement type.
+
 ```{r san_andreas, echo=TRUE}
 data("nuvel1")
 por <- subset(nuvel1, nuvel1$plate.rot == "na")
-san_andreas.prd <- PoR_shmax(san_andreas, por, type = "right")
+san_andreas_prd <- PoR_shmax(san_andreas, por, type = "right")
 ```
 
 Combine the model results with the coordinates of the observed data
 
 ```{r san_andreas2, echo=TRUE}
-san_andreas.res <- data.frame(
+san_andreas_res <- data.frame(
   sf::st_drop_geometry(san_andreas),
-  san_andreas.prd
+  san_andreas_prd
 )
 ```
 
 ## Statistical evaluation of the fit
 
-The rose diagram displays the frequency distribution of the transformed azimuths:
+The rose diagram displays the frequency distribution of the transformed
+azimuths:
 
 ```{r rose2, echo = TRUE}
-rose(san_andreas.res$azi.PoR, weights = 1 / san_andreas$unc, mtext = "PoR")
+rose(san_andreas_res$azi.PoR, weights = 1 / san_andreas$unc, mtext = "PoR")
 ```
+
 ### Mean direction of transformed azimuths
+
 ```{r stats, echo=TRUE}
-circular_mean(san_andreas.res$azi.PoR, w = 1 / san_andreas.res$unc)
+circular_mean(san_andreas_res$azi.PoR, w = 1 / san_andreas_res$unc)
 
-circular_sd(san_andreas.res$azi.PoR, w = 1 / san_andreas.res$unc)
+circular_sd(san_andreas_res$azi.PoR, w = 1 / san_andreas_res$unc)
 
-circular_median(san_andreas.res$azi.PoR, w = 1 / san_andreas.res$unc)
+circular_median(san_andreas_res$azi.PoR, w = 1 / san_andreas_res$unc)
 
-circular_var(san_andreas.res$azi.PoR, w = 1 / san_andreas.res$unc)
+circular_var(san_andreas_res$azi.PoR, w = 1 / san_andreas_res$unc)
 ```
 
+<!-- ### Norm chi-squared test -->
 
-### Norm chi-squared test
-The *normalized* $\chi^2$ test quantifies the fit between the
-modeled $\sigma_{\text{PB}}$ direction the observed stress direction $\sigma_{Hmax}$ 
-considering the reported uncertainties of the measurement.
+<!-- The *normalized* $\chi^2$ test quantifies the fit between the -->
 
-```{r san_andreas_nchisq, echo=TRUE}
-norm_chisq(
-  obs = san_andreas.res$azi.PoR,
-  prd = 135,
-  unc = san_andreas.res$unc
-)
-```
+<!-- modeled $\sigma_{\text{PB}}$ direction the observed stress direction $\sigma_{Hmax}$  -->
 
-The value is $\leq$ 0.15, indicating a significantly good fit of the
-model. Thus, the traction of the transform plate boundary explain the
-stress direction of the area.
+<!-- considering the reported uncertainties of the measurement. -->
+
+<!-- ```{r san_andreas_nchisq, echo=TRUE} -->
+
+<!-- norm_chisq( -->
+
+<!--   obs = san_andreas.res$azi.PoR, -->
+
+<!--   prd = 135, -->
+
+<!--   unc = san_andreas.res$unc -->
+
+<!-- ) -->
+
+<!-- ``` -->
+
+<!-- The value is $\leq$ 0.15, indicating a significantly good fit of the -->
+
+<!-- model. Thus, the traction of the transform plate boundary explain the -->
+
+<!-- stress direction of the area. -->
 
 ### Circular Dispersion
 
-The (weighted) circular dispersion of the orientation angles around the prediction  $D_w (\sigma_{Hmax}, \sigma_{\text{PB}})$  can be measured by:
+The (weighted) circular dispersion of the orientation angles around the
+prediction $D_w (\sigma_{Hmax}, \sigma_{\text{PB}})$ can be measured by:
 
 ```{r dispersion, echo=TRUE}
-circular_dispersion(san_andreas.res$azi.PoR, 135, w = san_andreas.res$unc)
+circular_dispersion(san_andreas_res$azi.PoR, 135, w = san_andreas_res$unc)
 ```
-
 
 ### Confidence interval
 
-Assuming a von Mises Distribution (circular normal distribution) of the orientation data, a $(1-\alpha \%)/100$ confidence interval can be calculated (Mardia and Jupp, 1999):
+Assuming a von Mises Distribution (circular normal distribution) of the
+orientation data, a $(1-\alpha \%)/100$ confidence interval can be
+calculated (Mardia and Jupp, 1999):
+
 ```{r confidence, echo=TRUE}
 confidence_interval(
-  san_andreas.res$azi.PoR,
+  san_andreas_res$azi.PoR,
   conf.level = 0.95,
-  w = 1 / san_andreas$unc
+  w = 1 / san_andreas_res$unc
 )
 ```
 
-The prediction for the transformed $\sigma_{SHmax}$ orientation is $\sigma_{\text{PB}} = 135^{\circ}$. Since the prediction $\sigma_{\text{PB}}$ lies within the confidence interval, it can be concluded with 95% confidence that the orientations follow the predicted trend.
-
-
+The prediction for the transformed $\sigma_{SHmax}$ orientation is
+$\sigma_{\text{PB}} = 135^{\circ}$. Since the prediction
+$\sigma_{\text{PB}}$ lies within the confidence interval, it can be
+concluded with 95% confidence that the orientations follow the predicted
+trend.
 
 ## Spatial distribution of the misfit from the predicted orientations
 
@@ -167,8 +191,8 @@ Also included are the plate boundary geometries after Bird (2003):
 data("plates") # load plate boundary data set
 ```
 
-Alternatively, there is also the NUVEL1 plate boundary model by DeMets et al. (1990)
-stored under `data("nuvel1_plates")`.
+Alternatively, there is also the NUVEL1 plate boundary model by DeMets
+et al. (1990) stored under `data("nuvel1_plates")`.
 
 First we create the predicted trajectories of $\sigma_{\text{PB}}$:
 
@@ -176,8 +200,8 @@ First we create the predicted trajectories of $\sigma_{\text{PB}}$:
 trajectories <- eulerpole_loxodromes(por, 40, cw = FALSE)
 ```
 
-
-...and add the $\sigma_{\text{PB}}$ trajectories and data points to our map:
+...and add the $\sigma_{\text{PB}}$ trajectories and data points to our
+map:
 
 ```{r plot2, echo=TRUE, warning=FALSE, message=FALSE}
 map +
@@ -186,7 +210,7 @@ map +
     lty = 2
   ) +
   geom_spoke(
-    data = san_andreas.res,
+    data = san_andreas_res,
     aes(
       x = lon,
       y = lat,
@@ -210,45 +234,47 @@ map +
   )
 ```
 
-The map shows generally low deviation of the observed $\sigma_{Hmax}$ directions from the modeled stress direction $\sigma_{\text{PB}}$ using counter-clockwise 45$^{\circ}$ loxodromes. 
-
-
+The map shows generally low deviation of the observed $\sigma_{Hmax}$
+directions from the modeled stress direction $\sigma_{\text{PB}}$ using
+counter-clockwise 45$^{\circ}$ loxodromes.
 
 ## Variation of the Direction of the Maximum Horizontal Stress wrt. to the Distance to the Plate Boundary
 
-The direction of the maximum horizontal stress correlates with plate motion 
-direction at the plate boundary zone. Towards the plate interior, plate boundary 
-forces become weaker and other stress sources will probably dominate.
+The direction of the maximum horizontal stress correlates with plate
+motion direction at the plate boundary zone. Towards the plate interior,
+plate boundary forces become weaker and other stress sources will
+probably dominate.
 
-To visualize the variation of the $\sigma_{Hmax}$ wrt. to the distance to the 
-plate boundary, we need to transfer the direction of $\sigma_{Hmax}$ from the
-geographic reference system (i.e. azimuth is the deviation of a direction from 
-geographic North pole) to the **Pole of Rotation (PoR)** reference system
-(i.e. azimuth is the deviation from the PoR). 
+To visualize the variation of the $\sigma_{Hmax}$ wrt. to the distance
+to the plate boundary, we need to transfer the direction of
+$\sigma_{Hmax}$ from the geographic reference system (i.e. azimuth is
+the deviation of a direction from geographic North pole) to the **Pole
+of Rotation (PoR)** reference system (i.e. azimuth is the deviation from
+the PoR).
 
-> The *PoR coordinate reference system* is the oblique transformation of the
-geographical coordinate system with the PoR coordinates being the the
-translation factors.
+> The *PoR coordinate reference system* is the oblique transformation of
+> the geographical coordinate system with the PoR coordinates being the
+> the translation factors.
 
-The azimuth in the *PoR reference system* $\alpha_{PoR}$ is the angular 
-difference between the azimuth in geographic reference system $\alpha_{geo}$ 
-and the (initial) bearing of the great circle 
-that passes through the data point and the PoR $\theta$.
+The azimuth in the *PoR reference system* $\alpha_{PoR}$ is the angular
+difference between the azimuth in geographic reference system
+$\alpha_{geo}$ and the (initial) bearing of the great circle that passes
+through the data point and the PoR $\theta$.
 
-To calculate the distance to the plate boundary, both the plate boundary 
-geometries and the data points (in geographical coordinates) will be 
-transformed in to the *PoR* reference system. 
-In the *PoR* system, the distance is the latitudinal or longitudinal difference 
-between the data points and the inward/outward or tangential moving plate 
-boundaries, respectively. 
+To calculate the distance to the plate boundary, both the plate boundary
+geometries and the data points (in geographical coordinates) will be
+transformed in to the *PoR* reference system. In the *PoR* system, the
+distance is the latitudinal or longitudinal difference between the data
+points and the inward/outward or tangential moving plate boundaries,
+respectively.
 
-This is done with the function `distance_from_pb()`, which returns the angular 
-distances.
+This is done with the function `distance_from_pb()`, which returns the
+angular distances.
 
 ```{r san_andreas_distance, echo=TRUE}
 plate_boundary <- subset(plates, plates$pair == "na-pa")
-san_andreas.res$distance <-
-  distance_from_pb(
+
+san_andreas_res$distance <- distance_from_pb(
     x = san_andreas,
     PoR = por,
     pb = plate_boundary,
@@ -256,10 +282,11 @@ san_andreas.res$distance <-
   )
 ```
 
-Finally, we visualize the $\sigma_{Hmax}$ direction wrt. to the distance to
-the plate boundary:
+Finally, we visualize the $\sigma_{Hmax}$ direction wrt. to the distance
+to the plate boundary:
+
 ```{r san.andreas.distanceplot1, echo=TRUE, message=FALSE, warning=FALSE}
-azi_plot <- ggplot(san_andreas.res, aes(x = distance, y = azi.PoR)) +
+azi_plot <- ggplot(san_andreas_res, aes(x = distance, y = azi.PoR)) +
   coord_cartesian(ylim = c(0, 180)) +
   labs(x = "Distance from plate boundary (\u00B0)", y = "Azimuth in PoR (\u00B0)") +
   geom_hline(yintercept = c(0, 45, 90, 135, 180), lty = 3) +
@@ -280,119 +307,122 @@ azi_plot <- ggplot(san_andreas.res, aes(x = distance, y = azi.PoR)) +
     )
   ) +
   scale_alpha_discrete(name = "Quality rank", range = c(1, 0.1)) +
-  scale_color_manual(name = "Tectonic regime", values = stress_colors(), breaks = names(stress_colors())) +
+  scale_color_manual(
+    name = "Tectonic regime", values = stress_colors(), breaks = names(stress_colors())
+    ) +
   theme_bw()
 print(azi_plot)
 ```
 
+Adding a rolling statistics (e.g. weighted mean and 95% confidence
+interval) of the transformed azimuth:
 
-Adding a rolling statistics (e.g. weighted mean and 95% confidence interval) of the transformed azimuth:
 ```{r san.andreas.distanceplot1_roll, echo=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
-san_andreas.res_roll <- san_andreas.res[order(san_andreas.res$distance), ]
+san_andreas_roll <- dplyr::arrange(san_andreas_res, distance)
 
-san_andreas.res_roll$r_mean <- roll_circstats(
-  san_andreas.res_roll$azi.PoR,
-  w = 1 / san_andreas.res_roll$unc,
+san_andreas_roll$r_mean <- roll_circstats(
+  san_andreas_roll$azi.PoR,
+  w = 1 / san_andreas_roll$unc,
   FUN = circular_mean,
   width = 51
 )
 
-san_andreas.res_roll$r_conf95 <- roll_confidence(
-  san_andreas.res_roll$azi.PoR,
-  w = 1 / san_andreas.res_roll$unc,
+san_andreas_roll$r_conf95 <- roll_confidence(
+  san_andreas_roll$azi.PoR,
+  w = 1 / san_andreas_roll$unc,
   width = 51
-)/2
+) / 2
+```
 
+Plot:
+```{r san.andreas.distanceplot1_roll_plot, echo=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
 azi_plot +
-   pammtools::geom_stepribbon(
-    data = san_andreas.res_roll,
-    aes(x = distance, ymin = r_mean - r_conf95, ymax = r_mean + r_conf95), color = NA, fill = "grey", alpha = 1/3
+  pammtools::geom_stepribbon(
+    data = san_andreas_roll,
+    aes(x = distance, ymin = r_mean - r_conf95, ymax = r_mean + r_conf95), 
+    color = NA, fill = "grey", alpha = 1 / 3
   ) +
-  # geom_step(
-  #   data = san_andreas.res_roll,
-  #   aes(distance, r_mean - r_conf95),
-  #   lty = 2
-  # ) +
-  # geom_step(
-  #   data = san_andreas.res_roll,
-  #   aes(distance, r_mean + r_conf95),
-  #   lty = 2
-  # ) +
   geom_step(
-    data = san_andreas.res_roll,
+    data = san_andreas_roll,
     aes(distance, r_mean),
     color = "red"
   )
 ```
 
-Close to the dextral plate boundary, the majority of the stress data have 
-a strike-slip fault regime and are oriented around 135$^{\circ}$ wrt. to the PoR. 
-Thus, the date are parallel to the predicted stress $\sigma_{\text{PB}}$ sourced by a 
-right-lateral displaced plate boundary. 
-Away from the plate boundary, the data becomes more noisy.
+Close to the dextral plate boundary, the majority of the stress data
+have a strike-slip fault regime and are oriented around 135$^{\circ}$
+wrt. to the PoR. Thus, the date are parallel to the predicted stress
+$\sigma_{\text{PB}}$ sourced by a right-lateral displaced plate
+boundary. Away from the plate boundary, the data becomes more noisy.
 
-> This azimuth (PoR) vs. distance plot also allows to identify whether a less 
-known plate boundary represents a inward, outward, or tangential displaced 
-boundary.
+> This azimuth (PoR) vs. distance plot also allows to identify whether a
+> less known plate boundary represents a inward, outward, or tangential
+> displaced boundary.
 
-The relationship between the azimuth and the distance can be better visualized 
-by using the deviation (normalized by the data precision) from the the predicted
-stress direction $\sigma_{\text{PB}}$, i.e. dispersion $D$:
+The relationship between the azimuth and the distance can be better
+visualized by using the deviation (normalized by the data precision)
+from the the predicted stress direction $\sigma_{\text{PB}}$, i.e.
+dispersion $D$:
 
 ```{r san.andreas.distanceplot2, echo=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
 # Rolling norm chisq:
-san_andreas.res_roll$roll_disp <- roll_dispersion(
-  san_andreas.res_roll$azi.PoR,
-  san_andreas.res_roll$prd,
-  1/san_andreas.res_roll$unc,
+san_andreas_roll$roll_disp <- roll_dispersion(
+ x = san_andreas_roll$azi.PoR,
+  y = san_andreas_roll$prd,
+  w = 1 / san_andreas_roll$unc,
   width = 51
 )
 
-
-
 # plotting:
-ggplot(san_andreas.res, aes(x = distance, y = cdist)) +
+ggplot(san_andreas_res, aes(x = distance, y = cdist)) +
   coord_cartesian(ylim = c(0, 1)) +
-  labs(x = "Distance from plate boundary (\u00B0)", y =expression(D[w] (sigma["Hmax"], sigma["PB"]))) +
+  labs(
+    x = "Distance from plate boundary (\u00B0)", 
+    y = expression(D[w](sigma["Hmax"], sigma["PB"]))
+    ) +
   geom_hline(yintercept = c(0.15, .33, .7), lty = 3) +
-  geom_point(aes(color = san_andreas$regime)) +
+  geom_point(aes(color = san_andreas_res$regime)) +
   scale_color_manual(name = "Tectonic regime", values = stress_colors(), breaks = names(stress_colors())) +
-
   geom_step(
-    data = san_andreas.res_roll,
+    data = san_andreas_roll,
     aes(distance, roll_disp),
     color = "red"
-  ) + 
-  
-  labs(title = "Dispersion") + 
+  ) +
+  labs(title = "Dispersion") +
   theme_bw()
 ```
 
-
-We can see that the data in fact starts to scatter notably 
-beyond a distance of -3$^{\circ}$ from 
-the plate boundary. 
-Thus, the North American-Pacific plate boundary zone at the San Andreas Fault is 
-approx. 3--5$^{\circ}$ (ca. 300-500 km) wide. 
+We can see that the data in fact starts to scatter notably beyond a
+distance of -3$^{\circ}$ from the plate boundary. Thus, the North
+American-Pacific plate boundary zone at the San Andreas Fault is approx.
+3--5$^{\circ}$ (ca. 300-500 km) wide.
 
 > The dispersion vs. distance plot allows to specify the width of the
-plate boundary zone.
-
+> plate boundary zone.
 
 ## Quick analysis
 
-A one-line analysis the results can be obtained `stress_analysis()` that returns a list. The transformed coordinates and azimuths as well as the deviations can be viewed by: 
+A one-line analysis the results can be obtained `stress_analysis()` that
+returns a list. The transformed coordinates and azimuths as well as the
+deviations can be viewed by:
+
 ```{r quick, echo=TRUE, eval=TRUE}
-results <- stress_analysis(san_andreas, por, "right", plate_boundary, plot = FALSE)
+results <- stress_analysis(
+  san_andreas, por, "right", plate_boundary, plot = FALSE
+  )
+
 head(results$result)
 ```
 
-Statistical parameters describing the distribution of the transformed azimuths can be displayed by
+Statistical parameters describing the distribution of the transformed
+azimuths can be displayed by
+
 ```{r quick_stats, echo=TRUE, eval=TRUE}
 results$stats
 ```
 
 Statistical test results are shown by
+
 ```{r quick_tests, echo=TRUE, eval=TRUE}
 results$test
 ```
@@ -403,26 +433,36 @@ results$test
 stress_analysis(san_andreas, por, "right", plate_boundary, plot = TRUE)
 ```
 
-
-
 ## Spatial interpolation
-The interpolated direction of far apart data points will suffer from distortions
-due to the underlying projection. In order to prevent such effects, the 
-interpolation can be done in the PoR reference frame where the direction stays 
-constant no matter the distance between the data points. Assuming that the 
-stress field is sourced by the plate boundary force, the model-based 
-interpolation allows more reliable results for areas close to plate boundaries.
+
+The interpolated direction of far apart data points will suffer from
+distortions due to the underlying projection. In order to prevent such
+effects, the interpolation can be done in the PoR reference frame where
+the direction stays constant no matter the distance between the data
+points. Assuming that the stress field is sourced by the plate boundary
+force, the model-based interpolation allows more reliable results for
+areas close to plate boundaries.
 
 ```{r interpolation_PoR, echo=TRUE}
-mean_SH_PoR <- PoR_stress2grid(san_andreas, PoR = por, gridsize = .5, R_range = seq(50, 350, 100))
+mean_SH_PoR <- PoR_stress2grid(
+  san_andreas, PoR = por, gridsize = .5, R_range = seq(50, 350, 100)
+  )
 ```
 
-The algorithm calculates the mean direction and variance for an incrementally growing search window `R` (defined by `R_range()`). 
+The algorithm calculates the mean direction and variance for an
+incrementally growing search window `R` (defined by `R_range()`).
+
 ```{r interpolation2, echo=TRUE, warning=FALSE, message=FALSE}
 map +
   geom_sf(data = trajectories, lty = 2) +
-  geom_spoke(data = san_andreas, aes(lon, lat, angle = deg2rad(90 - azi)), radius = .5, color = "grey30", position = "center_spoke") +
-  geom_spoke(data = mean_SH_PoR, aes(lon, lat, angle = deg2rad(90 - azi), alpha = sd, color = mdr), radius = 1, position = "center_spoke", size = 1) +
+  geom_spoke(
+    data = san_andreas, 
+    aes(lon, lat, angle = deg2rad(90 - azi)), 
+    radius = .5, color = "grey30", position = "center_spoke") +
+  geom_spoke(
+    data = mean_SH_PoR, 
+    aes(lon, lat, angle = deg2rad(90 - azi), alpha = sd, color = mdr), 
+    radius = 1, position = "center_spoke", size = 1) +
   scale_alpha(name = "Standard deviation", range = c(1, .25)) +
   scale_color_viridis_c(
     limits = c(0, 1),
@@ -435,7 +475,10 @@ map +
   ) +
   facet_wrap(~R)
 ```
-Considering only the data with the minimum standard deviation and the minimum radius of the search window, we can visualize the spatial distribution of the model deviation:
+
+Considering only the data with the minimum standard deviation and the
+minimum radius of the search window, we can visualize the spatial
+distribution of the model deviation:
 
 ```{r interpolation1, echo = TRUE}
 mean_SH_PoR_compact <- mean_SH_PoR |>
@@ -444,8 +487,14 @@ mean_SH_PoR_compact <- mean_SH_PoR |>
 
 ggplot() +
   geom_sf(data = countries, fill = "grey80", alpha = .5) +
-  ggforce::geom_voronoi_tile(data = mean_SH_PoR_compact, aes(lon, lat, fill = cdist), max.radius = .7, normalize = FALSE) +
-  geom_spoke(data = mean_SH_PoR_compact, aes(lon, lat, angle = deg2rad(90 - azi)), radius = .5, color = "white", alpha = .2) +
+  ggforce::geom_voronoi_tile(
+    data = mean_SH_PoR_compact, 
+    aes(lon, lat, fill = cdist), 
+    max.radius = .7, normalize = FALSE) +
+  geom_spoke(
+    data = mean_SH_PoR_compact, 
+    aes(lon, lat, angle = deg2rad(90 - azi)), 
+    radius = .5, color = "white", alpha = .2) +
   scale_fill_viridis_c("Angular distance", limits = c(0, 1)) +
   geom_sf(data = countries, fill = NA) +
   geom_sf(
@@ -463,34 +512,40 @@ ggplot() +
 
 ## Exercise
 
-Analyse the stress field of Iceland or Tibet. 
+Analyse the stress field of Iceland, Tibet, or a region of your choice. Analyse the dataset and consider the following questions.
 
-- What is the tectonic setting? Plate boundary displacement type?
-- Transform the stress data into the plate motion reference frame
-- What is the average orientation of the transformed Shmax directions?
-- How does the azimuth changes with the distance to the plate boundary?
-- Calculate the theoretical stress trajectories and visualize the spatial distribution of the fit
-- Interpolate the stress field and show the spatial misfit
+-   Describe the tectonic setting? Define the displacement type of the plate boundary (inward, outward, tangential)?
+-   Transform the stress data into the plate motion reference frame
+-   What is the average orientation and the variance of the transformed $\sigma_\text{Shmax}$ directions?
+-   Normal distribution?
+-   Test the significance of the predicted orientation
+-   How does the azimuth varies with the distance to the plate
+    boundary?
+-   Calculate the theoretical stress trajectories and visualize the
+    spatial distribution of the fit
+-   Interpolate the stress field and show the spatial misfit
 
 ```{r exercise}
-data("iceland") 
+data("iceland")
 # or
 data("tibet")
+# or
+wsm2016 <- readRDS("Data/wsm2016.rds") |>
+  sf::st_as_sf(coords = c("lon", "lat"), crs = "WGS84", remove = FALSE)
 ```
-
-
 
 ## References
 
-Bird, Peter. 2003. “An Updated Digital Model of Plate Boundaries” 
-*Geochemistry, Geophysics, Geosystems* 4 (3). 
-doi: 10.1029/2001gc000252.
-<!---[10.1029/2001gc000252](https://doi.org/10.1029/2001GC000252).-->
+Bird, Peter. 2003. "An Updated Digital Model of Plate Boundaries"
+*Geochemistry, Geophysics, Geosystems* 4 (3). doi: 10.1029/2001gc000252.
+[10.1029/2001gc000252](https://doi.org/10.1029/2001GC000252).
 
-DeMets, C., R. G. Gordon, D. F. Argus, and S. Stein. 1990. “Current Plate Motions” 
-*Geophysical Journal International* 101 (2): 425–78. 
-doi: [10.1111/j.1365-246x.1990.tb06579.x](https://doi.org/10.1111/j.1365-246x.1990.tb06579.x).
+DeMets, C., R. G. Gordon, D. F. Argus, and S. Stein. 1990. "Current
+Plate Motions" *Geophysical Journal International* 101 (2): 425--78.
+doi:
+[10.1111/j.1365-246x.1990.tb06579.x](https://doi.org/10.1111/j.1365-246x.1990.tb06579.x).
 
-Heidbach, Oliver, Mojtaba Rajabi, Karsten Reiter, Moritz Ziegler, and WSM Team. 2016. 
-“World Stress Map Database Release 2016. V. 1.1.” GFZ Data Services. 
-doi: [10.5880/WSM.2016.001](https://doi.org/10.5880/WSM.2016.001).
+Heidbach, Oliver, Mojtaba Rajabi, Karsten Reiter, Moritz Ziegler, and
+WSM Team. 2016. "World Stress Map Database Release 2016. V. 1.1." GFZ
+Data Services. doi:
+[10.5880/WSM.2016.001](https://doi.org/10.5880/WSM.2016.001).

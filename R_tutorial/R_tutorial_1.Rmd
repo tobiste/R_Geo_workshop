@@ -80,7 +80,7 @@ Operator |	Description
 1 / 200 * 30 # Comment
 (59 + 73 + 2) / 3 # Distributive property
 15 / 2
-15 %/% 2 # the integer divison (%/%) rounds the result down to the nearest whole number
+15 %/% 2 # the integer division (%/%) rounds the result down to the nearest whole number
 364 %% 360 # Modulo operation
 ```
 
