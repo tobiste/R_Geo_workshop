@@ -525,7 +525,7 @@ Analyse the stress field of Iceland, Tibet, or a region of your choice. Analyse 
     spatial distribution of the fit
 -   Interpolate the stress field and show the spatial misfit
 
-```{r exercise}
+```{r exercise, echo=TRUE}
 data("iceland")
 # or
 data("tibet")
