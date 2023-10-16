@@ -1,0 +1,91 @@
+<!DOCTYPE qgis_style>
+<qgis_style version="2">
+  <symbols>
+    <symbol frame_rate="10" force_rhr="0" name="Stress marker" type="marker" clip_to_extent="1" alpha="0.8" is_animated="0" tags="stress">
+      <data_defined_properties>
+        <Option type="Map">
+          <Option name="name" value="" type="QString"/>
+          <Option name="properties"/>
+          <Option name="type" value="collection" type="QString"/>
+        </Option>
+      </data_defined_properties>
+      <layer locked="0" enabled="1" class="SimpleMarker" id="{cfb7016e-acf4-4553-a9b6-445e95492e90}" pass="0">
+        <Option type="Map">
+          <Option name="angle" value="0" type="QString"/>
+          <Option name="cap_style" value="square" type="QString"/>
+          <Option name="color" value="255,0,0,255" type="QString"/>
+          <Option name="horizontal_anchor_point" value="1" type="QString"/>
+          <Option name="joinstyle" value="bevel" type="QString"/>
+          <Option name="name" value="line" type="QString"/>
+          <Option name="offset" value="0,0" type="QString"/>
+          <Option name="offset_map_unit_scale" value="3x:0,0,0,0,0,0" type="QString"/>
+          <Option name="offset_unit" value="MM" type="QString"/>
+          <Option name="outline_color" value="156,156,156,255" type="QString"/>
+          <Option name="outline_style" value="solid" type="QString"/>
+          <Option name="outline_width" value="0.5" type="QString"/>
+          <Option name="outline_width_map_unit_scale" value="3x:0,0,0,0,0,0" type="QString"/>
+          <Option name="outline_width_unit" value="MM" type="QString"/>
+          <Option name="scale_method" value="diameter" type="QString"/>
+          <Option name="size" value="7.6" type="QString"/>
+          <Option name="size_map_unit_scale" value="3x:0,0,0,0,0,0" type="QString"/>
+          <Option name="size_unit" value="MM" type="QString"/>
+          <Option name="vertical_anchor_point" value="1" type="QString"/>
+        </Option>
+        <data_defined_properties>
+          <Option type="Map">
+            <Option name="name" value="" type="QString"/>
+            <Option name="properties" type="Map">
+              <Option name="angle" type="Map">
+                <Option name="active" value="true" type="bool"/>
+                <Option name="expression" value="&quot;AZI&quot;" type="QString"/>
+                <Option name="type" value="3" type="int"/>
+              </Option>
+            </Option>
+            <Option name="type" value="collection" type="QString"/>
+          </Option>
+        </data_defined_properties>
+      </layer>
+      <layer locked="0" enabled="1" class="SimpleMarker" id="{83fe0004-70c0-49b9-8e91-42706cd55a14}" pass="0">
+        <Option type="Map">
+          <Option name="angle" value="0" type="QString"/>
+          <Option name="cap_style" value="square" type="QString"/>
+          <Option name="color" value="156,156,156,255" type="QString"/>
+          <Option name="horizontal_anchor_point" value="1" type="QString"/>
+          <Option name="joinstyle" value="bevel" type="QString"/>
+          <Option name="name" value="circle" type="QString"/>
+          <Option name="offset" value="0,0" type="QString"/>
+          <Option name="offset_map_unit_scale" value="3x:0,0,0,0,0,0" type="QString"/>
+          <Option name="offset_unit" value="MM" type="QString"/>
+          <Option name="outline_color" value="35,35,35,255" type="QString"/>
+          <Option name="outline_style" value="no" type="QString"/>
+          <Option name="outline_width" value="0" type="QString"/>
+          <Option name="outline_width_map_unit_scale" value="3x:0,0,0,0,0,0" type="QString"/>
+          <Option name="outline_width_unit" value="MM" type="QString"/>
+          <Option name="scale_method" value="diameter" type="QString"/>
+          <Option name="size" value="1.4" type="QString"/>
+          <Option name="size_map_unit_scale" value="3x:0,0,0,0,0,0" type="QString"/>
+          <Option name="size_unit" value="MM" type="QString"/>
+          <Option name="vertical_anchor_point" value="1" type="QString"/>
+        </Option>
+        <data_defined_properties>
+          <Option type="Map">
+            <Option name="name" value="" type="QString"/>
+            <Option name="properties" type="Map">
+              <Option name="angle" type="Map">
+                <Option name="active" value="true" type="bool"/>
+                <Option name="expression" value="&quot;AZI&quot;" type="QString"/>
+                <Option name="type" value="3" type="int"/>
+              </Option>
+            </Option>
+            <Option name="type" value="collection" type="QString"/>
+          </Option>
+        </data_defined_properties>
+      </layer>
+    </symbol>
+  </symbols>
+  <colorramps/>
+  <textformats/>
+  <labelsettings/>
+  <legendpatchshapes/>
+  <symbols3d/>
+</qgis_style>

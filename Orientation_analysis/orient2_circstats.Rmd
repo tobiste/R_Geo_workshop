@@ -164,12 +164,12 @@ for (k in c(0.1, .5, 1, 2, 4, 8)) {
 
 The parameter $\kappa$ is difficult to measure directly, but the
 concentration of the sample can be estimated from $\bar{R}$ (MLE).
-`tectonicr:::est.kappa()` estimates the parameter $\hat{kappa$} from the
+`tectonicr::est.kappa()` estimates the parameter $\hat{kappa$} from the
 sample:
 
 ```{r kappa, echo = TRUE}
 theta <- rvm(100, mean = 0, kappa = 10)
-tectonicr:::est.kappa(theta)
+tectonicr::est.kappa(theta)
 ```
 
 ## Test for uniformity
@@ -242,5 +242,5 @@ finland_stria <- c(
 -   Axial or directional data?
 -   Mean orientation?
 -   Normally distributed?
--   A todays location of a glacier is at 130$^{\circ}$ compass bearing.
+-   A today's location of a glacier is at 130$^{\circ}$ compass bearing.
     Does the stria origin from this glacier?

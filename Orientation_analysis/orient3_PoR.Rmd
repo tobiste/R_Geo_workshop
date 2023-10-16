@@ -29,6 +29,7 @@ library(rnaturalearth)
 
 ```{r load_wsm2016, echo=TRUE}
 data("san_andreas")
+#san_andreas <- filter(san_andreas, regime == "S")
 head(san_andreas)
 ```
 
@@ -79,7 +80,7 @@ map +
 ```
 
 Modeling the stress directions (wrt. to the geographic North pole) using
-the Pole of Oration (PoR) of the motion of North America relative to the
+the Pole of Rotation (PoR) of the motion of North America relative to the
 Pacific Pate. We test the dataset against a right-laterally tangential
 displacement type.
 
@@ -335,6 +336,7 @@ san_andreas_roll$r_conf95 <- roll_confidence(
 ```
 
 Plot:
+
 ```{r san.andreas.distanceplot1_roll_plot, echo=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
 azi_plot +
   pammtools::geom_stepribbon(
@@ -512,15 +514,17 @@ ggplot() +
 
 ## Exercise
 
-Analyse the stress field of Iceland, Tibet, or a region of your choice. Analyse the dataset and consider the following questions.
+Analyse the stress field of Iceland, Tibet, or a region of your choice.
+Analyse the dataset and consider the following questions.
 
--   Describe the tectonic setting? Define the displacement type of the plate boundary (inward, outward, tangential)?
+-   Describe the tectonic setting? Define the displacement type of the
+    plate boundary (inward, outward, tangential)?
 -   Transform the stress data into the plate motion reference frame
--   What is the average orientation and the variance of the transformed $\sigma_\text{Shmax}$ directions?
+-   What is the average orientation and the variance of the transformed
+    $\sigma_\text{Shmax}$ directions?
 -   Normal distribution?
 -   Test the significance of the predicted orientation
--   How does the azimuth varies with the distance to the plate
-    boundary?
+-   How does the azimuth varies with the distance to the plate boundary?
 -   Calculate the theoretical stress trajectories and visualize the
     spatial distribution of the fit
 -   Interpolate the stress field and show the spatial misfit
