@@ -1,0 +1,53 @@
+---
+title: "Programming with R --- A Beginners’ Guide for Geoscientists"
+author: "Tobias Stephan"
+date: "10/02/2022"
+output:
+  html_document:
+    highlight: tango
+    theme: united
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+subtitle: 6 - Geochemistry
+---
+
+
+## Geochemistry
+
+Packages that we will need:
+```{r packages, echo = TRUE, message = FALSE, warning = FALSE}
+pacman::p_load(
+  # plotting
+  ggplot2,
+  scico, # colorblind palettes for continuous data
+  patchwork, # multi-plot arrangements
+
+  # data handling
+  tidyr,
+  dplyr,
+
+  # cluster analysis
+  cluster,
+  factoextra
+)
+
+# my functions and stuff for the course
+source("R/colorblind_discrete.R")
+```
+
+### Import 
+
+### Normalise to volatile-free basis
+
+
+### TAS diagram
+
+### Trace elements
+
+### PCA
+
+### Cluster analysis
+
